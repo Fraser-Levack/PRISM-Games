@@ -1,0 +1,79 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.home, .credits {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.home h1, .credits h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #646cff 0%, #61dafb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.home p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #666;
+}
+
+.navigation {
+  margin: 2rem 0;
+}
+
+.nav-link {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #646cff 0%, #61dafb 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.nav-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(100, 108, 255, 0.3);
+}
+
+.credits-content {
+  text-align: left;
+  margin: 2rem 0;
+}
+
+.credits-content h2 {
+  color: #646cff;
+  margin-bottom: 1rem;
+}
+
+.credits-content ul {
+  margin-bottom: 2rem;
+}
+
+.credits-content li {
+  margin-bottom: 0.5rem;
+  padding-left: 1rem;
+}
+
+.credits-content p {
+  line-height: 1.6;
+  color: #666;
+}

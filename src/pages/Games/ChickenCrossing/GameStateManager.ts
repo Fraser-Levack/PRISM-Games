@@ -173,9 +173,7 @@ export class GameStateManager {
             obj.position.y === newPosition.y
             )
         );
-        
         const cubeType = this.getCubeTypeAt(state, newPosition.x, newPosition.y);
-        
         if (cubeType !== 'ground' && !isBoatAtTarget) {
             return state; // Don't move if not ground or boat
         }
@@ -351,11 +349,14 @@ export class GameStateManager {
     }
 
     public static getNearestObjectWithinRange(state: GameState, position: Position, range: number): GameObject | null {
+        
         let nearestObject: GameObject | null = null;
         let nearestDistance = Infinity;
         
+        // Check all objects and calculate their actual distances
         state.objects.forEach(obj => {
             let distance: number;
+            let positionInfo: string;
             
             if (obj.type === 'boat') {
                 // For boat, calculate distance to both positions and use the minimum
@@ -370,19 +371,22 @@ export class GameStateManager {
                 const distance2 = Math.sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
                 
                 distance = Math.min(distance1, distance2);
+                positionInfo = `boat at (${obj.position.x}, ${obj.position.y}, ${obj.position.z}) & (${obj.position.x + 1}, ${obj.position.y}, ${obj.position.z})`;
             } else {
                 const dx = obj.position.x - position.x;
                 const dy = obj.position.y - position.y;
                 const dz = obj.position.z - position.z;
                 distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+                positionInfo = `${obj.type} at (${obj.position.x}, ${obj.position.y}, ${obj.position.z})`;
             }
             
+            
+            // Only consider objects within range
             if (distance <= range && distance < nearestDistance) {
                 nearestDistance = distance;
                 nearestObject = obj;
             }
         });
-        
         return nearestObject;
     }
 }

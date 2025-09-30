@@ -1,24 +1,26 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { CubeGrid, type Cube } from './Grid';
+import { CubeGrid, type Cube } from './CubeGrid';
+import { ObjectGrid, type Object } from './ObjectGrid';
 
 interface IsometricRendererProps {
     cubeGrid: CubeGrid;
+    objectGrid: ObjectGrid;
+    updateTrigger?: number; // Simple prop to force re-render
 }
 
-const IsometricRenderer = ({ cubeGrid }: IsometricRendererProps) => {
+const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger }: IsometricRendererProps) => {
     const mountRef = useRef<HTMLDivElement>(null);
-    const sceneRef = useRef<THREE.Scene | null>(null);
-    const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-    const animationIdRef = useRef<number | null>(null);
 
     useEffect(() => {
         if (!mountRef.current) return;
 
+        // Clear any existing content
+        mountRef.current.innerHTML = '';
+
         // Initialize Three.js scene
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x202020); // Dark gray background
-        sceneRef.current = scene;
+        scene.background = new THREE.Color(0x202020);
 
         // Create orthographic camera for true isometric view
         const aspect = window.innerWidth / window.innerHeight;
@@ -32,7 +34,6 @@ const IsometricRenderer = ({ cubeGrid }: IsometricRendererProps) => {
             1000
         );
 
-        // Position camera for isometric view (45° angles)
         camera.position.set(10, 10, 10);
         camera.lookAt(0, 0, 0);
 
@@ -40,12 +41,10 @@ const IsometricRenderer = ({ cubeGrid }: IsometricRendererProps) => {
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
-        rendererRef.current = renderer;
 
-        // Append to our ref instead of document.body
         mountRef.current.appendChild(renderer.domElement);
 
-        // Add some lighting
+        // Add lighting
         const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
         scene.add(ambientLight);
 
@@ -53,26 +52,53 @@ const IsometricRenderer = ({ cubeGrid }: IsometricRendererProps) => {
         directionalLight.position.set(10, 8, 5);
         scene.add(directionalLight);
 
-        // Create a grid helper
+        // Create grid helper
         const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
         scene.add(gridHelper);
 
-        // Create cubes from CubeGrid
+        // Add all cubes
         const cubes = cubeGrid.getCubes();
         const cubeMeshes: THREE.Mesh[] = [];
-
+        
         cubes.forEach((cube: Cube) => {
-            // Set height to 0.5 if type is 'water', else 1
             const height = cube.type === 'water' ? 0.5 : 1;
             const geometry = new THREE.BoxGeometry(1, height, 1);
             const material = new THREE.MeshLambertMaterial({ color: cube.color });
             const mesh = new THREE.Mesh(geometry, material);
 
-            // Position the cube based on grid coordinates, adjust y for height
             mesh.position.set(cube.x, height / 2, cube.y);
-
+            
             scene.add(mesh);
             cubeMeshes.push(mesh);
+        });
+
+        // Add all objects
+        const objects = objectGrid.getObjects();
+        const objectMeshes: THREE.Mesh[] = [];
+        
+        objects.forEach((object: Object) => {
+            let mesh: THREE.Mesh;
+
+            if (object.type === 'boat') {
+                // Flat-top cylinder, occupies two spaces in X direction
+                const geometry = new THREE.CylinderGeometry(0.5, 0.5, 1, 24); // radius 1, height 1
+                const material = new THREE.MeshLambertMaterial({ color: object.color });
+                mesh = new THREE.Mesh(geometry, material);
+
+                // Shift the boat forward by half its length so the stern is at object.x
+                mesh.position.set(object.x + 0.5, object.z + object.height, object.y);
+                mesh.scale.x = 2; // Stretch in X direction to occupy two spaces
+            } else {
+            // Default: sphere
+            const geometry = new THREE.SphereGeometry(0.4, 16, 12);
+            const material = new THREE.MeshLambertMaterial({ color: object.color });
+            mesh = new THREE.Mesh(geometry, material);
+
+            mesh.position.set(object.x, object.z + object.height, object.y);
+            }
+
+            scene.add(mesh);
+            objectMeshes.push(mesh);
         });
 
         // Handle window resize
@@ -88,33 +114,32 @@ const IsometricRenderer = ({ cubeGrid }: IsometricRendererProps) => {
 
         window.addEventListener('resize', handleResize);
 
-        // Animation loop
+        // Simple animation loop
+        let animationId: number;
         const animate = () => {
-            animationIdRef.current = requestAnimationFrame(animate);
+            animationId = requestAnimationFrame(animate);
             renderer.render(scene, camera);
         };
         animate();
 
         // Cleanup function
         return () => {
-            if (animationIdRef.current) {
-                cancelAnimationFrame(animationIdRef.current);
-            }
+            cancelAnimationFrame(animationId);
             window.removeEventListener('resize', handleResize);
             
-            if (mountRef.current && renderer.domElement) {
-                mountRef.current.removeChild(renderer.domElement);
-            }
-            
-            // Dispose of all cube geometries and materials
-            cubeMeshes.forEach(mesh => {
+            // Dispose of all geometries and materials
+            [...cubeMeshes, ...objectMeshes].forEach(mesh => {
                 mesh.geometry.dispose();
                 (mesh.material as THREE.Material).dispose();
             });
             
             renderer.dispose();
+            
+            if (mountRef.current) {
+                mountRef.current.innerHTML = '';
+            }
         };
-    }, [cubeGrid]);
+    }, [cubeGrid, objectGrid, updateTrigger]); // Re-run when any of these change
 
     return (
         <div 

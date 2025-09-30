@@ -5,7 +5,7 @@ import Credits from './pages/Credits'
 import Games from './pages/Games'
 import GeometricBackground from './components/GeometricBackground'
 import './App.css'
-import Chicken_Crossing from './pages/Games/Chicken_Crossing'
+import Chicken_Crossing from './pages/Games/ChickenCrossing/ChickenCrossingGame'
 
 // Component to conditionally render background based on route
 function ConditionalBackground() {

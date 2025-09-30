@@ -62,13 +62,15 @@ const IsometricRenderer = ({ cubeGrid }: IsometricRendererProps) => {
         const cubeMeshes: THREE.Mesh[] = [];
 
         cubes.forEach((cube: Cube) => {
-            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            // Set height to 0.5 if type is 'water', else 1
+            const height = cube.type === 'water' ? 0.5 : 1;
+            const geometry = new THREE.BoxGeometry(1, height, 1);
             const material = new THREE.MeshLambertMaterial({ color: cube.color });
             const mesh = new THREE.Mesh(geometry, material);
-            
-            // Position the cube based on grid coordinates
-            mesh.position.set(cube.x, 0.5, cube.y);
-            
+
+            // Position the cube based on grid coordinates, adjust y for height
+            mesh.position.set(cube.x, height / 2, cube.y);
+
             scene.add(mesh);
             cubeMeshes.push(mesh);
         });

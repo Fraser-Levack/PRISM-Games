@@ -7,13 +7,41 @@ const Chicken_Crossing = () => {
   const cubeGrid = new CubeGrid();
   
   // Add some sample cubes
-  cubeGrid.addCube(0, 0, 0x00ff00, 'ground');    // Green cube at origin
-  cubeGrid.addCube(0, 1, 0x00ff00, 'ground');
-  cubeGrid.addCube(1, 0, 0x00ff00, 'ground');
-  cubeGrid.addCube(0, 2, 0x00ff00, 'ground');
-  cubeGrid.addCube(0, 3, 0x00ff00, 'ground');
-  cubeGrid.addCube(1, 2, 0x00ff00, 'ground');
+  // Bigger grid dimensions
+  const gridWidth = 20;
+  const gridHeight = 12;
+  const riverStart = 3;
+  const riverEnd = gridWidth - 4;
+  const riverWidth = 6; // Wider river
+
+  // Center the grid over (0, 0)
+  const xOffset = -Math.floor(gridWidth / 2);
+  const yOffset = -Math.floor(gridHeight / 2);
+
+  // Fill the grid with ground first
+  for (let x = 0; x < gridWidth; x++) {
+    for (let y = 0; y < gridHeight; y++) {
+      cubeGrid.addCube(x + xOffset, y + yOffset, 0x00ff00, 'ground');
+    }
+  }
+
+  // River (center, meandering, overwrite ground with water)
+  for (let y = 0; y < gridHeight; y++) {
+    // Sine wave meander for river center
+    const meander = Math.round(Math.sin(y / 2.5) * 2); // -2 to 2
+    // Center of river for this row
+    const riverCenter = Math.floor((riverStart + riverEnd) / 2) + meander;
+    for (let x = riverStart; x < riverEnd; x++) {
+      // Fill river cubes
+      if (Math.abs(x - riverCenter) <= Math.floor(riverWidth / 2)) {
+        cubeGrid.removeCube(x + xOffset, y + yOffset);
+        cubeGrid.addCube(x + xOffset, y + yOffset, 0x3399ff, 'water');
+        
+      }
+    }
+  }
   
+
 
   return (
     <div className="game-container">

@@ -18,6 +18,11 @@ class CubeGrid {
         this.cubes.push({ x, y, color, type });
     }
 
+    // Remove a cube at specific coordinates
+    removeCube(x: number, y: number): void {
+        this.cubes = this.cubes.filter(cube => !(cube.x === x && cube.y === y));
+    }
+
     // Get all cubes
     getCubes(): Cube[] {
         return this.cubes;

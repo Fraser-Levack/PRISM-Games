@@ -1,12 +1,32 @@
+/* Add overflow hidden to remove scroll bars */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Remove scroll bars */
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 #root {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh; /* Use viewport height instead of min-height */
   position: relative;
   z-index: 0;
+  overflow: hidden; /* Prevent root from scrolling */
 }
 
 .app {
-  min-height: 100vh;
+  height: 100vh; /* Use viewport height instead of min-height */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,6 +38,7 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  overflow: hidden; /* Prevent app container from scrolling */
 }
 
 .home, .credits, .games {
@@ -31,6 +52,19 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   position: relative;
   z-index: 20;
+  max-height: 80vh; /* Limit height to prevent overflow */
+  overflow-y: auto; /* Allow internal scrolling if needed */
+}
+
+.game-container {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  background: #000;
+  overflow: hidden;
 }
 
 .home h1, .credits h1, .games h1 {

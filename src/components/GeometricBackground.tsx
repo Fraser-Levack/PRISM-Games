@@ -74,7 +74,7 @@ const GeometricBackground = () => {
       }
     `;
 
-    // Replace the fragmentShader with dimmed version
+    // Replace the fragmentShader with optimized purple version
     const fragmentShader = `
       uniform float u_time;
       uniform vec2 u_resolution;
@@ -93,7 +93,7 @@ const GeometricBackground = () => {
         return min(max(q.x, max(q.y, q.z)), 0.0) + length(max(q, 0.0));
       }
 
-      // Shatter function - creates fractures in the crystal
+      // Optimized shatter function - reduced iterations
       float sh(vec3 p, float d, float n, float a, float s, float o) {
         for(float i = 0.0; i < n; i++) {
           p.xy *= rot(a);
@@ -106,52 +106,72 @@ const GeometricBackground = () => {
         return d;
       }
 
-      // Scene/map function
+      // Purple-themed color function instead of full rainbow
+      vec3 purpleSpectrum(float t) {
+        t = fract(t);
+        // Purple to pink to blue spectrum
+        vec3 purple = vec3(0.5, 0.0, 0.8);
+        vec3 pink = vec3(0.8, 0.2, 0.6);
+        vec3 blue = vec3(0.2, 0.4, 0.9);
+        vec3 cyan = vec3(0.0, 0.6, 0.8);
+        
+        if(t < 0.33) return mix(purple, pink, t * 3.0);
+        else if(t < 0.66) return mix(pink, blue, (t - 0.33) * 3.0);
+        else return mix(blue, cyan, (t - 0.66) * 3.0);
+      }
+
+      // Scene/map function with performance optimizations
       float mp(vec3 p) {
         // Rotate entire scene slowly
         p.xz *= rot(tt * 0.03 + 1.0);
         p.yz *= rot(tt * 0.05 + 0.5);
         
-        // Create crystal structure - REDUCED SIZE
+        // Create crystal structure
         float d = bx(p, vec3(3.0, 3.0, 3.0)) - 0.15;
         float c = bx(p, vec3(1.8, 1.8, 1.8));
         
-        // Apply fracturing with complexity scaling
-        float fractures = 5.0 + u_complexity * 4.0;
+        // Reduced fractures for better performance
+        float fractures = 3.0 + u_complexity * 2.0; // Reduced from 5.0 + 4.0
         d = sh(p, d, fractures, sin(tt * 0.01 + 0.3) * 3.0, 
                (cos(tt * 0.1) * 0.5 + 0.5) * 0.5 + 0.008, 0.4);
         
         sd = d;
         
-        // DIMMED: Reduced glow intensity
-        gl += 0.0005 / (0.001 + d * d) * normalize(p * p) * 0.004 * u_complexity;
+        // Reduced glow calculation for performance
+        gl += 0.0008 / (0.001 + d * d) * 0.006 * u_complexity;
         
         // Set material properties when near surface
         if(sd < 0.001) {
-          // SLIGHTLY BRIGHTER: Increased crystal brightness just a bit
-          oc = vec3(0.2, 0.15, 0.45) * (1.0 + u_complexity * 0.2);
-          ss = pow(abs(c), 3.0) * vec3(0.25, 0.2, 0.5);
-          io = 1.5 + c * 0.1;
-          ot = 0.7 - c * 0.2;
+          // Purple-themed crystal colors
+          float colorShift = tt * 0.03 + length(p) * 0.1; // Slower color shift
+          vec3 baseColor = purpleSpectrum(colorShift) * 0.6 + vec3(0.2, 0.1, 0.3);
+          oc = baseColor * (1.0 + u_complexity * 0.2);
+          
+          // Purple subsurface scattering
+          ss = pow(abs(c), 2.0) * purpleSpectrum(colorShift + 0.2) * 0.4;
+          
+          io = 1.4 + c * 0.1; // Slightly reduced for performance
+          ot = 0.7 - c * 0.1;
         }
         
         return sd;
       }
 
-      // Raymarcher
+      // Optimized raymarcher with fewer iterations
       void tr() {
         cd = 0.0;
-        for(float i = 0.0; i < 100.0 * u_complexity + 50.0; i++) {
+        float maxSteps = 60.0 * u_complexity + 30.0; // Reduced from 100.0 + 50.0
+        for(float i = 0.0; i < maxSteps; i++) {
           mp(ro + rd * cd);
           sd *= iv;
           cd += sd;
-          if(sd < 0.00005 || cd > 16.0) break;
+          if(sd < 0.0001 || cd > 12.0) break; // Increased threshold, reduced max distance
         }
       }
 
-      // Normal calculation
+      // Optimized normal calculation
       void nm() {
-        vec3 eps = vec3(0.0001, 0.0, 0.0);
+        vec3 eps = vec3(0.0002, 0.0, 0.0); // Increased epsilon for faster calculation
         cn = normalize(vec3(
           mp(cp + eps.xyy) - mp(cp - eps.xyy),
           mp(cp + eps.yxy) - mp(cp - eps.yxy),
@@ -159,25 +179,35 @@ const GeometricBackground = () => {
         ));
       }
 
-      // Pixel shader - lighting and color calculation
+      // Simplified pixel shader for better performance
       void px() {
-        // DIMMED: Much darker background
-        cc = vec3(0.02, 0.02, 0.05) + length(cr * cr) * 0.1 + gl;
+        // Dark purple background
+        cc = vec3(0.02, 0.01, 0.06) + length(cr * cr) * 0.05 + gl;
         
-        if(cd > 16.0) return;
+        if(cd > 12.0) return;
         
-        // SLIGHTLY BRIGHTER: Increased lighting just a touch
-        vec3 l = vec3(0.18, 0.13, 0.25);
-        float df = length(cn * l);
-        float fr = pow(1.0 - df, 2.0) * 0.35; // Slightly increased fresnel
-        float sp = (1.0 - length(cross(cr, cn))) * 0.18; // Slightly increased specular
-        float ao = min(mp(cp + cn * 0.5) - 0.5, 0.3) * 0.2; // Keep AO the same
+        // Simplified lighting with purple theme
+        float lightShift = tt * 0.02 + dot(cn, vec3(1.0, 0.5, 0.8));
+        vec3 lightColor = purpleSpectrum(lightShift) * 0.6 + vec3(0.3, 0.2, 0.4);
         
-        cc = oc * (df + fr + ss) + fr + sp + ao + gl;
+        float df = max(0.15, dot(cn, normalize(lightColor)));
+        
+        // Simplified fresnel
+        float fresnelAmount = pow(1.0 - df, 2.0); // Reduced power for performance
+        vec3 fresnelColor = purpleSpectrum(lightShift + 0.1) * fresnelAmount * 0.5;
+        
+        // Simplified specular
+        float specAmount = pow(max(0.0, dot(reflect(-rd, cn), normalize(lightColor))), 16.0); // Reduced power
+        vec3 specColor = purpleSpectrum(lightShift + 0.3) * specAmount * 0.8;
+        
+        // Simplified ambient occlusion
+        float ao = min(mp(cp + cn * 0.2) - 0.2, 0.15) * 0.2;
+        
+        // Combine lighting
+        cc = oc * (df * 0.5 + 0.15) + fresnelColor + specColor + ss * 0.6 + ao + gl;
       }
 
       void main() {
-        // FIXED: Use vUv instead of gl_FragCoord for proper scaling
         vec2 uv = vUv * 2.0 - 1.0;
         uv.x *= u_resolution.x / u_resolution.y;
         
@@ -192,41 +222,43 @@ const GeometricBackground = () => {
         
         tt = mod(iTime + 19.0, 120.0);
         
-        // CAMERA POSITION - Adjusted for medium size
         ro = vec3(0.0, 0.0, -6.5);
         rd = normalize(vec3(uv, 1.0));
         
-        // Transparency/refraction loop (reduced iterations for performance)
-        int maxLayers = int(3.0 + u_complexity * 3.0);
-        for(int i = 0; i < 12; i++) {
+        // Reduced transparency layers for better performance
+        int maxLayers = int(2.0 + u_complexity * 2.0); // Reduced from 4.0 + 4.0
+        for(int i = 0; i < 8; i++) { // Reduced from 16
           if(i >= maxLayers * 2) break;
           
           tr();
           cp = ro + rd * cd;
           nm();
           cr = rd;
-          ro = cp - cn * (0.01 * iv);
+          ro = cp - cn * (0.015 * iv);
           
-          // Refraction
+          // Simplified refraction without chromatic dispersion for performance
           rd = refract(cr, cn * iv, iv > 0.0 ? 1.0 / io : io);
           if(length(rd) == 0.0) rd = reflect(cr, cn * iv);
           
           px();
           iv *= -1.0;
           
-          if(iv < 0.0) fc = mix(fc, cc, ct);
-          ct *= ot;
+          // Simplified color mixing
+          if(iv < 0.0) {
+            fc = mix(fc, cc, ct);
+          }
           
-          if(ct <= 0.01 || cd > 128.0) break;
+          ct *= ot;
+          if(ct <= 0.01 || cd > 64.0) break; // Earlier termination
         }
         
-        // DIMMED: Reduced overall output brightness and transparency
-        gl_FragColor = vec4(fc * 0.6, 0.5 + u_complexity * 0.1);
+        // Final output with purple emphasis
+        gl_FragColor = vec4(fc * 0.8, 0.5 + u_complexity * 0.1);
       }
     `;
 
-    // Create shader material with adaptive complexity
-    const complexity = isLowEnd || isMobile ? 0.3 : 1.0;
+    // Enhanced performance optimizations in the material setup
+    const complexity = isLowEnd || isMobile ? 0.2 : 0.8; // Reduced complexity even for desktop
     const material = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
@@ -247,15 +279,14 @@ const GeometricBackground = () => {
 
     // Animation loop with adaptive frame rate
     let lastTime = 0;
-    const targetFPS = isMobile ? 30 : 60;
+    const targetFPS = isMobile ? 24 : 45; // Reduced target FPS
     const frameInterval = 1000 / targetFPS;
 
     const animate = (currentTime: number) => {
       animationIdRef.current = requestAnimationFrame(animate);
       
-      // Throttle frame rate on lower-end devices
       if (currentTime - lastTime >= frameInterval) {
-        material.uniforms.u_time.value += 0.008;
+        material.uniforms.u_time.value += isMobile ? 0.006 : 0.008; // Slower animation on mobile
         renderer.render(scene, camera);
         lastTime = currentTime;
       }

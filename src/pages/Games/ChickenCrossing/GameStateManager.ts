@@ -20,6 +20,7 @@ export interface GameState {
     score: number;
     gameStatus: 'playing' | 'won' | 'lost' | 'paused';
     playerHolding?: string; // ID of object player is holding
+    lastPlayerAction?: string; // Description of last action
 }
 
 export class GameStateManager {
@@ -141,7 +142,8 @@ export class GameStateManager {
         const newState = { 
             ...state,
             player: { ...state.player },
-            objects: [...state.objects]
+            objects: [...state.objects],
+            lastPlayerAction: 'Moved'
         };
         
         const newPosition = { ...newState.player.position };
@@ -212,7 +214,32 @@ export class GameStateManager {
 
     public static handleEnter(state: GameState, setState: (state: GameState) => void): void {
         const playerPos = state.player.position;
-        const nearestObj = this.getNearestObjectWithinRange(state, playerPos, 2);
+        
+        // Get all objects within range
+        const objectsInRange = state.objects.filter(obj => {
+            const distance = this.calculateDistanceToObject(obj, playerPos);
+            return distance <= 2;
+        });
+        
+        if (objectsInRange.length === 0) {
+            return;
+        }
+        
+        // Priority-based selection based on last action
+        let prioritizedObject: GameObject | null = null;
+        
+        if (state.lastPlayerAction === 'Dropped') {
+            // After dropping, prioritize boat interaction
+            prioritizedObject = objectsInRange.find(obj => obj.type === 'boat') || null;
+        } else if (state.lastPlayerAction === 'Sailed') {
+            // After sailing, prioritize picking up items (excluding boat)
+            prioritizedObject = objectsInRange.find(obj => 
+                obj.type !== 'boat' && (obj.type === 'chicken' || obj.type === 'fox' || obj.type === 'grain')
+            ) || null;
+        }
+        
+        // If no prioritized object found or no priority action, use nearest object
+        const nearestObj = prioritizedObject || this.getNearestObjectWithinRange(state, playerPos, 2);
         
         if (!nearestObj) {
             return;
@@ -224,7 +251,6 @@ export class GameStateManager {
             // check available space around player to drop (eg not water or occupied)
             // Try to drop at adjacent positions around the player (including current position)
             const directions = [
-                { dx: 0, dy: 0 }, // Current position first
                 { dx: 1, dy: 0 },
                 { dx: -1, dy: 0 },
                 { dx: 0, dy: 1 },
@@ -252,7 +278,8 @@ export class GameStateManager {
                             ? { ...obj, position: { ...dropPosition } } // Spread the dropPosition to ensure it's a new object
                             : obj
                     ),
-                    playerHolding: undefined
+                    playerHolding: undefined,
+                    lastPlayerAction: 'Dropped'
                 };
                 this.saveState(newState);
                 setState(newState);
@@ -268,30 +295,64 @@ export class GameStateManager {
             const isAtDestination = nearestObj.position.x === 3 && nearestObj.position.y === -1;
             
             let newBoatPos: Position;
-            let newPlayerPos: Position;
+            let playerAndObjectsNewPos: Position;
             
             if (isAtStart) {
                 // Move to destination (across the river)
                 newBoatPos = { x: 3, y: -1, z: nearestObj.position.z };
-                newPlayerPos = { x: 3, y: -1, z: state.player.position.z };
+                playerAndObjectsNewPos = { x: 3, y: -1, z: state.player.position.z };
             } else if (isAtDestination) {
                 // Move back to start
                 newBoatPos = { x: -2, y: -1, z: nearestObj.position.z };
-                newPlayerPos = { x: -2, y: -1, z: state.player.position.z };
+                playerAndObjectsNewPos = { x: -2, y: -1, z: state.player.position.z };
             } else {
                 // If boat is in some other position, move to start as default
                 newBoatPos = { x: -2, y: -1, z: nearestObj.position.z };
-                newPlayerPos = { x: -2, y: -1, z: state.player.position.z };
+                playerAndObjectsNewPos = { x: -2, y: -1, z: state.player.position.z };
             }
             
-            // Update both boat and player positions
+            // Find all objects on the boat (at both boat positions)
+            const objectsOnBoat = state.objects.filter(obj => {
+                if (obj.id === 'boat') return false; // Don't include the boat itself
+                
+                // Check if object is at boat position (x or x+1)
+                return (obj.position.x === nearestObj.position.x || 
+                        obj.position.x === nearestObj.position.x + 1) &&
+                       obj.position.y === nearestObj.position.y;
+            });
+            
+            // Update boat position
             const newState = this.moveObject(state, nearestObj.id, newBoatPos);
-            const finalState = {
+            
+            // Update player position
+            const stateWithPlayer = {
                 ...newState,
                 player: {
                     ...newState.player,
-                    position: newPlayerPos
-                }
+                    position: playerAndObjectsNewPos
+                },
+                lastPlayerAction: 'Sailed'
+            };
+            
+            // Update all objects that were on the boat
+            const finalState = {
+                ...stateWithPlayer,
+                objects: stateWithPlayer.objects.map(obj => {
+                    const wasOnBoat = objectsOnBoat.find(boatObj => boatObj.id === obj.id);
+                    if (wasOnBoat) {
+                        // Maintain the relative position on the boat
+                        const relativeX = wasOnBoat.position.x === nearestObj.position.x ? 0 : 1;
+                        return {
+                            ...obj,
+                            position: {
+                                x: newBoatPos.x + relativeX,
+                                y: newBoatPos.y,
+                                z: obj.position.z // Keep original z position
+                            }
+                        };
+                    }
+                    return obj;
+                })
             };
             
             this.saveState(finalState);
@@ -307,7 +368,8 @@ export class GameStateManager {
                     obj.id === nearestObj.id
                         ? { ...obj, position: { x: state.player.position.x, y: state.player.position.y, z: state.player.position.z + 1 } }
                         : obj
-                )
+                ),
+                lastPlayerAction: 'Picked up grain'
             };
             this.saveState(newState);
             setState(newState);
@@ -322,7 +384,8 @@ export class GameStateManager {
                     obj.id === nearestObj.id
                         ? { ...obj, position: { x: state.player.position.x, y: state.player.position.y, z: state.player.position.z + 1 } }
                         : obj
-                )
+                ),
+                lastPlayerAction: 'Picked up chicken'
             };
             this.saveState(newState);
             setState(newState);
@@ -337,10 +400,33 @@ export class GameStateManager {
                     obj.id === nearestObj.id
                         ? { ...obj, position: { x: state.player.position.x, y: state.player.position.y, z: state.player.position.z + 1 } }
                         : obj
-                )   
+                ),   
+                lastPlayerAction: 'Picked up Fox'
             };
             this.saveState(newState);
             setState(newState);
+        }
+    }
+
+    private static calculateDistanceToObject(obj: GameObject, position: Position): number {
+        if (obj.type === 'boat') {
+            // For boat, calculate distance to both positions and use the minimum
+            const dx1 = obj.position.x - position.x;
+            const dy1 = obj.position.y - position.y;
+            const dz1 = obj.position.z - position.z;
+            const distance1 = Math.sqrt(dx1 * dx1 + dy1 * dy1 + dz1 * dz1);
+            
+            const dx2 = (obj.position.x + 1) - position.x;
+            const dy2 = obj.position.y - position.y;
+            const dz2 = obj.position.z - position.z;
+            const distance2 = Math.sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
+            
+            return Math.min(distance1, distance2);
+        } else {
+            const dx = obj.position.x - position.x;
+            const dy = obj.position.y - position.y;
+            const dz = obj.position.z - position.z;
+            return Math.sqrt(dx * dx + dy * dy + dz * dz);
         }
     }
 

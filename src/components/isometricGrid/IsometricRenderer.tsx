@@ -20,7 +20,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger }: IsometricRen
 
         // Initialize Three.js scene
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x202020);
+        scene.background = new THREE.Color(0.005, 0.0025, 0.015); // Pure base color without the additional terms
 
         // Create orthographic camera for true isometric view
         const aspect = window.innerWidth / window.innerHeight;

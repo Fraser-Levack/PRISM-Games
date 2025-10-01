@@ -19,6 +19,7 @@ export interface GameState {
     level: number;
     score: number;
     gameStatus: 'playing' | 'won' | 'lost' | 'paused';
+    playerHolding?: string; // ID of object player is holding
 }
 
 export class GameStateManager {
@@ -97,7 +98,7 @@ export class GameStateManager {
             objects: [
                 {
                     id: 'chicken',
-                    type: 'enemy',
+                    type: 'chicken',
                     position: { x: -9, y: 0, z: 1 },
                     color: 0xff0000,
                     height: 0.4
@@ -191,6 +192,20 @@ export class GameStateManager {
         }
 
         newState.player.position = newPosition;
+        if (state.playerHolding) {
+            // Move held object with player
+            const heldObjectIndex = newState.objects.findIndex(obj => obj.id === state.playerHolding);
+            if (heldObjectIndex !== -1) {
+                // Create a separate position object for the held item
+                const heldObjectPosition = { 
+                    x: newPosition.x, 
+                    y: newPosition.y, 
+                    z: newState.player.position.z + 1 
+                };
+                newState.objects[heldObjectIndex].position = heldObjectPosition;
+            }
+        }
+
         this.saveState(newState);
         return newState;
     }
@@ -202,7 +217,51 @@ export class GameStateManager {
         if (!nearestObj) {
             return;
         }
-        
+
+        if (state.playerHolding) {
+            // If player is holding something, drop it
+            const heldObjectIndex = state.objects.findIndex(obj => obj.id === state.playerHolding);
+            // check available space around player to drop (eg not water or occupied)
+            // Try to drop at adjacent positions around the player (including current position)
+            const directions = [
+                { dx: 0, dy: 0 }, // Current position first
+                { dx: 1, dy: 0 },
+                { dx: -1, dy: 0 },
+                { dx: 0, dy: 1 },
+                { dx: 0, dy: -1 }
+            ];
+            let dropPosition: Position | null = null;
+            for (const dir of directions) {
+                const candidate = { 
+                    x: playerPos.x + dir.dx, 
+                    y: playerPos.y + dir.dy, 
+                    z: 1 // Explicitly set z to 1 instead of using playerPos.z
+                };
+                if (this.isPositionAvailable(state, candidate)) {
+                    dropPosition = candidate;
+                    break;
+                }
+            }
+            const isSpaceAvailable = !!dropPosition;
+            if (heldObjectIndex !== -1 && isSpaceAvailable && dropPosition) {
+                console.log(`Dropping object at position:`, dropPosition); // Debug log
+                const newState = { 
+                    ...state,
+                    objects: state.objects.map(obj =>
+                        obj.id === state.playerHolding
+                            ? { ...obj, position: { ...dropPosition } } // Spread the dropPosition to ensure it's a new object
+                            : obj
+                    ),
+                    playerHolding: undefined
+                };
+                this.saveState(newState);
+                setState(newState);
+            } else {
+                console.log('Cannot drop object: no available space or object not found', { heldObjectIndex, isSpaceAvailable, dropPosition }); // Debug log
+            }
+            return;
+        }
+
         if (nearestObj.type === 'boat') {
             // Check if boat is at starting position or destination position
             const isAtStart = nearestObj.position.x === -2 && nearestObj.position.y === -1;
@@ -237,6 +296,51 @@ export class GameStateManager {
             
             this.saveState(finalState);
             setState(finalState);
+        } else if (nearestObj.type === 'grain') {
+            // just log pickup grain
+            console.log('Picked up grain!');
+            // set playerHolding to grain id and move the gain to same x and y as player but z +1
+            const newState = { 
+                ...state,
+                playerHolding: nearestObj.id,
+                objects: state.objects.map(obj =>
+                    obj.id === nearestObj.id
+                        ? { ...obj, position: { x: state.player.position.x, y: state.player.position.y, z: state.player.position.z + 1 } }
+                        : obj
+                )
+            };
+            this.saveState(newState);
+            setState(newState);
+        } else if (nearestObj.type === 'chicken') {
+            // just log pickup chicken
+            console.log('Picked up chicken!');
+            // set playerHolding to chicken id and move the chicken to same x and y as player but z +1
+            const newState = {
+                ...state,
+                playerHolding: nearestObj.id,
+                objects: state.objects.map(obj =>
+                    obj.id === nearestObj.id
+                        ? { ...obj, position: { x: state.player.position.x, y: state.player.position.y, z: state.player.position.z + 1 } }
+                        : obj
+                )
+            };
+            this.saveState(newState);
+            setState(newState);
+        } else if (nearestObj.type === 'fox') {
+            // just log pickup fox
+            console.log('Picked up fox!');
+            // set playerHolding to fox id and move the fox to same x and y as player but z +1
+            const newState = {
+                ...state,
+                playerHolding: nearestObj.id,
+                objects: state.objects.map(obj =>
+                    obj.id === nearestObj.id
+                        ? { ...obj, position: { x: state.player.position.x, y: state.player.position.y, z: state.player.position.z + 1 } }
+                        : obj
+                )   
+            };
+            this.saveState(newState);
+            setState(newState);
         }
     }
 
@@ -346,6 +450,39 @@ export class GameStateManager {
                 );
             }
         });
+    }
+
+    public static isPositionAvailable(state: GameState, position: Position): boolean {
+        // Check bounds
+        if (position.x < -10 || position.x > 9 || position.y < -6 || position.y > 5) {
+            return false;
+        }
+        // Check cube type
+        const cubeType = this.getCubeTypeAt(state, position.x, position.y);
+        if (cubeType !== 'ground') {
+            // Allow boat as valid position
+            const isBoatAtTarget = state.objects.some(obj =>
+                obj.type === 'boat' &&
+                (
+                    obj.position.x === position.x || obj.position.x + 1 === position.x
+                ) &&
+                obj.position.y === position.y
+            );
+            if (!isBoatAtTarget) {
+                return false;
+            }
+        }
+        // Check if occupied by other objects (except boat)
+        const occupied = state.objects.some(obj =>
+            obj.id !== 'boat' &&
+            obj.position.x === position.x &&
+            obj.position.y === position.y &&
+            Math.abs(obj.position.z - position.z) < 1
+        );
+        if (occupied) {
+            return false;
+        }
+        return true;
     }
 
     public static getNearestObjectWithinRange(state: GameState, position: Position, range: number): GameObject | null {

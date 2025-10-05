@@ -21,17 +21,23 @@ export interface GameState {
     gameStatus: 'playing' | 'won' | 'lost' | 'paused';
     playerHolding?: string; // ID of object player is holding
     lastPlayerAction?: string; // Description of last action
+    left?: string[];
+    right?: string[];
 }
 
 export class GameStateManager {
     private static readonly STORAGE_KEY = 'chicken-crossing-isometric-game';
 
     public static saveState(state: GameState): void {
+        // Check win/loss conditions before saving
+        const updatedState = this.checkWinLossConditions(state);
+        
         // Convert Map to object for JSON serialization
         const serializableState = {
-            ...state,
-            cubeTypes: Object.fromEntries(state.cubeTypes)
+            ...updatedState,
+            cubeTypes: Object.fromEntries(updatedState.cubeTypes)
         };
+        console.log('Saving game state:', serializableState);
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(serializableState));
     }
 
@@ -129,7 +135,10 @@ export class GameStateManager {
             cubeTypes: this.createDefaultCubeTypes(),
             level: 1,
             score: 0,
-            gameStatus: 'playing'
+            gameStatus: 'playing',
+            left: ['fox', 'chicken', 'grain', 'player'],
+            right: []
+
         };
     }
 
@@ -323,7 +332,7 @@ export class GameStateManager {
             
             // Update boat position
             const newState = this.moveObject(state, nearestObj.id, newBoatPos);
-            
+
             // Update player position
             const stateWithPlayer = {
                 ...newState,
@@ -333,8 +342,31 @@ export class GameStateManager {
                 },
                 lastPlayerAction: 'Sailed'
             };
-            
+
+            // Toggle player between left/right arrays
+            let newLeft = [...(stateWithPlayer.left ?? [])];
+            let newRight = [...(stateWithPlayer.right ?? [])];
+            if (newLeft.includes('player')) {
+                newLeft = newLeft.filter(id => id !== 'player');
+                newRight.push('player');
+            } else if (newRight.includes('player')) {
+                newRight = newRight.filter(id => id !== 'player');
+                newLeft.push('player');
+            }
+
             // Update all objects that were on the boat
+            // Toggle left/right arrays for objects transported by boat
+            objectsOnBoat.forEach(obj => {
+                if (obj.id === 'player' || obj.id === 'boat') return; // Skip player and boat
+                if (newLeft.includes(obj.id)) {
+                    newLeft = newLeft.filter(id => id !== obj.id);
+                    newRight.push(obj.id);
+                } else if (newRight.includes(obj.id)) {
+                    newRight = newRight.filter(id => id !== obj.id);
+                    newLeft.push(obj.id);
+                }
+            });
+
             const finalState = {
                 ...stateWithPlayer,
                 objects: stateWithPlayer.objects.map(obj => {
@@ -352,7 +384,9 @@ export class GameStateManager {
                         };
                     }
                     return obj;
-                })
+                }),
+                left: newLeft,
+                right: newRight
             };
             
             this.saveState(finalState);
@@ -611,5 +645,52 @@ export class GameStateManager {
             }
         });
         return nearestObject;
+    }
+
+    public static checkWinLossConditions(state: GameState): GameState {
+        // Skip checking if game is already won or lost
+        if (state.gameStatus === 'won' || state.gameStatus === 'lost') {
+            return state;
+        }
+
+        const left = state.left || [];
+        const right = state.right || [];
+
+        // Win condition: All three objects (fox, chicken, grain) and player are on the right side
+        const requiredEntities = ['player', 'fox', 'chicken', 'grain'];
+        const allOnRight = requiredEntities.every(entity => right.includes(entity));
+        
+        if (allOnRight) {
+            return {
+                ...state,
+                gameStatus: 'won',
+                score: state.score + 100 // Bonus points for winning
+            };
+        }
+
+        // Loss condition 1: Chicken is with grain on one side without the player being there
+        const chickenAndGrainOnLeft = left.includes('chicken') && left.includes('grain') && !left.includes('player');
+        const chickenAndGrainOnRight = right.includes('chicken') && right.includes('grain') && !right.includes('player');
+        
+        if (chickenAndGrainOnLeft || chickenAndGrainOnRight) {
+            return {
+                ...state,
+                gameStatus: 'lost'
+            };
+        }
+
+        // Loss condition 2: Fox is with chicken on one side without the player being there
+        const foxAndChickenOnLeft = left.includes('fox') && left.includes('chicken') && !left.includes('player');
+        const foxAndChickenOnRight = right.includes('fox') && right.includes('chicken') && !right.includes('player');
+        
+        if (foxAndChickenOnLeft || foxAndChickenOnRight) {
+            return {
+                ...state,
+                gameStatus: 'lost'
+            };
+        }
+
+        // No win/loss conditions met, return original state
+        return state;
     }
 }

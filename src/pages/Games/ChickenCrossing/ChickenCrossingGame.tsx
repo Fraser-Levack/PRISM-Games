@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import IsometricRenderer from '../../../components/isometricGrid/IsometricRenderer'
 import { CubeGrid } from '../../../components/isometricGrid/CubeGrid'
 import { ObjectGrid } from '../../../components/isometricGrid/ObjectGrid'
@@ -12,9 +12,51 @@ const Chicken_Crossing = () => {
   });
 
   const [updateTrigger, setUpdateTrigger] = useState(0);
+  const [showStatusPopup, setShowStatusPopup] = useState(false);
+  const previousStatusRef = useRef(gameState.gameStatus);
 
   const cubeGrid = useMemo(() => new CubeGrid(), []);
   const objectGrid = useMemo(() => new ObjectGrid(), []);
+
+  // Show popup when game status changes
+  useEffect(() => {
+    const currentStatus = gameState.gameStatus;
+    const previousStatus = previousStatusRef.current;
+    
+    console.log('Status check:', { currentStatus, previousStatus }); // Debug log
+    
+    if (currentStatus !== previousStatus && currentStatus !== 'playing') {
+      console.log('Showing popup for status:', currentStatus); // Debug log
+      setShowStatusPopup(true);
+      
+      // Auto-hide popup after 3 seconds
+      const timer = setTimeout(() => {
+        setShowStatusPopup(false);
+      }, 3000);
+
+      // Update the ref to the new status
+      previousStatusRef.current = currentStatus;
+      
+      return () => clearTimeout(timer);
+    }
+    
+    // Always update the ref to track the current status
+    previousStatusRef.current = currentStatus;
+  }, [gameState.gameStatus]);
+
+  // Get status message and color
+  const getStatusDisplay = () => {
+    switch (gameState.gameStatus) {
+      case 'won':
+        return { message: '🎉 Congratulations! You Won!', color: '#4ade80' };
+      case 'lost':
+        return { message: '💀 Game Over! You Lost!', color: '#ef4444' };
+      case 'paused':
+        return { message: '⏸️ Game Paused', color: '#f59e0b' };
+      default:
+        return { message: '', color: '#ffffff' };
+    }
+  };
 
   // Initialize the world (cubes) only once
   useEffect(() => {
@@ -90,42 +132,57 @@ const Chicken_Crossing = () => {
       // Handle collision logic here if needed
     }
     
-    setGameState(newState);
+    // Check win/loss conditions after movement
+    const checkedState = GameStateManager.checkWinLossConditions(newState);
+    
+    setGameState(checkedState);
+    GameStateManager.saveState(checkedState); // Save the checked state
   }, [gameState]);
 
   // Keyboard event handling
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (gameState.gameStatus !== 'playing') return;
-
       switch (event.key.toLowerCase()) {
+        case 'r':
+          event.preventDefault();
+          const resetState = GameStateManager.resetToDefault();
+          setGameState(resetState);
+          GameStateManager.saveState(resetState); // Save reset state
+          setShowStatusPopup(false); // Hide popup when resetting
+          break;
         case 'w':
         case 'arrowup':
+          if (gameState.gameStatus !== 'playing') return;
           event.preventDefault();
           movePlayer('up');
           break;
         case 's':
         case 'arrowdown':
+          if (gameState.gameStatus !== 'playing') return;
           event.preventDefault();
           movePlayer('down');
           break;
         case 'a':
         case 'arrowleft':
+          if (gameState.gameStatus !== 'playing') return;
           event.preventDefault();
           movePlayer('left');
           break;
         case 'd':
         case 'arrowright':
+          if (gameState.gameStatus !== 'playing') return;
           event.preventDefault();
           movePlayer('right');
           break;
-        case 'r':
-          event.preventDefault();
-          setGameState(GameStateManager.resetToDefault());
-          break;
         case 'enter':
+          if (gameState.gameStatus !== 'playing') return;
           event.preventDefault();
-          GameStateManager.handleEnter(gameState, setGameState);
+          // Handle enter key with win/loss checking
+          GameStateManager.handleEnter(gameState, (newState) => {
+            const checkedState = GameStateManager.checkWinLossConditions(newState);
+            setGameState(checkedState);
+            GameStateManager.saveState(checkedState);
+          });
           break;
       }
     };
@@ -133,6 +190,8 @@ const Chicken_Crossing = () => {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [movePlayer, gameState.gameStatus, gameState]);
+
+  const statusDisplay = getStatusDisplay();
 
   return (
     <div className="game-container">
@@ -174,6 +233,37 @@ const Chicken_Crossing = () => {
         <div>Press R to reset</div>
       </div>
 
+      {/* Status Popup */}
+      {showStatusPopup && (
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: 200,
+          background: 'rgba(0, 0, 0, 0.9)',
+          color: statusDisplay.color,
+          padding: '30px 40px',
+          borderRadius: '15px',
+          fontSize: '24px',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          border: `3px solid ${statusDisplay.color}`,
+          boxShadow: '0 0 20px rgba(0, 0, 0, 0.8)',
+          animation: 'fadeInScale 0.3s ease-out'
+        }}>
+          {statusDisplay.message}
+          <div style={{
+            fontSize: '14px',
+            marginTop: '10px',
+            color: '#ffffff',
+            opacity: 0.8
+          }}>
+            Press R to restart
+          </div>
+        </div>
+      )}
+
       {/* Game content */}
       <div style={{
         width: '100%',
@@ -188,6 +278,20 @@ const Chicken_Crossing = () => {
           updateTrigger={updateTrigger}
         />
       </div>
+
+      {/* CSS for popup animation */}
+      <style>{`
+        @keyframes fadeInScale {
+          from {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.5);
+          }
+          to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+          }
+        }
+      `}</style>
     </div>
   )
 }

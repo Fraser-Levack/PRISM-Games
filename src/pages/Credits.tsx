@@ -16,10 +16,9 @@ const Credits = () => {
           <li>TypeScript</li>
           <li>Vite</li>
           <li>React Router</li>
+          <li>Three.js</li>
+          <li>PRISM Model Checker</li>
         </ul>
-        
-        <h2>Special Thanks</h2>
-        <p>Thanks to the open-source community for providing the tools and libraries that made this project possible.</p>
       </div>
       
       <div className="navigation">

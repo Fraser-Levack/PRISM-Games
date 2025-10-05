@@ -4,6 +4,7 @@ import IsometricRenderer from '../../../components/isometricGrid/IsometricRender
 import { CubeGrid } from '../../../components/isometricGrid/CubeGrid'
 import { ObjectGrid } from '../../../components/isometricGrid/ObjectGrid'
 import { GameStateManager, type GameState } from './GameStateManager';
+import GameStatusPopup from './GameStatusPopup';
 
 const Chicken_Crossing = () => {
   const [gameState, setGameState] = useState<GameState>(() => {
@@ -29,33 +30,25 @@ const Chicken_Crossing = () => {
       console.log('Showing popup for status:', currentStatus); // Debug log
       setShowStatusPopup(true);
       
-      // Auto-hide popup after 3 seconds
-      const timer = setTimeout(() => {
-        setShowStatusPopup(false);
-      }, 3000);
-
       // Update the ref to the new status
       previousStatusRef.current = currentStatus;
-      
-      return () => clearTimeout(timer);
     }
     
     // Always update the ref to track the current status
     previousStatusRef.current = currentStatus;
   }, [gameState.gameStatus]);
 
-  // Get status message and color
-  const getStatusDisplay = () => {
-    switch (gameState.gameStatus) {
-      case 'won':
-        return { message: '🎉 Congratulations! You Won!', color: '#4ade80' };
-      case 'lost':
-        return { message: '💀 Game Over! You Lost!', color: '#ef4444' };
-      case 'paused':
-        return { message: '⏸️ Game Paused', color: '#f59e0b' };
-      default:
-        return { message: '', color: '#ffffff' };
-    }
+  // Handle popup close
+  const handleClosePopup = () => {
+    setShowStatusPopup(false);
+  };
+
+  // Handle restart from popup
+  const handleRestart = () => {
+    const resetState = GameStateManager.resetToDefault();
+    setGameState(resetState);
+    GameStateManager.saveState(resetState);
+    setShowStatusPopup(false);
   };
 
   // Initialize the world (cubes) only once
@@ -191,8 +184,6 @@ const Chicken_Crossing = () => {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [movePlayer, gameState.gameStatus, gameState]);
 
-  const statusDisplay = getStatusDisplay();
-
   return (
     <div className="game-container">
       {/* Back to games button */}
@@ -228,40 +219,17 @@ const Chicken_Crossing = () => {
       }}>
         <div>Controls: WASD or Arrow Keys</div>
         <div>Position: ({gameState.player.position.x}, {gameState.player.position.y})</div>
-        <div>Score: {gameState.score}</div>
         <div>Status: {gameState.gameStatus}</div>
         <div>Press R to reset</div>
       </div>
 
       {/* Status Popup */}
-      {showStatusPopup && (
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          zIndex: 200,
-          background: 'rgba(0, 0, 0, 0.9)',
-          color: statusDisplay.color,
-          padding: '30px 40px',
-          borderRadius: '15px',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          border: `3px solid ${statusDisplay.color}`,
-          boxShadow: '0 0 20px rgba(0, 0, 0, 0.8)',
-          animation: 'fadeInScale 0.3s ease-out'
-        }}>
-          {statusDisplay.message}
-          <div style={{
-            fontSize: '14px',
-            marginTop: '10px',
-            color: '#ffffff',
-            opacity: 0.8
-          }}>
-            Press R to restart
-          </div>
-        </div>
+      {showStatusPopup && gameState.gameStatus !== 'playing' && (
+        <GameStatusPopup
+          gameStatus={gameState.gameStatus as 'won' | 'lost' | 'paused'}
+          onClose={handleClosePopup}
+          onRestart={handleRestart}
+        />
       )}
 
       {/* Game content */}

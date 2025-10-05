@@ -17,7 +17,6 @@ export interface GameState {
     objects: GameObject[];
     cubeTypes: Map<string, string>; // Simple position->type mapping
     level: number;
-    score: number;
     gameStatus: 'playing' | 'won' | 'lost' | 'paused';
     playerHolding?: string; // ID of object player is holding
     lastPlayerAction?: string; // Description of last action
@@ -134,7 +133,6 @@ export class GameStateManager {
             ],
             cubeTypes: this.createDefaultCubeTypes(),
             level: 1,
-            score: 0,
             gameStatus: 'playing',
             left: ['fox', 'chicken', 'grain', 'player'],
             right: []
@@ -527,16 +525,6 @@ export class GameStateManager {
         return { collision: false };
     }
 
-    public static updateScore(state: GameState, points: number): GameState {
-        const newState = { 
-            ...state,
-            score: state.score + points
-        };
-        
-        this.saveState(newState);
-        return newState;
-    }
-
     public static setGameStatus(state: GameState, status: GameState['gameStatus']): GameState {
         const newState = { 
             ...state,
@@ -613,7 +601,6 @@ export class GameStateManager {
         // Check all objects and calculate their actual distances
         state.objects.forEach(obj => {
             let distance: number;
-            let positionInfo: string;
             
             if (obj.type === 'boat') {
                 // For boat, calculate distance to both positions and use the minimum
@@ -628,13 +615,11 @@ export class GameStateManager {
                 const distance2 = Math.sqrt(dx2 * dx2 + dy2 * dy2 + dz2 * dz2);
                 
                 distance = Math.min(distance1, distance2);
-                positionInfo = `boat at (${obj.position.x}, ${obj.position.y}, ${obj.position.z}) & (${obj.position.x + 1}, ${obj.position.y}, ${obj.position.z})`;
             } else {
                 const dx = obj.position.x - position.x;
                 const dy = obj.position.y - position.y;
                 const dz = obj.position.z - position.z;
                 distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-                positionInfo = `${obj.type} at (${obj.position.x}, ${obj.position.y}, ${obj.position.z})`;
             }
             
             
@@ -663,8 +648,7 @@ export class GameStateManager {
         if (allOnRight) {
             return {
                 ...state,
-                gameStatus: 'won',
-                score: state.score + 100 // Bonus points for winning
+                gameStatus: 'won'
             };
         }
 

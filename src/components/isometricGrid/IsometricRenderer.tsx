@@ -45,10 +45,10 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger }: IsometricRen
         mountRef.current.appendChild(renderer.domElement);
 
         // Add lighting
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+        const ambientLight = new THREE.AmbientLight(0x404040, 1.2); // Increased from 0.6 to 1.2
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5); // Increased from 0.8 to 1.5
         directionalLight.position.set(10, 8, 5);
         scene.add(directionalLight);
 

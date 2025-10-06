@@ -192,7 +192,7 @@ const GameStatusPopup: React.FC<GameStatusPopupProps> = ({
           margin: '0',
           fontSize: '24px'
         }}>
-          💡 Solution Guide
+          💡 PRISM Solution Guide
         </h2>
         <button
           onClick={() => setShowSolution(false)}
@@ -255,7 +255,7 @@ const GameStatusPopup: React.FC<GameStatusPopupProps> = ({
             onMouseOver={(e) => e.currentTarget.style.background = '#d97706'}
             onMouseOut={(e) => e.currentTarget.style.background = '#f59e0b'}
           >
-            🔄 Reset
+            🔄 Start of Solution
           </button>
 
           <button

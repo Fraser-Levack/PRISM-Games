@@ -2,6 +2,10 @@ import React from 'react';
 import type { StepComponentProps } from './Step0';
 
 const Step2: React.FC<StepComponentProps> = ({ isActive = false }) => {
+  const openGraphInNewTab = () => {
+    window.open('/Crossing-Graph-SVG.svg', '_blank');
+  };
+
   return (
     <div style={{
       background: 'rgba(59, 130, 246, 0.1)',
@@ -27,7 +31,7 @@ const Step2: React.FC<StepComponentProps> = ({ isActive = false }) => {
           fontSize: '14px',
           color: '#ccc'
         }}>
-          Return Journey
+          How to solve the problem using model checking.
         </span>
       </div>
 
@@ -36,7 +40,7 @@ const Step2: React.FC<StepComponentProps> = ({ isActive = false }) => {
         margin: '0 0 10px 0',
         fontSize: '16px'
       }}>
-        Player Returns Alone
+        Understanding the Results
       </h4>
 
       {/* Placeholder content area */}
@@ -46,73 +50,41 @@ const Step2: React.FC<StepComponentProps> = ({ isActive = false }) => {
         borderRadius: '8px',
         marginBottom: '15px'
       }}>
-        <p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
-          [Placeholder for detailed step content - customize as needed]
+        <p style={{ color: '#ccc', margin: '0 0 10px 0', fontSize: '14px' }}>
+          After defining the model, goal, and constraints, we can run the model checker to explore all possible states and transitions. 
+          This results in a state space that represents all possible configurations of the game. 
+          A visual graph can be generated to illustrate these states and the transitions between them.
         </p>
+        
+        {/* View Graph Button */}
+        <button
+          onClick={openGraphInNewTab}
+          style={{
+            background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+            color: 'white',
+            border: 'none',
+            padding: '10px 20px',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 4px rgba(59, 130, 246, 0.3)'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 4px 8px rgba(59, 130, 246, 0.4)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 2px 4px rgba(59, 130, 246, 0.3)';
+          }}
+        >
+          📊 View State Space Graph (New Tab)
+        </button>
       </div>
 
-      {/* Side-by-side layout */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        margin: '20px 0',
-        gap: '20px'
-      }}>
-        <div style={{
-          flex: 1,
-          background: 'rgba(239, 68, 68, 0.2)',
-          padding: '15px',
-          borderRadius: '8px',
-          border: '1px solid rgba(239, 68, 68, 0.5)'
-        }}>
-          <h5 style={{
-            color: '#ef4444',
-            margin: '0 0 10px 0',
-            fontSize: '14px'
-          }}>
-            LEFT SIDE
-          </h5>
-          <div style={{ fontSize: '14px', marginBottom: '5px' }}>🦊 Fox</div>
-          <div style={{ fontSize: '14px', marginBottom: '5px' }}>🌾 Grain</div>
-          <div style={{ fontSize: '14px', marginBottom: '5px' }}>👤 Player</div>
-        </div>
-
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '24px'
-        }}>
-          🌊
-        </div>
-
-        <div style={{
-          flex: 1,
-          background: 'rgba(74, 222, 128, 0.2)',
-          padding: '15px',
-          borderRadius: '8px',
-          border: '1px solid rgba(74, 222, 128, 0.5)'
-        }}>
-          <h5 style={{
-            color: '#4ade80',
-            margin: '0 0 10px 0',
-            fontSize: '14px'
-          }}>
-            RIGHT SIDE
-          </h5>
-          <div style={{ fontSize: '14px', marginBottom: '5px' }}>🐔 Chicken</div>
-        </div>
       </div>
-
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.1)',
-        padding: '15px',
-        borderRadius: '8px',
-        fontSize: '14px',
-        lineHeight: '1.4'
-      }}>
-        <strong>Key Point:</strong> Player must return to transport the remaining items.
-      </div>
-    </div>
   );
 };
 

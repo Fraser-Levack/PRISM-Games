@@ -27,7 +27,7 @@ const Step1: React.FC<StepComponentProps> = ({ isActive = false }) => {
           fontSize: '14px',
           color: '#ccc'
         }}>
-          First Move
+          How to solve the problem using model checking.
         </span>
       </div>
 
@@ -36,10 +36,9 @@ const Step1: React.FC<StepComponentProps> = ({ isActive = false }) => {
         margin: '0 0 10px 0',
         fontSize: '16px'
       }}>
-        Player and Chicken Cross Together
+        Running the Model
       </h4>
 
-      {/* Placeholder content area */}
       <div style={{
         background: 'rgba(255, 255, 255, 0.05)',
         padding: '15px',
@@ -47,75 +46,75 @@ const Step1: React.FC<StepComponentProps> = ({ isActive = false }) => {
         marginBottom: '15px'
       }}>
         <p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
-          [Placeholder for detailed step content - customize as needed]
+          To use the model we need to define the goal and the failure states (constraints).
+          These failure states are written as formulas that will, when true, result in a deadlock.
+          The example for this game is as follows:
         </p>
-        <p style={{ color: '#ccc', margin: '10px 0 0 0', fontSize: '14px' }}>
-          Add your detailed explanation, diagrams, or interactive elements here.
+        <div
+          style={{
+            fontFamily: 'monospace',
+            fontSize: '14px',
+            color: '#3b82f6',
+            margin: '10px 0 0 0',
+            display: 'flex',
+            justifyContent: 'center'
+          }}
+        >
+          <div style={{ textAlign: 'left' }}>
+            <span>
+              formula unsafe = ((c = x) & (f != c)) | ((c = g) & (f != c)); <br></br>
+              formula safe = !unsafe; <br></br>
+            </span>
+          </div>
+          </div>
+          <p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
+          Next for the goal we can simply define a state where all characters are on the right side of the river, 
+          giving this state the "goal" label when true:
         </p>
-      </div>
-
-      {/* Side-by-side layout */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        margin: '20px 0',
-        gap: '20px'
-      }}>
-        <div style={{
-          flex: 1,
-          background: 'rgba(239, 68, 68, 0.2)',
-          padding: '15px',
-          borderRadius: '8px',
-          border: '1px solid rgba(239, 68, 68, 0.5)'
-        }}>
-          <h5 style={{
-            color: '#ef4444',
-            margin: '0 0 10px 0',
-            fontSize: '14px'
-          }}>
-            LEFT SIDE
-          </h5>
-          <div style={{ fontSize: '14px', marginBottom: '5px' }}>🦊 Fox</div>
-          <div style={{ fontSize: '14px', marginBottom: '5px' }}>🌾 Grain</div>
+        <div
+          style={{
+            fontFamily: 'monospace',
+            fontSize: '14px',
+            color: '#3b82f6',
+            margin: '10px 0 0 0',
+            display: 'flex',
+            justifyContent: 'center'
+          }}
+        >
+          <div style={{ textAlign: 'left' }}>
+            <span>
+              label "goal" = (f = 1 & c = 1 & x = 1 & g = 1); <br></br>
+            </span>
+          </div>
         </div>
-
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          fontSize: '24px'
-        }}>
-          🌊
+        <p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
+          Lastly we write the possible actions that can be taken in the model.
+          Since its just the river crossing we can flip the state of the chosen object and the player. 
+          To do this we use commands and we can write these like this:
+        </p>
+        <div
+          style={{
+            fontFamily: 'monospace',
+            fontSize: '14px',
+            color: '#3b82f6',
+            margin: '10px 0 0 0',
+            display: 'flex',
+            justifyContent: 'center'
+          }}
+        >
+          <div style={{ textAlign: 'left' }}>
+            <span>
+              [move_none] safe -{'>'} (f' = 1 - f); <br></br>
+              [move_chicken] safe & (c = f) -{'>'} (f' = 1 - f) & (c' = 1 - c); <br></br>
+              [move_fox] safe & (x = f) -{'>'} (f' = 1 - f) & (x' = 1 - x); <br></br>
+              [move_grain] safe & (g = f) -{'>'} (f' = 1 - f) & (g' = 1 - g); <br></br>
+            </span>
+          </div>
         </div>
-
-        <div style={{
-          flex: 1,
-          background: 'rgba(74, 222, 128, 0.2)',
-          padding: '15px',
-          borderRadius: '8px',
-          border: '1px solid rgba(74, 222, 128, 0.5)'
-        }}>
-          <h5 style={{
-            color: '#4ade80',
-            margin: '0 0 10px 0',
-            fontSize: '14px'
-          }}>
-            RIGHT SIDE
-          </h5>
-          <div style={{ fontSize: '14px', marginBottom: '5px' }}>🐔 Chicken</div>
-          <div style={{ fontSize: '14px', marginBottom: '5px' }}>👤 Player</div>
-        </div>
+      
       </div>
-
-      {/* Explanation section */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.1)',
-        padding: '15px',
-        borderRadius: '8px',
-        fontSize: '14px',
-        lineHeight: '1.4'
-      }}>
-        <strong>Strategy:</strong> Taking the chicken first prevents immediate conflicts between fox and chicken.
-      </div>
+      
+      
     </div>
   );
 };

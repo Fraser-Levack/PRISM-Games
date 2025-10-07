@@ -82,6 +82,39 @@ const Step2: React.FC<StepComponentProps> = ({ isActive = false }) => {
         >
           📊 View State Space Graph (New Tab)
         </button>
+
+        <p style={{ color: '#ccc', margin: '0 0 10px 0', fontSize: '14px' }}>
+          We can now simulate the most optimal path using the model. 
+          Without going into further explanation we can show that the minimum number of moves required to get all objects across is 7 moves. 
+          Here is the resultant graph showing the optimal graph.
+        </p>
+
+        {/* View Path Button */}
+        <button
+          onClick={() => window.open('/strategy-view.svg', '_blank')}
+          style={{
+            background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+            color: 'white',
+            border: 'none',
+            padding: '10px 20px',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 4px rgba(59, 130, 246, 0.3)'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 4px 8px rgba(59, 130, 246, 0.4)';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 2px 4px rgba(59, 130, 246, 0.3)';
+          }}
+        >
+          📊 View Optimal Path Graph (New Tab)
+        </button>
       </div>
 
       </div>

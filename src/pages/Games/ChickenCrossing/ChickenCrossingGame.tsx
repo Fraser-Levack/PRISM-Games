@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import IsometricRenderer from '../../../components/isometricGrid/IsometricRenderer'
+import ModelManager from '../../../components/ModelManager';
 import { CubeGrid } from '../../../components/isometricGrid/CubeGrid'
 import { ObjectGrid } from '../../../components/isometricGrid/ObjectGrid'
 import { GameStateManager, type GameState } from './GameStateManager';
@@ -18,6 +19,28 @@ const Chicken_Crossing = () => {
 
   const cubeGrid = useMemo(() => new CubeGrid(), []);
   const objectGrid = useMemo(() => new ObjectGrid(), []);
+  const [modelsLoaded, setModelsLoaded] = useState(false);
+
+  // Declare the model map for this game here so it's easy to change per-game
+  const modelMap = {
+    chicken: '/Models/chicken.gltf',
+    fox: '/Models/fox.gltf',
+    grain: '/Models/grain.gltf',
+  } as const;
+
+  // Preload models on mount for better UX. Renderer will fallback to spheres if not loaded.
+  useEffect(() => {
+    let mounted = true;
+    ModelManager.loadAll(modelMap)
+      .then(() => {
+        if (mounted) setModelsLoaded(true);
+      })
+      .catch((err) => {
+        console.error('Failed to preload models:', err);
+        if (mounted) setModelsLoaded(false);
+      });
+    return () => { mounted = false; };
+  }, []);
 
   // Show popup when game status changes
   useEffect(() => {
@@ -244,6 +267,7 @@ const Chicken_Crossing = () => {
           cubeGrid={cubeGrid} 
           objectGrid={objectGrid} 
           updateTrigger={updateTrigger}
+          modelsLoaded={modelsLoaded}
         />
       </div>
 

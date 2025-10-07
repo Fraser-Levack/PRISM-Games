@@ -2,14 +2,16 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { CubeGrid, type Cube } from './CubeGrid';
 import { ObjectGrid, type Object } from './ObjectGrid';
+import ModelManager from '../ModelManager';
 
 interface IsometricRendererProps {
     cubeGrid: CubeGrid;
     objectGrid: ObjectGrid;
     updateTrigger?: number; // Simple prop to force re-render
+    modelsLoaded?: boolean;
 }
 
-const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger }: IsometricRendererProps) => {
+const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded }: IsometricRendererProps) => {
     const mountRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -74,9 +76,30 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger }: IsometricRen
 
         // Add all objects
         const objects = objectGrid.getObjects();
-        const objectMeshes: THREE.Mesh[] = [];
+    const objectMeshes: THREE.Mesh[] = [];
+    // Keep track of cloned Object3D instances (from GLTF) so we can dispose them on cleanup
+    const clonedObjects: THREE.Object3D[] = [];
         
         objects.forEach((object: Object) => {
+            // Try to use GLTF models for chicken/fox/grain. Boat and other objects keep existing primitives.
+            const modelNames = ['chicken', 'fox', 'grain'];
+            const wantsModel = modelNames.includes(object.type);
+
+            if (wantsModel) {
+                const clone = ModelManager.getClone(object.type);
+                if (clone) {
+                    // Position the clone appropriately. Models are centered at origin in many exports;
+                    // place them so their base sits on top of the cube (object.z + object.height)
+                    clone.position.set(object.x, object.z + object.height, object.y);
+                    // Optionally scale models down to fit the grid; tweak this as needed
+                    clone.scale.setScalar(0.8);
+                    scene.add(clone);
+                    clonedObjects.push(clone);
+                    return; // skip primitive creation
+                }
+                // fallthrough to sphere if model not available
+            }
+
             let mesh: THREE.Mesh;
 
             if (object.type === 'boat') {
@@ -89,12 +112,12 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger }: IsometricRen
                 mesh.position.set(object.x + 0.5, object.z + object.height, object.y);
                 mesh.scale.x = 2; // Stretch in X direction to occupy two spaces
             } else {
-            // Default: sphere
-            const geometry = new THREE.SphereGeometry(0.4, 16, 12);
-            const material = new THREE.MeshLambertMaterial({ color: object.color });
-            mesh = new THREE.Mesh(geometry, material);
+                // Default: sphere
+                const geometry = new THREE.SphereGeometry(0.4, 16, 12);
+                const material = new THREE.MeshLambertMaterial({ color: object.color });
+                mesh = new THREE.Mesh(geometry, material);
 
-            mesh.position.set(object.x, object.z + object.height, object.y);
+                mesh.position.set(object.x, object.z + object.height, object.y);
             }
 
             scene.add(mesh);
@@ -127,10 +150,39 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger }: IsometricRen
             cancelAnimationFrame(animationId);
             window.removeEventListener('resize', handleResize);
             
-            // Dispose of all geometries and materials
+            // Dispose of all geometries and materials for meshes
             [...cubeMeshes, ...objectMeshes].forEach(mesh => {
-                mesh.geometry.dispose();
-                (mesh.material as THREE.Material).dispose();
+                try {
+                    mesh.geometry.dispose();
+                } catch (e) {
+                    // ignore
+                }
+                try {
+                    (mesh.material as THREE.Material).dispose();
+                } catch (e) {
+                    // ignore
+                }
+            });
+
+            // Remove and dispose cloned GLTF objects
+            clonedObjects.forEach(obj => {
+                try {
+                    obj.traverse((n: any) => {
+                        if (n.isMesh) {
+                            if (n.geometry) n.geometry.dispose();
+                            const disposeMaterial = (mat: any) => {
+                                if (!mat) return;
+                                if (mat.map) mat.map.dispose();
+                                if (typeof mat.dispose === 'function') mat.dispose();
+                            };
+                            if (Array.isArray(n.material)) n.material.forEach(disposeMaterial);
+                            else disposeMaterial(n.material);
+                        }
+                    });
+                } catch (e) {
+                    // ignore
+                }
+                if (obj.parent) obj.parent.remove(obj);
             });
             
             renderer.dispose();
@@ -139,17 +191,34 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger }: IsometricRen
                 mountRef.current.innerHTML = '';
             }
         };
-    }, [cubeGrid, objectGrid, updateTrigger]); // Re-run when any of these change
+    }, [cubeGrid, objectGrid, updateTrigger, modelsLoaded]); // Re-run when any of these change
 
     return (
-        <div 
-            ref={mountRef} 
-            style={{ 
-                width: '100%', 
-                height: '100%',
-                overflow: 'hidden'
-            }} 
-        />
+        <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+            <div 
+                ref={mountRef} 
+                style={{ 
+                    width: '100%', 
+                    height: '100%',
+                    overflow: 'hidden'
+                }} 
+            />
+            {!modelsLoaded && (
+                <div style={{
+                    position: 'absolute',
+                    left: 12,
+                    top: 12,
+                    zIndex: 200,
+                    padding: '6px 10px',
+                    background: 'rgba(0,0,0,0.6)',
+                    color: 'white',
+                    borderRadius: 6,
+                    fontSize: 12
+                }}>
+                    Loading models...
+                </div>
+            )}
+        </div>
     );
 };
 

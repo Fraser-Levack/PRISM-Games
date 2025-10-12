@@ -1,5 +1,9 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+// Postprocessing imports (three examples)
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { CubeGrid, type Cube } from './CubeGrid';
 import { ObjectGrid, type Object } from './ObjectGrid';
 import ModelManager from '../ModelManager';
@@ -28,7 +32,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded, 
 
         // Create orthographic camera for true isometric view
         const aspect = window.innerWidth / window.innerHeight;
-        const frustumSize = 20;
+        const frustumSize = 16; // smaller -> zoom in a bit
         const camera = new THREE.OrthographicCamera(
             frustumSize * aspect / -2,
             frustumSize * aspect / 2,
@@ -38,21 +42,77 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded, 
             1000
         );
 
-        camera.position.set(10, 10, 10);
+        camera.position.set(8, 8, 8); // move camera slightly closer
         camera.lookAt(0, 0, 0);
 
         // Create renderer
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
-
         mountRef.current.appendChild(renderer.domElement);
 
-        // Add lighting
-        const ambientLight = new THREE.AmbientLight(0x404040, 1.2); // Increased from 0.6 to 1.2
+        // Simple vibrance/brightness shader
+        const VibranceShader = {
+            uniforms: {
+                tDiffuse: { value: null },
+                brightness: { value: 1.20 }, // slightly reduced from 1.30
+                vibrance: { value: 0.18 },   // toned down to avoid hue shifts
+                exposure: { value: 1.1 },
+                gamma: { value: 2.2 }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tDiffuse;
+                uniform float brightness;
+                uniform float vibrance;
+                uniform float exposure;
+                uniform float gamma;
+                varying vec2 vUv;
+
+                vec3 aces(vec3 x) {
+                    const float a = 2.51;
+                    const float b = 0.03;
+                    const float c = 2.43;
+                    const float d = 0.59;
+                    const float e = 0.14;
+                    return clamp((x*(a*x + b)) / (x*(c*x + d) + e), 0.0, 1.0);
+                }
+
+                void main() {
+                    vec4 c = texture2D(tDiffuse, vUv);
+                    vec3 linear = pow(c.rgb, vec3(1.0 / gamma)); // sRGB -> linear
+
+                    float luma = dot(linear, vec3(0.299, 0.587, 0.114));
+                    vec3 sat = mix(vec3(luma), linear, 1.0 + vibrance * (1.0 - luma));
+
+                    sat *= brightness;
+
+                    vec3 mapped = aces(sat * exposure);
+                    vec3 outColor = pow(mapped, vec3(gamma)); // linear -> sRGB
+                    gl_FragColor = vec4(outColor, c.a);
+                }
+
+            `
+        };
+
+        // Setup composer + passes
+        const composer = new EffectComposer(renderer);
+        const renderPass = new RenderPass(scene, camera);
+        const vibrancePass = new ShaderPass(VibranceShader);
+        composer.addPass(renderPass);
+        composer.addPass(vibrancePass);
+
+        // Add lighting (slightly brighter)
+        const ambientLight = new THREE.AmbientLight(0x404040, 2.0);
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5); // Increased from 0.8 to 1.5
+        const directionalLight = new THREE.DirectionalLight(0xffffff, );
         directionalLight.position.set(10, 8, 5);
         scene.add(directionalLight);
 
@@ -165,6 +225,8 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded, 
             camera.bottom = frustumSize / -2;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            // keep composer in sync
+            try { composer.setSize(window.innerWidth, window.innerHeight); } catch (e) { /* ignore */ }
         };
 
         window.addEventListener('resize', handleResize);
@@ -173,7 +235,8 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded, 
         let animationId: number;
         const animate = () => {
             animationId = requestAnimationFrame(animate);
-            renderer.render(scene, camera);
+            // Render via composer so the vibrance shader is applied
+            composer.render();
         };
         animate();
 
@@ -217,12 +280,14 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded, 
                 if (obj.parent) obj.parent.remove(obj);
             });
             
+            // dispose composer and renderer
+            try { composer.dispose(); } catch (e) { /* ignore */ }
             renderer.dispose();
-            
-            if (mountRef.current) {
-                mountRef.current.innerHTML = '';
-            }
-        };
+             
+             if (mountRef.current) {
+                 mountRef.current.innerHTML = '';
+             }
+         };
     }, [cubeGrid, objectGrid, updateTrigger, modelsLoaded, playerDirection]); // Re-run when any of these change
 
     return (

@@ -98,7 +98,7 @@ const Chicken_Crossing = () => {
     // Fill the grid with ground first
     for (let x = 0; x < gridWidth; x++) {
       for (let y = 0; y < gridHeight; y++) {
-        cubeGrid.addCube(x + xOffset, y + yOffset, 0x00ff00, 'ground');
+        cubeGrid.addCube(x + xOffset, y + yOffset, 0x5FC33B, 'ground');
       }
     }
 

@@ -26,7 +26,14 @@ const Chicken_Crossing = () => {
     chicken: '/Models/chicken.gltf',
     fox: '/Models/fox.gltf',
     grain: '/Models/grain.gltf',
+    farmer: '/Models/farmer.gltf', // <-- added farmer model for player
+    farmer_hands_up: '/Models/farmer_hands_up.gltf', // <-- added carrying model
   } as const;
+
+  // Track last player direction so we can rotate the farmer model to face movement
+  const [playerDirection, setPlayerDirection] = useState<'left'|'right'|'up'|'down'>('right');
+  const [playerCarry, setPlayerCarry] = useState<boolean>(false)
+
 
   // Preload models on mount for better UX. Renderer will fallback to spheres if not loaded.
   useEffect(() => {
@@ -66,12 +73,13 @@ const Chicken_Crossing = () => {
     setShowStatusPopup(false);
   };
 
-  // Handle restart from popup
+  // Handle restart from popup'
   const handleRestart = () => {
     const resetState = GameStateManager.resetToDefault();
     setGameState(resetState);
     GameStateManager.saveState(resetState);
     setShowStatusPopup(false);
+    setPlayerDirection('right'); // reset player facing
   };
 
   // Initialize the world (cubes) only once
@@ -113,14 +121,14 @@ const Chicken_Crossing = () => {
   useEffect(() => {
     objectGrid.clear();
     
-    // Add player
+    // Add player (use chosen model type derived above)
     objectGrid.addObject(
       gameState.player.position.x,
       gameState.player.position.y,
       gameState.player.position.z,
       gameState.player.height || 0.4,
       gameState.player.color,
-      gameState.player.type
+      'player' // keep the object.type as 'player' and let the renderer use playerModelType prop
     );
     
     // Add all other objects
@@ -142,6 +150,9 @@ const Chicken_Crossing = () => {
   const movePlayer = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
     const newState = GameStateManager.movePlayer(gameState, direction);
     
+    // record facing direction for renderer
+    setPlayerDirection(direction);
+
     // Check for collisions after movement
     const collision = GameStateManager.checkCollisions(newState);
     if (collision.collision) {
@@ -165,6 +176,7 @@ const Chicken_Crossing = () => {
           setGameState(resetState);
           GameStateManager.saveState(resetState); // Save reset state
           setShowStatusPopup(false); // Hide popup when resetting
+          setPlayerDirection('left');
           break;
         case 'w':
         case 'arrowup':
@@ -198,6 +210,8 @@ const Chicken_Crossing = () => {
             const checkedState = GameStateManager.checkWinLossConditions(newState);
             setGameState(checkedState);
             GameStateManager.saveState(checkedState);
+            // check if in new state if the player is carrying something.
+            setPlayerCarry(Boolean(checkedState.playerHolding));
           });
           break;
       }
@@ -268,6 +282,8 @@ const Chicken_Crossing = () => {
           objectGrid={objectGrid} 
           updateTrigger={updateTrigger}
           modelsLoaded={modelsLoaded}
+          playerDirection={playerDirection} // <-- pass facing direction
+          playerCarry={playerCarry}
         />
       </div>
 

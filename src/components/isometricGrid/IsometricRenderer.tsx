@@ -9,9 +9,11 @@ interface IsometricRendererProps {
     objectGrid: ObjectGrid;
     updateTrigger?: number; // Simple prop to force re-render
     modelsLoaded?: boolean;
+    playerDirection?: 'left'|'right'|'up'|'down'; // <-- new prop
+    playerCarry?: boolean;
 }
 
-const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded }: IsometricRendererProps) => {
+const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded, playerDirection, playerCarry }: IsometricRendererProps) => {
     const mountRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -76,28 +78,58 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded }
 
         // Add all objects
         const objects = objectGrid.getObjects();
-    const objectMeshes: THREE.Mesh[] = [];
-    // Keep track of cloned Object3D instances (from GLTF) so we can dispose them on cleanup
-    const clonedObjects: THREE.Object3D[] = [];
+        const objectMeshes: THREE.Mesh[] = [];
+        // Keep track of cloned Object3D instances (from GLTF) so we can dispose them on cleanup
+        const clonedObjects: THREE.Object3D[] = [];
         
         objects.forEach((object: Object) => {
-            // Try to use GLTF models for chicken/fox/grain. Boat and other objects keep existing primitives.
-            const modelNames = ['chicken', 'fox', 'grain'];
-            const wantsModel = modelNames.includes(object.type);
+            // Try to use GLTF models for chicken/fox/grain and farmer (player).
+            const modelNames = ['chicken', 'fox', 'grain', 'farmer', 'farmer_hands_up'];
+            const wantsModel = modelNames.includes(object.type) || (object.type === 'player' && ModelManager.has('farmer'));
 
             if (wantsModel) {
-                const clone = ModelManager.getClone(object.type);
+                // prefer explicit named model if present
+                const modelKey = object.type === 'player' ? 'farmer' : object.type;
+                let clone = ModelManager.getClone(modelKey);
                 if (clone) {
                     // Position the clone appropriately. Models are centered at origin in many exports;
                     // place them so their base sits on top of the cube (object.z + object.height)
                     clone.position.set(object.x, object.z + object.height, object.y);
                     // Optionally scale models down to fit the grid; tweak this as needed
                     clone.scale.setScalar(0.8);
+
+                    // If this is the player (farmer), rotate to face last movement direction
+                    const isPlayer = object.type === 'player' || object.type === 'farmer';
+                    if (isPlayer) {
+                        // If player is carrying, try to use the 'farmer_hands_up' model (fallback to normal farmer)
+                        if (playerCarry) {
+                            const handsUp = ModelManager.getClone('farmer_hands_up');
+                            if (handsUp) {
+                                clone = handsUp;
+                                clone.position.set(object.x, object.z + object.height, object.y);
+                                clone.scale.setScalar(0.8);
+                            }
+                        }
+
+                        const dir = playerDirection || 'right';
+                        // Model originally faces left. Map directions to Y rotation:
+                        // left -> 0, right -> PI, up -> -PI/2, down -> PI/2
+                        let yRot = 0;
+                        switch (dir) {
+                            case 'left': yRot = Math.PI; break;
+                            case 'right': yRot = 0; break;
+                            case 'up': yRot = Math.PI / 2; break;
+                            case 'down': yRot = -Math.PI / 2; break;
+                        }
+                        clone.rotation.set(0, yRot, 0);
+
+                    }
+
                     scene.add(clone);
                     clonedObjects.push(clone);
                     return; // skip primitive creation
                 }
-                // fallthrough to sphere if model not available
+                // fallthrough to primitives if model not available
             }
 
             let mesh: THREE.Mesh;
@@ -191,7 +223,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded }
                 mountRef.current.innerHTML = '';
             }
         };
-    }, [cubeGrid, objectGrid, updateTrigger, modelsLoaded]); // Re-run when any of these change
+    }, [cubeGrid, objectGrid, updateTrigger, modelsLoaded, playerDirection]); // Re-run when any of these change
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>

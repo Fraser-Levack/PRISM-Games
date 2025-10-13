@@ -109,7 +109,8 @@ const Chicken_Crossing = () => {
     // Add a test tree decoration (one or more as needed)
     // DecorationGrid.addDecoration(x, y, z, type, modelKey)
     // z is vertical offset (0 places on top of ground)
-    decorationGrid.addDecoration(xOffset + 2, yOffset + 2, 1, 'tree', 'tree');
+    decorationGrid.addDecoration(xOffset + 2, yOffset + 1, 1, 'tree', 'tree');
+    decorationGrid.addDecoration(xOffset + 5, yOffset + 1, 1, 'tree', 'tree');
     // add more trees for testing if desired:
     // decorationGrid.addDecoration(xOffset - 3, yOffset + 1, 0, 'tree', 'tree');
 
@@ -187,7 +188,7 @@ const Chicken_Crossing = () => {
           setGameState(resetState);
           GameStateManager.saveState(resetState); // Save reset state
           setShowStatusPopup(false); // Hide popup when resetting
-          setPlayerDirection('left');
+          setPlayerDirection('right');
           break;
         case 'w':
         case 'arrowup':

@@ -97,7 +97,7 @@ export class GameStateManager {
             player: {
                 id: 'player',
                 type: 'player',
-                position: { x: -9, y: -5, z: 1 },
+                position: { x: -9, y: -3, z: 1 },
                 color: 0xffff00,
                 height: 0.4
             },

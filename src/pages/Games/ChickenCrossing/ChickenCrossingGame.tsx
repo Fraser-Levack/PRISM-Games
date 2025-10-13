@@ -4,6 +4,7 @@ import IsometricRenderer from '../../../components/isometricGrid/IsometricRender
 import ModelManager from '../../../components/ModelManager';
 import { CubeGrid } from '../../../components/isometricGrid/CubeGrid'
 import { ObjectGrid } from '../../../components/isometricGrid/ObjectGrid'
+import { DecorationGrid } from '../../../components/isometricGrid/DecorationGrid';
 import { GameStateManager, type GameState } from './GameStateManager';
 import GameStatusPopup from './GameStatusPopup';
 
@@ -19,6 +20,7 @@ const Chicken_Crossing = () => {
 
   const cubeGrid = useMemo(() => new CubeGrid(), []);
   const objectGrid = useMemo(() => new ObjectGrid(), []);
+  const decorationGrid = useMemo(() => new DecorationGrid(), []);
   const [modelsLoaded, setModelsLoaded] = useState(false);
 
   // Declare the model map for this game here so it's easy to change per-game
@@ -28,6 +30,7 @@ const Chicken_Crossing = () => {
     grain: '/Models/grain.gltf',
     farmer: '/Models/farmer.gltf', // <-- added farmer model for player
     farmer_hands_up: '/Models/farmer_hands_up.gltf', // <-- added carrying model
+    tree: '/Models/tree.gltf', // <-- tree for decorations (testing single model)
   } as const;
 
   // Track last player direction so we can rotate the farmer model to face movement
@@ -85,6 +88,7 @@ const Chicken_Crossing = () => {
   // Initialize the world (cubes) only once
   useEffect(() => {
     cubeGrid.clear();
+    decorationGrid.clear(); // clear any previous decorations
 
     const gridWidth = 20;
     const gridHeight = 12;
@@ -101,6 +105,13 @@ const Chicken_Crossing = () => {
         cubeGrid.addCube(x + xOffset, y + yOffset, 0x5FC33B, 'ground');
       }
     }
+    
+    // Add a test tree decoration (one or more as needed)
+    // DecorationGrid.addDecoration(x, y, z, type, modelKey)
+    // z is vertical offset (0 places on top of ground)
+    decorationGrid.addDecoration(xOffset + 2, yOffset + 2, 1, 'tree', 'tree');
+    // add more trees for testing if desired:
+    // decorationGrid.addDecoration(xOffset - 3, yOffset + 1, 0, 'tree', 'tree');
 
     // River with meander
     for (let y = 0; y < gridHeight; y++) {
@@ -280,6 +291,7 @@ const Chicken_Crossing = () => {
         <IsometricRenderer 
           cubeGrid={cubeGrid} 
           objectGrid={objectGrid} 
+          decorationGrid={decorationGrid}
           updateTrigger={updateTrigger}
           modelsLoaded={modelsLoaded}
           playerDirection={playerDirection} // <-- pass facing direction

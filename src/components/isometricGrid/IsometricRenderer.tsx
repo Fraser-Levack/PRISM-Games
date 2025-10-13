@@ -6,18 +6,20 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { CubeGrid, type Cube } from './CubeGrid';
 import { ObjectGrid, type Object } from './ObjectGrid';
+import { DecorationGrid, type Decoration } from './DecorationGrid';
 import ModelManager from '../ModelManager';
 
 interface IsometricRendererProps {
     cubeGrid: CubeGrid;
     objectGrid: ObjectGrid;
+    decorationGrid?: DecorationGrid;
     updateTrigger?: number; // Simple prop to force re-render
     modelsLoaded?: boolean;
     playerDirection?: 'left'|'right'|'up'|'down'; // <-- new prop
     playerCarry?: boolean;
 }
 
-const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded, playerDirection, playerCarry }: IsometricRendererProps) => {
+const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger, modelsLoaded, playerDirection, playerCarry }: IsometricRendererProps) => {
     const mountRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -141,6 +143,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded, 
         const objectMeshes: THREE.Mesh[] = [];
         // Keep track of cloned Object3D instances (from GLTF) so we can dispose them on cleanup
         const clonedObjects: THREE.Object3D[] = [];
+        const decorationMeshes: THREE.Mesh[] = [];
         
         objects.forEach((object: Object) => {
             // Try to use GLTF models for chicken/fox/grain and farmer (player).
@@ -215,6 +218,37 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded, 
             scene.add(mesh);
             objectMeshes.push(mesh);
         });
+    
+        // Add all decorations (if decorationGrid is provided)
+        if (decorationGrid) {
+            const decorations = decorationGrid.getDecorations();
+            decorations.forEach(dec => {
+                // Try to use a GLTF model for the decoration
+                const modelClone = ModelManager.getClone(dec.model);
+                if (modelClone) {
+                    // ModelManager.getClone() in this project returns a ready-to-add Object3D
+                    // Position/scale/rotation may need tweaking per-model
+                    modelClone.position.set(dec.x, dec.z + 0.01, dec.y);
+                    modelClone.scale.setScalar(0.8);
+                    // If needed, orient decorations so they face camera / correct axis:
+                    // modelClone.rotation.set(0, 0, 0);
+                    scene.add(modelClone);
+                    clonedObjects.push(modelClone);
+                    return;
+                }
+
+                // Fallback: simple plane on the ground
+                const geometry = new THREE.PlaneGeometry(1, 1);
+                const material = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.5, side: THREE.DoubleSide });
+                const mesh = new THREE.Mesh(geometry, material);
+                // Place slightly above the cube surface
+                mesh.position.set(dec.x, dec.z + 0.01, dec.y);
+                // Lay flat on XZ plane
+                mesh.rotation.x = -Math.PI / 2;
+                scene.add(mesh);
+                decorationMeshes.push(mesh);
+            });
+        }
 
         // Handle window resize
         const handleResize = () => {
@@ -246,7 +280,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded, 
             window.removeEventListener('resize', handleResize);
             
             // Dispose of all geometries and materials for meshes
-            [...cubeMeshes, ...objectMeshes].forEach(mesh => {
+            [...cubeMeshes, ...objectMeshes, ...decorationMeshes].forEach(mesh => {
                 try {
                     mesh.geometry.dispose();
                 } catch (e) {
@@ -288,7 +322,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, updateTrigger, modelsLoaded, 
                  mountRef.current.innerHTML = '';
              }
          };
-    }, [cubeGrid, objectGrid, updateTrigger, modelsLoaded, playerDirection]); // Re-run when any of these change
+    }, [cubeGrid, objectGrid, updateTrigger, modelsLoaded, playerDirection, decorationGrid, playerCarry]); // Re-run when any of these change
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>

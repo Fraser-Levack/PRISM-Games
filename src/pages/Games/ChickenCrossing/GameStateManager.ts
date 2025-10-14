@@ -105,21 +105,21 @@ export class GameStateManager {
                 {
                     id: 'chicken',
                     type: 'chicken',
-                    position: { x: -9, y: 0, z: 1 },
+                    position: { x: -9, y: 0, z: 0.8 },
                     color: 0xff0000,
                     height: 0.4
                 },
                 {
                     id: 'fox',
                     type: 'fox',
-                    position: { x: -9, y: 2, z: 1 },
+                    position: { x: -9, y: 2, z: 0.6 },
                     color: 0x00ff00,
                     height: 0.4
                 },
                 {
                     id: 'grain',
                     type: 'grain',
-                    position: { x: -9, y: 4, z: 1 },
+                    position: { x: -9, y: 4, z: 0.6 },
                     color: 0xffff00,
                     height: 0.4
                 },
@@ -209,7 +209,7 @@ export class GameStateManager {
                 const heldObjectPosition = { 
                     x: newPosition.x, 
                     y: newPosition.y, 
-                    z: newState.player.position.z + 1 
+                    z: newState.objects[heldObjectIndex].position.z 
                 };
                 newState.objects[heldObjectIndex].position = heldObjectPosition;
             }
@@ -268,7 +268,7 @@ export class GameStateManager {
                 const candidate = { 
                     x: playerPos.x + dir.dx, 
                     y: playerPos.y + dir.dy, 
-                    z: 1 // Explicitly set z to 1 instead of using playerPos.z
+                    z: (state.objects.find(o => o.id === state.playerHolding)?.position.z ?? 1) - 1.25 // drop at held object's original z minus 1
                 };
                 if (this.isPositionAvailable(state, candidate)) {
                     dropPosition = candidate;
@@ -398,7 +398,7 @@ export class GameStateManager {
                 playerHolding: nearestObj.id,
                 objects: state.objects.map(obj =>
                     obj.id === nearestObj.id
-                        ? { ...obj, position: { x: state.player.position.x, y: state.player.position.y, z: state.player.position.z + 1 } }
+                        ? { ...obj, position: { x: state.player.position.x, y: state.player.position.y, z: nearestObj.position.z + 1.25 } }
                         : obj
                 ),
                 lastPlayerAction: 'Picked up grain'
@@ -414,7 +414,7 @@ export class GameStateManager {
                 playerHolding: nearestObj.id,
                 objects: state.objects.map(obj =>
                     obj.id === nearestObj.id
-                        ? { ...obj, position: { x: state.player.position.x, y: state.player.position.y, z: state.player.position.z + 1 } }
+                        ? { ...obj, position: { x: state.player.position.x, y: state.player.position.y, z: nearestObj.position.z+ 1.25 } }
                         : obj
                 ),
                 lastPlayerAction: 'Picked up chicken'
@@ -430,7 +430,7 @@ export class GameStateManager {
                 playerHolding: nearestObj.id,
                 objects: state.objects.map(obj =>
                     obj.id === nearestObj.id
-                        ? { ...obj, position: { x: state.player.position.x, y: state.player.position.y, z: state.player.position.z + 1 } }
+                        ? { ...obj, position: { x: state.player.position.x, y: state.player.position.y, z: nearestObj.position.z + 1.25 } }
                         : obj
                 ),   
                 lastPlayerAction: 'Picked up Fox'

@@ -31,6 +31,7 @@ const Chicken_Crossing = () => {
     farmer: '/Models/farmer.gltf', // <-- added farmer model for player
     farmer_hands_up: '/Models/farmer_hands_up.gltf', // <-- added carrying model
     tree: '/Models/tree.gltf', // <-- tree for decorations (testing single model)
+    rocks: '/Models/rocks.gltf', // <-- rocks for decorations (testing single model)
   } as const;
 
   // Track last player direction so we can rotate the farmer model to face movement
@@ -111,8 +112,7 @@ const Chicken_Crossing = () => {
     // z is vertical offset (0 places on top of ground)
     decorationGrid.addDecoration(xOffset + 2, yOffset + 1, 1, 'tree', 'tree');
     decorationGrid.addDecoration(xOffset + 5, yOffset + 1, 1, 'tree', 'tree');
-    // add more trees for testing if desired:
-    // decorationGrid.addDecoration(xOffset - 3, yOffset + 1, 0, 'tree', 'tree');
+    decorationGrid.addDecoration(xOffset + 7, yOffset + 3, 1.5, 'rocks', 'rocks');
 
     // River with meander
     for (let y = 0; y < gridHeight; y++) {

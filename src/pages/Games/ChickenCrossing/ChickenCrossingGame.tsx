@@ -115,12 +115,26 @@ const Chicken_Crossing = () => {
     // z is vertical offset (0 places on top of ground)
     decorationGrid.addDecoration(xOffset + 2, yOffset + 1, 1, 'tree', 'tree');
     decorationGrid.addDecoration(xOffset + 5, yOffset + 1, 1, 'tree', 'tree');
+
+    decorationGrid.addDecoration(xOffset + 17, yOffset + 11, 1, 'tree', 'tree');
+
     decorationGrid.addDecoration(xOffset + 7, yOffset + 3, 1.5, 'rocks', 'rocks');
-    decorationGrid.addDecoration(xOffset + 14, yOffset + 8, 1.5, 'bush', 'bush');
+    decorationGrid.addDecoration(xOffset + 7.4, yOffset + 1.8, 0.5, 'rocks', 'rocks');
+    decorationGrid.addDecoration(xOffset + 1, yOffset + 1, 1.5, 'rocks', 'rocks',{ x: 0, y: -Math.PI / 2, z: 0 });
+    decorationGrid.addDecoration(xOffset + 6, yOffset + 8, 0.5, 'rocks', 'rocks',{ x: 0, y: Math.PI / 2, z: 0 });
+    decorationGrid.addDecoration(xOffset + 5.5, yOffset + 9, 0.098, 'rocks', 'rocks',{ x: 0, y: Math.PI, z: Math.PI });
+
+    decorationGrid.addDecoration(xOffset + 18, yOffset + 11, 1.5, 'bush', 'bush');
+    decorationGrid.addDecoration(xOffset + 5, yOffset + 8, 1.5, 'bush', 'bush');
+
     decorationGrid.addDecoration(xOffset + 1, yOffset + 11, 1.25, 'fence', 'fence');
     decorationGrid.addDecoration(xOffset + 0, yOffset + 9.5, 1.25, 'fence', 'fence',{ x: 0, y: Math.PI / 2, z: 0 });
     decorationGrid.addDecoration(xOffset + 0, yOffset + 7.25, 1.25, 'fence', 'fence',{ x: 0, y: Math.PI / 2, z: 0 });
     decorationGrid.addDecoration(xOffset + 0, yOffset + 5.0, 1.25, 'fence', 'fence',{ x: 0, y: Math.PI / 2, z: 0 });
+
+    decorationGrid.addDecoration(xOffset + 12, yOffset + 11, 1.25, 'fence', 'fence');
+    decorationGrid.addDecoration(xOffset + 14.25, yOffset + 11, 1.25, 'fence', 'fence');
+
     decorationGrid.addDecoration(xOffset + 17.25, yOffset + 2, 2.5, 'barn', 'barn');
     // River with meander
     for (let y = 0; y < gridHeight; y++) {

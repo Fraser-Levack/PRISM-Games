@@ -92,8 +92,13 @@ export class GameStateManager {
         // im needing the same for these decorations
         cubeTypes.set(`${2 + xOffset},${1 + yOffset}`, 'hitbox'); // tree
         cubeTypes.set(`${5 + xOffset},${1 + yOffset}`, 'hitbox'); // tree
+        cubeTypes.set(`${17 + xOffset},${11 + yOffset}`, 'hitbox'); // tree
+
         cubeTypes.set(`${7 + xOffset},${3 + yOffset}`, 'hitbox'); // rocks
-        cubeTypes.set(`${14 + xOffset},${8 + yOffset}`, 'hitbox'); // bush
+        cubeTypes.set(`${1 + xOffset},${1 + yOffset}`, 'hitbox'); // rocks
+
+        cubeTypes.set(`${18 + xOffset},${11 + yOffset}`, 'hitbox'); // bush
+        cubeTypes.set(`${5 + xOffset},${8 + yOffset}`, 'hitbox'); // bush
 
         cubeTypes.set(`${0 + xOffset},${10 + yOffset}`, 'hitbox'); // fence
         cubeTypes.set(`${0 + xOffset},${9 + yOffset}`, 'hitbox'); // fence
@@ -104,6 +109,10 @@ export class GameStateManager {
         cubeTypes.set(`${0 + xOffset},${4 + yOffset}`, 'hitbox'); // fence
         cubeTypes.set(`${1 + xOffset},${11 + yOffset}`, 'hitbox'); // fence
         cubeTypes.set(`${2 + xOffset},${11 + yOffset}`, 'hitbox'); // fence
+        cubeTypes.set(`${11 + xOffset},${11 + yOffset}`, 'hitbox'); // fence
+        cubeTypes.set(`${12 + xOffset},${11 + yOffset}`, 'hitbox'); // fence
+        cubeTypes.set(`${13 + xOffset},${11 + yOffset}`, 'hitbox'); // fence
+        cubeTypes.set(`${14 + xOffset},${11 + yOffset}`, 'hitbox'); // fence
 
         cubeTypes.set(`${15 + xOffset},${4 + yOffset}`, 'hitbox'); // barn
         cubeTypes.set(`${16 + xOffset},${4 + yOffset}`, 'hitbox'); // barn

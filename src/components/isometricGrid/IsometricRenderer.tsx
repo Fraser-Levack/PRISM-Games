@@ -111,10 +111,10 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
         composer.addPass(vibrancePass);
 
         // Add lighting (slightly brighter)
-        const ambientLight = new THREE.AmbientLight(0x404040, 2.0);
+        const ambientLight = new THREE.AmbientLight(0x404040, 3.0);
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, );
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2.0);
         directionalLight.position.set(10, 8, 5);
         scene.add(directionalLight);
 

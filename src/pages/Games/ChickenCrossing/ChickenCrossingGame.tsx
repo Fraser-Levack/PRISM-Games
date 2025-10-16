@@ -30,8 +30,11 @@ const Chicken_Crossing = () => {
     grain: '/Models/grain.gltf',
     farmer: '/Models/farmer.gltf', // <-- added farmer model for player
     farmer_hands_up: '/Models/farmer_hands_up.gltf', // <-- added carrying model
-    tree: '/Models/tree.gltf', // <-- tree for decorations (testing single model)
-    rocks: '/Models/rocks.gltf', // <-- rocks for decorations (testing single model)
+    tree: '/Models/tree.gltf',
+    rocks: '/Models/rocks.gltf', 
+    bush: '/Models/bush.gltf',
+    fence: '/Models/fence.gltf',
+    barn: '/Models/barn.gltf',
   } as const;
 
   // Track last player direction so we can rotate the farmer model to face movement
@@ -113,7 +116,12 @@ const Chicken_Crossing = () => {
     decorationGrid.addDecoration(xOffset + 2, yOffset + 1, 1, 'tree', 'tree');
     decorationGrid.addDecoration(xOffset + 5, yOffset + 1, 1, 'tree', 'tree');
     decorationGrid.addDecoration(xOffset + 7, yOffset + 3, 1.5, 'rocks', 'rocks');
-
+    decorationGrid.addDecoration(xOffset + 14, yOffset + 8, 1.5, 'bush', 'bush');
+    decorationGrid.addDecoration(xOffset + 1, yOffset + 11, 1.25, 'fence', 'fence');
+    decorationGrid.addDecoration(xOffset + 0, yOffset + 9.5, 1.25, 'fence', 'fence',{ x: 0, y: Math.PI / 2, z: 0 });
+    decorationGrid.addDecoration(xOffset + 0, yOffset + 7.25, 1.25, 'fence', 'fence',{ x: 0, y: Math.PI / 2, z: 0 });
+    decorationGrid.addDecoration(xOffset + 0, yOffset + 5.0, 1.25, 'fence', 'fence',{ x: 0, y: Math.PI / 2, z: 0 });
+    decorationGrid.addDecoration(xOffset + 17.25, yOffset + 2, 2.5, 'barn', 'barn');
     // River with meander
     for (let y = 0; y < gridHeight; y++) {
       const meander = Math.round(Math.sin(y / 2.5) * 2);
@@ -125,6 +133,7 @@ const Chicken_Crossing = () => {
         }
       }
     }
+
     
     setUpdateTrigger(prev => prev + 1);
   }, [cubeGrid]);
@@ -176,8 +185,9 @@ const Chicken_Crossing = () => {
     
     setGameState(checkedState);
     GameStateManager.saveState(checkedState); // Save the checked state
+    // Handle collision logic here if needed
   }, [gameState]);
-
+  
   // Keyboard event handling
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -317,4 +327,4 @@ const Chicken_Crossing = () => {
   )
 }
 
-export default Chicken_Crossing
+export default Chicken_Crossing;

@@ -230,8 +230,14 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
                     // Position/scale/rotation may need tweaking per-model
                     modelClone.position.set(dec.x, dec.z + 0.01, dec.y);
                     modelClone.scale.setScalar(0.8);
-                    // If needed, orient decorations so they face camera / correct axis:
-                    // modelClone.rotation.set(0, 0, 0);
+                    // Apply optional rotation (expects radians). If you store degrees convert to radians first.
+                    if (dec.rotation) {
+                        modelClone.rotation.set(
+                            dec.rotation.x ?? 0,
+                            dec.rotation.y ?? 0,
+                            dec.rotation.z ?? 0
+                        );
+                    }
                     scene.add(modelClone);
                     clonedObjects.push(modelClone);
                     return;
@@ -245,6 +251,12 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
                 mesh.position.set(dec.x, dec.z + 0.01, dec.y);
                 // Lay flat on XZ plane
                 mesh.rotation.x = -Math.PI / 2;
+                // Apply optional rotation on top of the base X rotation
+                if (dec.rotation) {
+                    mesh.rotation.x += dec.rotation.x ?? 0;
+                    mesh.rotation.y += dec.rotation.y ?? 0;
+                    mesh.rotation.z += dec.rotation.z ?? 0;
+                }
                 scene.add(mesh);
                 decorationMeshes.push(mesh);
             });

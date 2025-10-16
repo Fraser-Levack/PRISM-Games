@@ -36,7 +36,7 @@ export class GameStateManager {
             ...updatedState,
             cubeTypes: Object.fromEntries(updatedState.cubeTypes)
         };
-        console.log('Saving game state:', serializableState);
+        // console.log('Saving game state:', serializableState);
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(serializableState));
     }
 
@@ -89,6 +89,27 @@ export class GameStateManager {
             }
         }
 
+        // im needing the same for these decorations
+        cubeTypes.set(`${2 + xOffset},${1 + yOffset}`, 'hitbox'); // tree
+        cubeTypes.set(`${5 + xOffset},${1 + yOffset}`, 'hitbox'); // tree
+        cubeTypes.set(`${7 + xOffset},${3 + yOffset}`, 'hitbox'); // rocks
+        cubeTypes.set(`${14 + xOffset},${8 + yOffset}`, 'hitbox'); // bush
+
+        cubeTypes.set(`${0 + xOffset},${10 + yOffset}`, 'hitbox'); // fence
+        cubeTypes.set(`${0 + xOffset},${9 + yOffset}`, 'hitbox'); // fence
+        cubeTypes.set(`${0 + xOffset},${8 + yOffset}`, 'hitbox'); // fence
+        cubeTypes.set(`${0 + xOffset},${7 + yOffset}`, 'hitbox'); // fence
+        cubeTypes.set(`${0 + xOffset},${6 + yOffset}`, 'hitbox'); // fence
+        cubeTypes.set(`${0 + xOffset},${5 + yOffset}`, 'hitbox'); // fence
+        cubeTypes.set(`${0 + xOffset},${4 + yOffset}`, 'hitbox'); // fence
+        cubeTypes.set(`${1 + xOffset},${11 + yOffset}`, 'hitbox'); // fence
+        cubeTypes.set(`${2 + xOffset},${11 + yOffset}`, 'hitbox'); // fence
+
+        cubeTypes.set(`${15 + xOffset},${4 + yOffset}`, 'hitbox'); // barn
+        cubeTypes.set(`${16 + xOffset},${4 + yOffset}`, 'hitbox'); // barn
+        cubeTypes.set(`${17 + xOffset},${4 + yOffset}`, 'hitbox'); // barn
+        cubeTypes.set(`${18 + xOffset},${4 + yOffset}`, 'hitbox'); // barn
+        cubeTypes.set(`${19 + xOffset},${4 + yOffset}`, 'hitbox'); // barn
         return cubeTypes;
     }
 
@@ -277,7 +298,7 @@ export class GameStateManager {
             }
             const isSpaceAvailable = !!dropPosition;
             if (heldObjectIndex !== -1 && isSpaceAvailable && dropPosition) {
-                console.log(`Dropping object at position:`, dropPosition); // Debug log
+                // console.log(`Dropping object at position:`, dropPosition); // Debug log
                 const newState = { 
                     ...state,
                     objects: state.objects.map(obj =>
@@ -391,7 +412,7 @@ export class GameStateManager {
             setState(finalState);
         } else if (nearestObj.type === 'grain') {
             // just log pickup grain
-            console.log('Picked up grain!');
+            // console.log('Picked up grain!');
             // set playerHolding to grain id and move the gain to same x and y as player but z +1
             const newState = { 
                 ...state,
@@ -407,7 +428,7 @@ export class GameStateManager {
             setState(newState);
         } else if (nearestObj.type === 'chicken') {
             // just log pickup chicken
-            console.log('Picked up chicken!');
+            // console.log('Picked up chicken!');
             // set playerHolding to chicken id and move the chicken to same x and y as player but z +1
             const newState = {
                 ...state,
@@ -423,7 +444,7 @@ export class GameStateManager {
             setState(newState);
         } else if (nearestObj.type === 'fox') {
             // just log pickup fox
-            console.log('Picked up fox!');
+            // console.log('Picked up fox!');
             // set playerHolding to fox id and move the fox to same x and y as player but z +1
             const newState = {
                 ...state,

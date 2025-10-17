@@ -337,15 +337,45 @@ export class GameStateManager {
             if (isAtStart) {
                 // Move to destination (across the river)
                 newBoatPos = { x: 3, y: -1, z: nearestObj.position.z };
-                playerAndObjectsNewPos = { x: 3, y: -1, z: state.player.position.z };
+
+                // Special case: player standing just left of the boat at start (-3, -1) or (-3, -2)
+                // These should be transported to the specific landing slot (4, -1)
+                if (state.player.position.x === -3 && (state.player.position.y === -1 || state.player.position.y === -2)) {
+                    playerAndObjectsNewPos = { x: 4, y: -1, z: state.player.position.z };
+                } else {
+                    // preserve which boat slot the player is on (left or right) and place them in the same slot on the new boat position
+                    const playerOnBoat = state.player.position.y === nearestObj.position.y &&
+                        (state.player.position.x === nearestObj.position.x || state.player.position.x === nearestObj.position.x + 1);
+                    if (playerOnBoat) {
+                        const relX = state.player.position.x === nearestObj.position.x ? 0 : 1;
+                        playerAndObjectsNewPos = { x: newBoatPos.x + relX, y: newBoatPos.y, z: state.player.position.z };
+                    } else {
+                        playerAndObjectsNewPos = { x: newBoatPos.x, y: newBoatPos.y, z: state.player.position.z };
+                    }
+                }
             } else if (isAtDestination) {
                 // Move back to start
                 newBoatPos = { x: -2, y: -1, z: nearestObj.position.z };
-                playerAndObjectsNewPos = { x: -2, y: -1, z: state.player.position.z };
+                // preserve which boat slot the player is on (left or right) and place them in the same slot on the new boat position
+                const playerOnBoat = state.player.position.y === nearestObj.position.y &&
+                    (state.player.position.x === nearestObj.position.x || state.player.position.x === nearestObj.position.x + 1);
+                if (playerOnBoat) {
+                    const relX = state.player.position.x === nearestObj.position.x ? 0 : 1;
+                    playerAndObjectsNewPos = { x: newBoatPos.x + relX, y: newBoatPos.y, z: state.player.position.z };
+                } else {
+                    playerAndObjectsNewPos = { x: newBoatPos.x, y: newBoatPos.y, z: state.player.position.z };
+                }
             } else {
                 // If boat is in some other position, move to start as default
                 newBoatPos = { x: -2, y: -1, z: nearestObj.position.z };
-                playerAndObjectsNewPos = { x: -2, y: -1, z: state.player.position.z };
+                const playerOnBoat = state.player.position.y === nearestObj.position.y &&
+                    (state.player.position.x === nearestObj.position.x || state.player.position.x === nearestObj.position.x + 1);
+                if (playerOnBoat) {
+                    const relX = state.player.position.x === nearestObj.position.x ? 0 : 1;
+                    playerAndObjectsNewPos = { x: newBoatPos.x + relX, y: newBoatPos.y, z: state.player.position.z };
+                } else {
+                    playerAndObjectsNewPos = { x: newBoatPos.x, y: newBoatPos.y, z: state.player.position.z };
+                }
             }
             
             // Find all objects on the boat (at both boat positions)

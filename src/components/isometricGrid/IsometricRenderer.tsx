@@ -17,9 +17,10 @@ interface IsometricRendererProps {
     modelsLoaded?: boolean;
     playerDirection?: 'left'|'right'|'up'|'down'; // <-- new prop
     playerCarry?: boolean;
+    gameStatus?: 'playing' | 'won' | 'lost' | 'paused';
 }
 
-const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger, modelsLoaded, playerDirection, playerCarry }: IsometricRendererProps) => {
+const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger, modelsLoaded, playerDirection, playerCarry, gameStatus }: IsometricRendererProps) => {
     const mountRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -46,6 +47,13 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
 
         camera.position.set(8, 8, 8); // move camera slightly closer
         camera.lookAt(0, 0, 0);
+
+        // Rotation state for win animation — initialize from the current camera so we don't "jump"
+        // Compute spherical parameters from the current camera position.
+        const initialRadius = Math.sqrt(camera.position.x * camera.position.x + camera.position.z * camera.position.z);
+        let radius = initialRadius;
+        let theta = Math.atan2(camera.position.z, camera.position.x); // derive from current position
+        const baseCameraY = camera.position.y; // keep initial Y so bobbing is relative to it
 
         // Create renderer
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -115,7 +123,13 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
         scene.add(ambientLight);
 
         const directionalLight = new THREE.DirectionalLight(0xffffff, 2.0);
-        directionalLight.position.set(10, 8, 5);
+        // Place the light initially near the camera but slightly offset so shadows/highlights look natural
+        directionalLight.position.copy(camera.position).multiplyScalar(0.9).add(new THREE.Vector3(2, 2, 0));
+        // Ensure the light's target exists in the scene so we can update it during the orbit
+        const lightTarget = new THREE.Object3D();
+        lightTarget.position.set(0, 0, 0);
+        scene.add(lightTarget);
+        directionalLight.target = lightTarget;
         scene.add(directionalLight);
 
         // Create grid helper
@@ -279,8 +293,32 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
 
         // Simple animation loop
         let animationId: number;
-        const animate = () => {
+        let lastTime = performance.now();
+        const animate = (time?: number) => {
             animationId = requestAnimationFrame(animate);
+            const now = performance.now();
+            const dt = (now - lastTime) / 1000; // seconds
+            lastTime = now;
+
+            // If the player won, orbit the camera smoothly around the origin
+            if (gameStatus === 'won') {
+                theta += dt * 0.3; // rotation speed (radians/sec) — tweak as needed
+                // keep radius stable (derived from the original camera) so we don't jump
+                radius = initialRadius;
+                // note: scene uses x and z for the ground plane, y is up
+                camera.position.x = Math.cos(theta) * radius;
+                camera.position.z = Math.sin(theta) * radius;
+                camera.position.y = baseCameraY + Math.sin(theta * 0.5) * 0.55; // slight bob for interest
+                camera.lookAt(0, 0, 0);
+
+                // Move the light on a slightly offset orbit (phase-shifted) so highlights shift smoothly
+                const lightTheta = theta + 0.3; // phase offset so light isn't exactly coincident with camera
+                const lightRadius = radius * 0.85;
+                directionalLight.position.set(Math.cos(lightTheta) * lightRadius, camera.position.y + 2.2, Math.sin(lightTheta) * lightRadius);
+                // Keep the light targeting the center
+                directionalLight.target.position.set(0, 0, 0);
+            }
+
             // Render via composer so the vibrance shader is applied
             composer.render();
         };
@@ -334,7 +372,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
                  mountRef.current.innerHTML = '';
              }
          };
-    }, [cubeGrid, objectGrid, updateTrigger, modelsLoaded, playerDirection, decorationGrid, playerCarry]); // Re-run when any of these change
+    }, [cubeGrid, objectGrid, updateTrigger, modelsLoaded, playerDirection, decorationGrid, playerCarry, gameStatus]); // Re-run when gameStatus changes too
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>

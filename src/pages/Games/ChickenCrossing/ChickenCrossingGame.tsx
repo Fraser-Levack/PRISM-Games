@@ -321,6 +321,7 @@ const Chicken_Crossing = () => {
           modelsLoaded={modelsLoaded}
           playerDirection={playerDirection} // <-- pass facing direction
           playerCarry={playerCarry}
+          gameStatus={gameState.gameStatus}
         />
       </div>
 

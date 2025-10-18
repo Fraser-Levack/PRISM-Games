@@ -6,7 +6,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { CubeGrid, type Cube } from './CubeGrid';
 import { ObjectGrid, type Object } from './ObjectGrid';
-import { DecorationGrid, type Decoration } from './DecorationGrid';
+import { DecorationGrid } from './DecorationGrid';
 import ModelManager from '../ModelManager';
 
 interface IsometricRendererProps {
@@ -294,7 +294,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
         // Simple animation loop
         let animationId: number;
         let lastTime = performance.now();
-        const animate = (time?: number) => {
+        const animate = () => {
             animationId = requestAnimationFrame(animate);
             const now = performance.now();
             const dt = (now - lastTime) / 1000; // seconds

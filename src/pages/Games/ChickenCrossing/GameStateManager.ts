@@ -25,71 +25,7 @@ export interface GameState {
 }
 
 export class GameStateManager {
-    private static readonly STORAGE_KEY = 'chicken-crossing-isometric-game';
-    // In-memory fallback used when localStorage isn't available (SSR or restricted environment)
-    private static inMemoryStore: string | null = null;
 
-    public static saveState(state: GameState): void {
-        const updatedState = this.checkWinLossConditions(state);
-        const serializableState = {
-            ...updatedState,
-            cubeTypes: Object.fromEntries(updatedState.cubeTypes)
-        };
-        const payload = JSON.stringify(serializableState);
-
-        try {
-            if (typeof window === 'undefined' || !window.localStorage) {
-                // SSR or no storage available: keep in-memory so code doesn't crash
-                this.inMemoryStore = payload;
-                return;
-            }
-            window.localStorage.setItem(this.STORAGE_KEY, payload);
-        } catch (err) {
-            // Storage might be disabled, quota exceeded, or blocked — fallback to in-memory
-            // eslint-disable-next-line no-console
-            console.warn('Failed to save state to localStorage, using in-memory fallback', err);
-            this.inMemoryStore = payload;
-        }
-    }
-
-    public static loadState(): GameState | null {
-        try {
-            if (typeof window === 'undefined' || !window.localStorage) {
-                if (!this.inMemoryStore) return null;
-                const parsed = JSON.parse(this.inMemoryStore);
-                return {
-                    ...parsed,
-                    cubeTypes: new Map(Object.entries(parsed.cubeTypes || {}))
-                };
-            }
-
-            const stored = window.localStorage.getItem(this.STORAGE_KEY);
-            if (!stored) return null;
-            const parsed = JSON.parse(stored);
-            return {
-                ...parsed,
-                cubeTypes: new Map(Object.entries(parsed.cubeTypes || {}))
-            };
-        } catch (err) {
-            // eslint-disable-next-line no-console
-            console.warn('Failed to load state from storage', err);
-            return null;
-        }
-    }
-
-    public static clearState(): void {
-        try {
-            if (typeof window === 'undefined' || !window.localStorage) {
-                this.inMemoryStore = null;
-                return;
-            }
-            window.localStorage.removeItem(this.STORAGE_KEY);
-        } catch (err) {
-            // eslint-disable-next-line no-console
-            console.warn('Failed to clear localStorage, clearing in-memory fallback', err);
-            this.inMemoryStore = null;
-        }
-    }
 
     private static createDefaultCubeTypes(): Map<string, string> {
         const cubeTypes = new Map<string, string>();
@@ -279,7 +215,6 @@ export class GameStateManager {
             }
         }
 
-        this.saveState(newState);
         return newState;
     }
 
@@ -352,7 +287,6 @@ export class GameStateManager {
                     playerHolding: undefined,
                     lastPlayerAction: 'Dropped'
                 };
-                this.saveState(newState);
                 setState(newState);
             } else {
                 console.log('Cannot drop object: no available space or object not found', { heldObjectIndex, isSpaceAvailable, dropPosition }); // Debug log
@@ -481,7 +415,6 @@ export class GameStateManager {
                 right: newRight
             };
             
-            this.saveState(finalState);
             setState(finalState);
         } else if (nearestObj.type === 'grain') {
             // just log pickup grain
@@ -497,7 +430,7 @@ export class GameStateManager {
                 ),
                 lastPlayerAction: 'Picked up grain'
             };
-            this.saveState(newState);
+
             setState(newState);
         } else if (nearestObj.type === 'chicken') {
             // just log pickup chicken
@@ -513,7 +446,6 @@ export class GameStateManager {
                 ),
                 lastPlayerAction: 'Picked up chicken'
             };
-            this.saveState(newState);
             setState(newState);
         } else if (nearestObj.type === 'fox') {
             // just log pickup fox
@@ -529,7 +461,6 @@ export class GameStateManager {
                 ),   
                 lastPlayerAction: 'Picked up Fox'
             };
-            this.saveState(newState);
             setState(newState);
         }
     }
@@ -566,7 +497,6 @@ export class GameStateManager {
             )
         };
         
-        this.saveState(newState);
         return newState;
     }
 
@@ -576,7 +506,7 @@ export class GameStateManager {
             objects: [...state.objects, object]
         };
         
-        this.saveState(newState);
+
         return newState;
     }
 
@@ -586,7 +516,7 @@ export class GameStateManager {
             objects: state.objects.filter(obj => obj.id !== objectId)
         };
         
-        this.saveState(newState);
+
         return newState;
     }
 
@@ -625,13 +555,13 @@ export class GameStateManager {
             gameStatus: status
         };
         
-        this.saveState(newState);
+
         return newState;
     }
 
     public static resetToDefault(): GameState {
         const defaultState = this.getDefaultState();
-        this.saveState(defaultState);
+
         return defaultState;
     }
 

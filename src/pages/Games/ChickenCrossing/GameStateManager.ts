@@ -26,35 +26,69 @@ export interface GameState {
 
 export class GameStateManager {
     private static readonly STORAGE_KEY = 'chicken-crossing-isometric-game';
+    // In-memory fallback used when localStorage isn't available (SSR or restricted environment)
+    private static inMemoryStore: string | null = null;
 
     public static saveState(state: GameState): void {
-        // Check win/loss conditions before saving
         const updatedState = this.checkWinLossConditions(state);
-        
-        // Convert Map to object for JSON serialization
         const serializableState = {
             ...updatedState,
             cubeTypes: Object.fromEntries(updatedState.cubeTypes)
         };
-        // console.log('Saving game state:', serializableState);
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(serializableState));
+        const payload = JSON.stringify(serializableState);
+
+        try {
+            if (typeof window === 'undefined' || !window.localStorage) {
+                // SSR or no storage available: keep in-memory so code doesn't crash
+                this.inMemoryStore = payload;
+                return;
+            }
+            window.localStorage.setItem(this.STORAGE_KEY, payload);
+        } catch (err) {
+            // Storage might be disabled, quota exceeded, or blocked — fallback to in-memory
+            // eslint-disable-next-line no-console
+            console.warn('Failed to save state to localStorage, using in-memory fallback', err);
+            this.inMemoryStore = payload;
+        }
     }
 
     public static loadState(): GameState | null {
-        const stored = localStorage.getItem(this.STORAGE_KEY);
-        if (!stored) return null;
-        
-        const parsed = JSON.parse(stored);
-        
-        // Convert object back to Map
-        return {
-            ...parsed,
-            cubeTypes: new Map(Object.entries(parsed.cubeTypes || {}))
-        };
+        try {
+            if (typeof window === 'undefined' || !window.localStorage) {
+                if (!this.inMemoryStore) return null;
+                const parsed = JSON.parse(this.inMemoryStore);
+                return {
+                    ...parsed,
+                    cubeTypes: new Map(Object.entries(parsed.cubeTypes || {}))
+                };
+            }
+
+            const stored = window.localStorage.getItem(this.STORAGE_KEY);
+            if (!stored) return null;
+            const parsed = JSON.parse(stored);
+            return {
+                ...parsed,
+                cubeTypes: new Map(Object.entries(parsed.cubeTypes || {}))
+            };
+        } catch (err) {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to load state from storage', err);
+            return null;
+        }
     }
 
     public static clearState(): void {
-        localStorage.removeItem(this.STORAGE_KEY);
+        try {
+            if (typeof window === 'undefined' || !window.localStorage) {
+                this.inMemoryStore = null;
+                return;
+            }
+            window.localStorage.removeItem(this.STORAGE_KEY);
+        } catch (err) {
+            // eslint-disable-next-line no-console
+            console.warn('Failed to clear localStorage, clearing in-memory fallback', err);
+            this.inMemoryStore = null;
+        }
     }
 
     private static createDefaultCubeTypes(): Map<string, string> {

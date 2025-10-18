@@ -10,8 +10,7 @@ import GameStatusPopup from './GameStatusPopup';
 
 const Chicken_Crossing = () => {
   const [gameState, setGameState] = useState<GameState>(() => {
-    const savedState = GameStateManager.loadState();
-    return savedState || GameStateManager.getDefaultState();
+    return GameStateManager.getDefaultState();
   });
 
   const [updateTrigger, setUpdateTrigger] = useState(0);
@@ -84,7 +83,6 @@ const Chicken_Crossing = () => {
   const handleRestart = () => {
     const resetState = GameStateManager.resetToDefault();
     setGameState(resetState);
-    GameStateManager.saveState(resetState);
     setShowStatusPopup(false);
     setPlayerDirection('right'); // reset player facing
   };
@@ -198,7 +196,6 @@ const Chicken_Crossing = () => {
     const checkedState = GameStateManager.checkWinLossConditions(newState);
     
     setGameState(checkedState);
-    GameStateManager.saveState(checkedState); // Save the checked state
     // Handle collision logic here if needed
   }, [gameState]);
   
@@ -210,7 +207,6 @@ const Chicken_Crossing = () => {
           event.preventDefault();
           const resetState = GameStateManager.resetToDefault();
           setGameState(resetState);
-          GameStateManager.saveState(resetState); // Save reset state
           setShowStatusPopup(false); // Hide popup when resetting
           setPlayerDirection('right');
           break;
@@ -245,7 +241,6 @@ const Chicken_Crossing = () => {
           GameStateManager.handleEnter(gameState, (newState) => {
             const checkedState = GameStateManager.checkWinLossConditions(newState);
             setGameState(checkedState);
-            GameStateManager.saveState(checkedState);
             // check if in new state if the player is carrying something.
             setPlayerCarry(Boolean(checkedState.playerHolding));
           });

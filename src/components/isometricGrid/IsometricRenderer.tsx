@@ -45,8 +45,8 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
             1000
         );
 
-        camera.position.set(8, 8, 8); // move camera slightly closer
-        camera.lookAt(0, 0, 0);
+        camera.position.set(8, 9, 8); // move camera slightly closer
+        camera.lookAt(0, 1, 0);
 
         // Rotation state for win animation — initialize from the current camera so we don't "jump"
         // Compute spherical parameters from the current camera position.

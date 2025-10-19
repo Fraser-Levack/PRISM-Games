@@ -87,6 +87,12 @@ const Chicken_Crossing = () => {
     setPlayerDirection('right'); // reset player facing
   };
 
+  // NEW: set game to playing without resetting/stopping
+  const setPlaying = useCallback(() => {
+    setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
+    setShowStatusPopup(false); // hide popup if visible
+  }, [setGameState, setShowStatusPopup]);
+
   // Initialize the world (cubes) only once
   useEffect(() => {
     cubeGrid.clear();
@@ -203,6 +209,10 @@ const Chicken_Crossing = () => {
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       switch (event.key.toLowerCase()) {
+        case 'p':
+          event.preventDefault();
+          setPlaying();
+          break;
         case 'r':
           event.preventDefault();
           const resetState = GameStateManager.resetToDefault();
@@ -250,7 +260,7 @@ const Chicken_Crossing = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [movePlayer, gameState.gameStatus, gameState]);
+  }, [movePlayer, gameState.gameStatus, gameState, setPlaying]);
 
   return (
     <div className="game-container">

@@ -8,83 +8,67 @@ export interface StepComponentProps {
 
 const Step0: React.FC<StepComponentProps> = ({ isActive = false }) => {
   return (
-    <div style={{
-      background: 'rgba(59, 130, 246, 0.1)',
-      padding: '20px',
-      borderRadius: '10px',
-      marginBottom: '20px',
-      border: isActive ? '2px solid #3b82f6' : '1px solid rgba(59, 130, 246, 0.3)'
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '15px'
-      }}>
-        <h3 style={{
-          color: '#3b82f6',
-          margin: '0',
-          fontSize: '18px'
-        }}>
-          Step 1 of 8
-        </h3>
-        <span style={{
-          fontSize: '14px',
-          color: '#ccc'
-        }}>
-          How to solve the problem using model checking.
-        </span>
-      </div>
-
-      <h4 style={{
-        color: '#fff',
-        margin: '0 0 10px 0',
-        fontSize: '16px'
-      }}>
-        Making a Model
-      </h4>
-
-      {/* Placeholder content area - you can customize this section */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.05)',
-        padding: '15px',
-        borderRadius: '8px',
-        marginBottom: '15px'
-      }}>
-        <p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
-          We can solve the Chicken Crossing puzzle using model checking by creating a formal model of the problem. This involves defining the states, actions, and constraints of the puzzle in a way that a model checker can understand.
-          <br></br><br></br>
-          Firstly we need to decide what type of model we are working with. Since this game has no luck or chance involved we will use
-          a deterministic model. This means that the outcome of each action is predictable and there are no random elements.
-          <br></br><br></br>
-          Next we need to define the states of the model. In this case, a state can be represented by the positions of the player, chicken, fox, and grain (left or right side of the river).
-          Therefore we have four variables, each of which can take on two values (left or right). This gives us a total of 2^4 = 16 possible states.
-          <br></br><br></br>
-          In PRISM language we write this as:
-        </p>
-        <div
-          style={{
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            color: '#3b82f6',
-            margin: '10px 0 0 0',
-            display: 'flex',
-            justifyContent: 'center'
-          }}
-        >
-          <div style={{ textAlign: 'left' }}>
-            <span>
-              f : [0..1] init 0; <span style={{ color: 'green', fontFamily: 'inherit' }}>// This represents the farmer (or player)</span><br />
-              c : [0..1] init 0; <span style={{ color: 'green', fontFamily: 'inherit' }}>// This represents the chicken</span><br />
-              x : [0..1] init 0; <span style={{ color: 'green', fontFamily: 'inherit' }}>// This represents the fox</span><br />
-              g : [0..1] init 0; <span style={{ color: 'green', fontFamily: 'inherit' }}>// This represents the grain</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Side-by-side layout for left/right sides */}
+    <div>
+    <p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
+  Let’s get started by turning the classic <strong>Chicken Crossing puzzle</strong> into a model that a computer can understand!  
+  <br /><br />
+  The goal of <em>model checking</em> is to represent every possible situation in a problem — what we call the <strong>states</strong> — and the actions that move us between them.  
+  <br /><br />
+  Since this puzzle doesn’t involve any luck or randomness (no dice rolls, no coin flips!), we’ll use a <strong>deterministic model</strong>.  
+  That means every action has a predictable outcome — what you see is what you get.
+  <br /><br />
+  Now, it’s time to decide what makes up a <em>state</em> in our model.  
+  Each state will describe where our four characters are:  
+  <div style={{
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: '10px',
+    margin: '10px 0'
+  }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <img src="/Icons/Farmer_Icon.png" alt="Farmer" width="24" height="24" />
+      <span>the Farmer</span>
     </div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <img src="/Icons/Chicken_Icon.png" alt="Chicken" width="24" height="24" />
+      <span>the Chicken</span>
+    </div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <img src="/Icons/Fox_Icon.png" alt="Fox" width="24" height="24" />
+      <span>the Fox</span>
+    </div>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <img src="/Icons/Grain_Icon.png" alt="Grain" width="24" height="24" />
+      <span>the Grain</span>
+    </div>
+  </div>
+  Each one can be on either the <strong>left</strong> or <strong>right</strong> side of the river — giving us four variables, each with two possible values.
+  That’s <code>2⁴ = 16</code> total states the model checker will explore!
+  <br /><br />
+  In PRISM, we describe this setup using variables like this:
+</p>
+
+<div
+  style={{
+    fontFamily: 'monospace',
+    fontSize: '14px',
+    color: '#3b82f6',
+    margin: '10px 0 0 0',
+    display: 'flex',
+    justifyContent: 'center'
+  }}
+>
+  <div style={{ textAlign: 'left' }}>
+    <span>
+      f : [0..1] init 0; <span style={{ color: 'green', fontFamily: 'inherit' }}> // Farmer</span><br />
+      c : [0..1] init 0; <span style={{ color: 'green', fontFamily: 'inherit' }}> // Chicken</span><br />
+      x : [0..1] init 0; <span style={{ color: 'green', fontFamily: 'inherit' }}> // Fox</span><br />
+      g : [0..1] init 0; <span style={{ color: 'green', fontFamily: 'inherit' }}> // Grain</span>
+    </span>
+  </div>
+  </div>
+  </div>
   );
 };
 

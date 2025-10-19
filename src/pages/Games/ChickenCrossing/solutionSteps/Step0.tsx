@@ -6,7 +6,7 @@ export interface StepComponentProps {
   onAction?: () => void;
 }
 
-const Step0: React.FC<StepComponentProps> = ({ isActive = false }) => {
+const Step0: React.FC<StepComponentProps> = ({ }) => {
   return (
     <div>
     <p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>

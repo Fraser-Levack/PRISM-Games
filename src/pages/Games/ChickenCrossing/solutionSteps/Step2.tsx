@@ -2,9 +2,9 @@ import React from 'react';
 import type { StepComponentProps } from './Step0';
 
 const Step2: React.FC<StepComponentProps> = ({ isActive = false }) => {
-  const openGraphInNewTab = () => {
-    window.open('/Crossing-Graph-SVG.svg', '_blank');
-  };
+  // const openGraphInNewTab = () => {
+  //   window.open('/Crossing-Graph-SVG.svg', '_blank');
+  // };
 
   return (
     <div style={{

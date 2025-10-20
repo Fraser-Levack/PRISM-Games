@@ -10,113 +10,119 @@ const Step1: React.FC<StepComponentProps> = ({ isActive = false }) => {
       marginBottom: '20px',
       border: isActive ? '2px solid #3b82f6' : '1px solid rgba(59, 130, 246, 0.3)'
     }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '15px'
-      }}>
-        <h3 style={{
-          color: '#3b82f6',
-          margin: '0',
-          fontSize: '18px'
-        }}>
-          Step 2 of 8
-        </h3>
-        <span style={{
-          fontSize: '14px',
-          color: '#ccc'
-        }}>
-          How to solve the problem using model checking.
-        </span>
-      </div>
-
-      <h4 style={{
-        color: '#fff',
-        margin: '0 0 10px 0',
-        fontSize: '16px'
-      }}>
-        Running the Model
-      </h4>
-
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.05)',
-        padding: '15px',
-        borderRadius: '8px',
-        marginBottom: '15px'
-      }}>
-        <p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
-          To use the model we need to define the goal and the failure states (constraints).
-          These failure states are written as formulas that will, when true, result in a deadlock.
-          The example for this game is as follows:
-        </p>
-        <div
-          style={{
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            color: '#3b82f6',
-            margin: '10px 0 0 0',
-            display: 'flex',
-            justifyContent: 'center'
-          }}
-        >
-          <div style={{ textAlign: 'left' }}>
-            <span>
-              formula unsafe = ((c = x) & (f != c)) | ((c = g) & (f != c)); <br></br>
-              formula safe = !unsafe; <br></br>
-            </span>
-          </div>
-          </div>
-          <p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
-          Next for the goal we can simply define a state where all characters are on the right side of the river, 
-          giving this state the "goal" label when true:
-        </p>
-        <div
-          style={{
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            color: '#3b82f6',
-            margin: '10px 0 0 0',
-            display: 'flex',
-            justifyContent: 'center'
-          }}
-        >
-          <div style={{ textAlign: 'left' }}>
-            <span>
-              label "goal" = (f = 1 & c = 1 & x = 1 & g = 1); <br></br>
-            </span>
-          </div>
-        </div>
-        <p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
-          Lastly we write the possible actions that can be taken in the model.
-          Since its just the river crossing we can flip the state of the chosen object and the player. 
-          To do this we use commands and we can write these like this:
-        </p>
-        <div
-          style={{
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            color: '#3b82f6',
-            margin: '10px 0 0 0',
-            display: 'flex',
-            justifyContent: 'center'
-          }}
-        >
-          <div style={{ textAlign: 'left' }}>
-            <span>
-              [move_none] safe -{'>'} (f' = 1 - f); <br></br>
-              [move_chicken] safe & (c = f) -{'>'} (f' = 1 - f) & (c' = 1 - c); <br></br>
-              [move_fox] safe & (x = f) -{'>'} (f' = 1 - f) & (x' = 1 - x); <br></br>
-              [move_grain] safe & (g = f) -{'>'} (f' = 1 - f) & (g' = 1 - g); <br></br>
-            </span>
-          </div>
-        </div>
-      
-      </div>
-      
       
     </div>
   );
 };
 
 export default Step1;
+
+{/* <div style={{
+      background: 'rgba(59, 130, 246, 0.1)',
+      padding: '20px',
+      borderRadius: '10px',
+      marginBottom: '20px',
+      border: isActive ? '2px solid #3b82f6' : '1px solid rgba(59, 130, 246, 0.3)'
+    }}>
+      
+    <p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
+  Now that we’ve built the model, it’s time to make it <strong>do something</strong>!  
+  We’ll define which situations are safe, which are dangerous, and what actions the <img src="/Icons/Farmer_Icon.png" alt="Farmer" width="20" height="20" style={{ verticalAlign: 'middle' }} /> <strong>Farmer</strong> can take.
+  <br /><br />
+  Just like in the real puzzle, there are two disaster scenarios we want to avoid:
+</p>
+
+<div style={{
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: '10px',
+  margin: '10px 0'
+}}>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+    <img src="/Icons/Fox_Icon.png" alt="Fox" width="24" height="24" />
+    <span> <strong>Fox</strong> eats the <img src="/Icons/Chicken_Icon.png" alt="Chicken" width="20" height="20" style={{ verticalAlign: 'middle' }} /> Chicken! </span>
+  </div>
+  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+    <img src="/Icons/Chicken_Icon.png" alt="Chicken" width="24" height="24" />
+    <span> <strong>Chicken</strong> eats the <img src="/Icons/Grain_Icon.png" alt="Grain" width="20" height="20" style={{ verticalAlign: 'middle' }} /> Grain! </span>
+  </div>
+</div>
+
+<p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
+  We can describe those “uh oh” situations as formulas in PRISM — when they’re true, the system knows we’ve reached an <strong>unsafe state</strong>:
+</p>
+
+<div
+  style={{
+    fontFamily: 'monospace',
+    fontSize: '14px',
+    color: '#3b82f6',
+    margin: '10px 0',
+    display: 'flex',
+    justifyContent: 'center'
+  }}
+>
+  <div style={{ textAlign: 'left' }}>
+    <span>
+      formula unsafe = ((c = x) & (f != c)) | ((c = g) & (f != c)); <br />
+      formula safe = !unsafe; <br />
+    </span>
+  </div>
+</div>
+
+<p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
+  So the model checker will avoid any state where the <img src="/Icons/Chicken_Icon.png" alt="Chicken" width="20" height="20" style={{ verticalAlign: 'middle' }} /> Chicken ends up alone with either the <img src="/Icons/Fox_Icon.png" alt="Fox" width="20" height="20" style={{ verticalAlign: 'middle' }} /> Fox or the <img src="/Icons/Grain_Icon.png" alt="Grain" width="20" height="20" style={{ verticalAlign: 'middle' }} /> Grain.  
+  <br /><br />
+  Next, we’ll define our <strong>goal</strong> — the happy ending where everyone makes it safely to the other side of the river:
+</p>
+
+<div
+  style={{
+    fontFamily: 'monospace',
+    fontSize: '14px',
+    color: '#3b82f6',
+    margin: '10px 0',
+    display: 'flex',
+    justifyContent: 'center'
+  }}
+>
+  <div style={{ textAlign: 'left' }}>
+    <span>
+      label "goal" = (f = 1 & c = 1 & x = 1 & g = 1); <br />
+    </span>
+  </div>
+</div>
+
+<p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
+  Finally, we’ll tell PRISM what moves are allowed — the actions the <img src="/Icons/Farmer_Icon.png" alt="Farmer" width="20" height="20" style={{ verticalAlign: 'middle' }} /> <strong>Farmer</strong> can take.  
+  Each command flips the positions of the <strong>Farmer</strong> and whichever passenger (if any) they choose to bring across.
+</p>
+
+<div
+  style={{
+    fontFamily: 'monospace',
+    fontSize: '14px',
+    color: '#3b82f6',
+    margin: '10px 0 0 0',
+    display: 'flex',
+    justifyContent: 'center'
+  }}
+>
+  <div style={{ textAlign: 'left' }}>
+    <span>
+      [move_none] safe -{'>'} (f' = 1 - f); <br />
+      [move_chicken] safe & (c = f) -{'>'} (f' = 1 - f) & (c' = 1 - c); <br />
+      [move_fox] safe & (x = f) -{'>'} (f' = 1 - f) & (x' = 1 - x); <br />
+      [move_grain] safe & (g = f) -{'>'} (f' = 1 - f) & (g' = 1 - g); <br />
+    </span>
+  </div>
+</div>
+
+<p style={{ color: '#ccc', margin: '0', fontSize: '14px' }}>
+  Each line represents a possible action: move alone, or bring one of your companions.  
+  The model checker will explore all combinations to find a safe path to the goal — without any feathers (or grain) getting ruffled.
+</p>
+
+    </div> */}

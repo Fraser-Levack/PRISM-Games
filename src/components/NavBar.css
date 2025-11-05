@@ -1,9 +1,10 @@
 .navbar {
   position: fixed;
+  font-size: 0.8rem;
   top: 0;
   left: 0;
   right: 0;
-  height: 64px;
+  height: 5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -26,6 +27,15 @@
   font-weight: 700;
   letter-spacing: 0.4px;
   color: #fff;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin: 0.5rem 0;
+}
+
+.logo {
+  display: flex;
 }
 
 .nav-links {

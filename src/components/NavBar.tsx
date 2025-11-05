@@ -10,10 +10,17 @@ export default function NavBar() {
   return (
     <nav className="navbar">
       <div className="navbar-inner">
-        <div className='logo'>
-            <img src="/prism-logo.svg" alt="PRISM Logo" className="logo-image" />
+        <NavLink to="/">
+        <div className="brand">
+            
+            
+            <div className='logo'>
+                <img src="/prism-logo.svg" alt="PRISM Logo" className="logo-image" />
+          </div>
+          PRISM Games
+          
         </div>
-        <div className="brand">PRISM Games</div>
+        </NavLink>
         <div className="nav-links">
           <NavLink to="/" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
             Home

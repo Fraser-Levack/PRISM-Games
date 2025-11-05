@@ -27,22 +27,24 @@ html, body {
 
 .app {
   height: 100vh; /* Use viewport height instead of min-height */
-  display: flex;
+  /* display: flex; */
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  /* align-items: center; */
+  /* justify-content: center; */
   position: relative;
   z-index: 10;
   width: 100%;
-  max-width: 1280px;
+  /* max-width: 1280px; */
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
   overflow: hidden; /* Prevent app container from scrolling */
+  padding-top: 64px;
+  min-height: calc(100vh - 64px);
 }
 
 .home, .credits, .games {
-  max-width: 800px;
+  /* max-width: 800px; */
   margin: 0 auto;
   padding: 2rem;
   background: rgba(0, 0, 0, 0.3);

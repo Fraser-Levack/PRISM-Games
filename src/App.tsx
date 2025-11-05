@@ -6,6 +6,7 @@ import Games from './pages/Games'
 import GeometricBackground from './components/GeometricBackground'
 import './App.css'
 import Chicken_Crossing from './pages/Games/ChickenCrossing/ChickenCrossingGame'
+import NavBar from './components/NavBar'
 
 // Component to conditionally render background based on route
 function ConditionalBackground() {
@@ -24,6 +25,7 @@ function ConditionalBackground() {
 function App() {
   return (
     <Router>
+      <NavBar />
       <ConditionalBackground />
       <div className="app">
         <Routes>

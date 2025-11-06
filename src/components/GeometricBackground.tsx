@@ -19,8 +19,12 @@ const GeometricBackground = () => {
     const isMobile = width < 768;
     const pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
     
-    rendererRef.current.setSize(width, height);
+    // Use setSize with updateStyle = false and explicitly set canvas style to pixel dimensions
+    rendererRef.current.setSize(width, height, false);
     rendererRef.current.setPixelRatio(pixelRatio);
+    const canvas = rendererRef.current.domElement as HTMLCanvasElement;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
     materialRef.current.uniforms.u_resolution.value.set(width, height);
   }, []);
 
@@ -48,17 +52,17 @@ const GeometricBackground = () => {
     });
     rendererRef.current = renderer;
     
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(window.innerWidth, window.innerHeight, false);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
     renderer.setClearColor(0x000000, 0);
     
-    // Style the canvas element directly
+    // Style the canvas element directly (use pixel dimensions to avoid CSS scaling issues)
     const canvas = renderer.domElement;
     canvas.style.position = 'fixed';
     canvas.style.top = '0';
     canvas.style.left = '0';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
     canvas.style.zIndex = '-1';
     canvas.style.pointerEvents = 'none';
     
@@ -279,7 +283,7 @@ const GeometricBackground = () => {
 
     // Animation loop with adaptive frame rate
     let lastTime = 0;
-    const targetFPS = isMobile ? 24 : 45; // Reduced target FPS
+    const targetFPS = isMobile ? 24 : 45;
     const frameInterval = 1000 / targetFPS;
 
     const animate = (currentTime: number) => {
@@ -318,11 +322,13 @@ const GeometricBackground = () => {
     <div
       ref={mountRef}
       style={{
-        position: 'absolute',
+        position: 'fixed',
         top: 0,
         left: 0,
-        width: 0,
-        height: 0,
+        right: 0,
+        bottom: 0,
+        width: '100%',
+        height: '100%',
         zIndex: -10,
         pointerEvents: 'none'
       }}

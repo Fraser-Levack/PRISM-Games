@@ -22,9 +22,6 @@ export default function NavBar() {
         </div>
         </NavLink>
         <div className="nav-links">
-          <NavLink to="/" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-            Home
-          </NavLink>
           <NavLink to="/games" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
             Games
           </NavLink>

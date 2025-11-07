@@ -7,11 +7,15 @@ import { ObjectGrid } from '../../../components/isometricGrid/ObjectGrid'
 import { DecorationGrid } from '../../../components/isometricGrid/DecorationGrid';
 import { GameStateManager, type GameState } from './GameStateManager';
 import GameStatusPopup from './GameStatusPopup';
+import Tutorial from './Tutorial'; // <-- new import
 
 const Chicken_Crossing = () => {
   const [gameState, setGameState] = useState<GameState>(() => {
     return GameStateManager.getDefaultState();
   });
+
+  // NEW: show tutorial before play
+  const [showTutorial, setShowTutorial] = useState<boolean>(true);
 
   const [updateTrigger, setUpdateTrigger] = useState(0);
   const [showStatusPopup, setShowStatusPopup] = useState(false);
@@ -79,20 +83,34 @@ const Chicken_Crossing = () => {
     setShowStatusPopup(false);
   };
 
+  const setPlaying = () => {
+    setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
+    setShowStatusPopup(false);
+  }
+
   // Handle restart from popup'
   const handleRestart = () => {
     const resetState = GameStateManager.resetToDefault();
     setGameState(resetState);
     setShowStatusPopup(false);
     setPlayerDirection('right'); // reset player facing
+    // if user restarts from tutorial state show tutorial again
+    setShowTutorial(true);
   };
 
-  // NEW: set game to playing without resetting/stopping
-  const setPlaying = useCallback(() => {
-    // clear any previous loss reason when resuming play
+  // NEW: start the game after tutorial
+  const onStartTutorial = () => {
+    setShowTutorial(false);
+    // Resume playing
     setGameState(prev => ({ ...prev, gameStatus: 'playing', lossReason: null }));
-    setShowStatusPopup(false); // hide popup if visible
-  }, [setGameState, setShowStatusPopup]);
+    setShowStatusPopup(false);
+  };
+
+  // NEW: allow skipping tutorial (optional)
+  const onSkipTutorial = () => {
+    setShowTutorial(false);
+    setGameState(prev => ({ ...prev, gameStatus: 'playing', lossReason: null }));
+  };
 
   // Initialize the world (cubes) only once
   useEffect(() => {
@@ -285,8 +303,30 @@ const Chicken_Crossing = () => {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [movePlayer, gameState.gameStatus, gameState, setPlaying]);
 
+  // Ensure the game is paused while tutorial is visible
+  useEffect(() => {
+    if (showTutorial) {
+      setGameState(prev => ({ ...prev, gameStatus: 'paused' }));
+    }
+  }, [showTutorial]);
+
   return (
     <div className="game-container">
+      {/* Tutorial overlay shown before first play */}
+      {showTutorial && (
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 200,
+          background: 'rgba(0,0,0,0.6)'
+        }}>
+          <Tutorial onStart={onStartTutorial} onSkip={onSkipTutorial} />
+        </div>
+      )}
+
       <div style={{
         position: 'absolute',
         top: '70px',
@@ -305,7 +345,7 @@ const Chicken_Crossing = () => {
       </div>
 
       {/* Status Popup */}
-      {showStatusPopup && gameState.gameStatus !== 'playing' && (
+      {showStatusPopup && gameState.gameStatus !== 'playing' && !showTutorial && (
         <GameStatusPopup
           gameStatus={gameState.gameStatus as 'won' | 'lost' | 'paused'}
           lossReason={gameState.lossReason ?? null}

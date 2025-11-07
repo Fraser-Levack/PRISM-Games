@@ -7,7 +7,6 @@ import { ObjectGrid } from '../../../components/isometricGrid/ObjectGrid'
 import { DecorationGrid } from '../../../components/isometricGrid/DecorationGrid';
 import { GameStateManager, type GameState } from './GameStateManager';
 import GameStatusPopup from './GameStatusPopup';
-import NavBar from '../../../components/NavBar';
 
 const Chicken_Crossing = () => {
   const [gameState, setGameState] = useState<GameState>(() => {

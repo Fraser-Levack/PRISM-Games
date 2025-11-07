@@ -1,11 +1,7 @@
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink} from 'react-router-dom'
 import './NavBar.css'
 
 export default function NavBar() {
-  const location = useLocation()
-  // hide navbar on actual game routes if you want a focused game view
-  const hideOnGame = location.pathname.startsWith('/games/') && location.pathname !== '/games'
-  if (hideOnGame) return null
 
   const GITHUB_URL = 'https://github.com/Fraser-Levack/PRISM-Games'
 

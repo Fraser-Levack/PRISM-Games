@@ -45,8 +45,8 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
             1000
         );
 
-        camera.position.set(8, 9, 8); // move camera slightly closer
-        camera.lookAt(0, 1, 0);
+        camera.position.set(8, 11, 8); // move camera slightly closer
+        camera.lookAt(0, 3, 0);
 
         // Rotation state for win animation — initialize from the current camera so we don't "jump"
         // Compute spherical parameters from the current camera position.
@@ -309,7 +309,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
                 camera.position.x = Math.cos(theta) * radius;
                 camera.position.z = Math.sin(theta) * radius;
                 camera.position.y = baseCameraY + Math.sin(theta * 0.5) * 0.55; // slight bob for interest
-                camera.lookAt(0, 0, 0);
+                camera.lookAt(0, 3, 0);
 
                 // Move the light on a slightly offset orbit (phase-shifted) so highlights shift smoothly
                 const lightTheta = theta + 0.3; // phase offset so light isn't exactly coincident with camera

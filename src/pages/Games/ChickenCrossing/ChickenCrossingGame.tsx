@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+// import { Link } from 'react-router-dom'
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import IsometricRenderer from '../../../components/isometricGrid/IsometricRenderer'
 import ModelManager from '../../../components/ModelManager';
@@ -7,6 +7,7 @@ import { ObjectGrid } from '../../../components/isometricGrid/ObjectGrid'
 import { DecorationGrid } from '../../../components/isometricGrid/DecorationGrid';
 import { GameStateManager, type GameState } from './GameStateManager';
 import GameStatusPopup from './GameStatusPopup';
+import NavBar from '../../../components/NavBar';
 
 const Chicken_Crossing = () => {
   const [gameState, setGameState] = useState<GameState>(() => {
@@ -264,26 +265,6 @@ const Chicken_Crossing = () => {
 
   return (
     <div className="game-container">
-      {/* Back to games button */}
-      <div style={{ 
-        position: 'absolute', 
-        top: '20px', 
-        left: '20px', 
-        zIndex: 100 
-      }}>
-        <Link 
-          to="/games" 
-          className="nav-link"
-          style={{ 
-            background: 'rgba(0, 0, 0, 0.8)',
-            border: '1px solid rgba(255, 255, 255, 0.3)'
-          }}
-        >
-          ← Back to Games
-        </Link>
-      </div>
-      
-      {/* Game UI */}
       <div style={{
         position: 'absolute',
         top: '70px',

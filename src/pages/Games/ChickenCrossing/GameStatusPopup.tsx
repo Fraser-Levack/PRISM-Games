@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   Step0, Step1, Step2, Step3, Step4, Step5, Step6, Step7 
 } from './solutionSteps';
+import '../../../styles/GamePopUp.css'
 
-interface GameStatusPopupProps {
+type Props = {
   gameStatus: 'won' | 'lost' | 'paused';
+  lossReason?: string | null;
   onClose: () => void;
   onRestart: () => void;
 }
@@ -12,11 +14,12 @@ interface GameStatusPopupProps {
 // Array of step components for easy navigation
 const STEP_COMPONENTS = [Step0, Step1, Step2, Step3, Step4, Step5, Step6, Step7];
 
-const GameStatusPopup: React.FC<GameStatusPopupProps> = ({ 
+const GameStatusPopup = ({ 
   gameStatus, 
+  lossReason, 
   onClose, 
   onRestart 
-}) => {
+}: Props) => {
   const [showSolution, setShowSolution] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -49,6 +52,19 @@ const GameStatusPopup: React.FC<GameStatusPopupProps> = ({
     }
   };
 
+  const getLossMessage = () => {
+    if (!lossReason) return 'You lost.';
+    switch (lossReason) {
+      case 'fox':
+        return 'A fox ate your chicken!';
+      case 'grain':
+        return 'Your chicken ate the grain!';
+      // add more mappings as needed
+      default:
+        return lossReason;
+    }
+  };
+
   const statusDisplay = getStatusDisplay();
 
   const nextStep = () => {
@@ -69,22 +85,7 @@ const GameStatusPopup: React.FC<GameStatusPopupProps> = ({
 
   if (!showSolution) {
     return (
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 200,
-        background: 'rgba(0, 0, 0, 0.95)',
-        color: statusDisplay.color,
-        padding: '30px 40px',
-        borderRadius: '15px',
-        textAlign: 'center',
-        border: `3px solid ${statusDisplay.color}`,
-        boxShadow: '0 0 20px rgba(0, 0, 0, 0.8)',
-        animation: 'fadeInScale 0.3s ease-out',
-        minWidth: '300px'
-      }}>
+      <div className='popup-card'>
         <div style={{
           fontSize: '24px',
           fontWeight: 'bold',
@@ -92,6 +93,19 @@ const GameStatusPopup: React.FC<GameStatusPopupProps> = ({
         }}>
           {statusDisplay.message}
         </div>
+
+        {/* Show loss reason when gameStatus is 'lost' */}
+        {gameStatus === 'lost' && (
+          <div style={{
+            fontSize: '16px',
+            color: '#fff',
+            opacity: 0.9,
+            marginBottom: '12px',
+            textAlign: 'center'
+          }}>
+            {getLossMessage()}
+          </div>
+        )}
         
         <div style={{
           display: 'flex',
@@ -165,22 +179,7 @@ const GameStatusPopup: React.FC<GameStatusPopupProps> = ({
   const CurrentStepComponent = STEP_COMPONENTS[currentStep];
 
   return (
-    <div style={{
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      zIndex: 200,
-      background: 'rgba(0, 0, 0, 0.95)',
-      color: '#ffffff',
-      padding: '30px',
-      borderRadius: '15px',
-      border: '3px solid #3b82f6',
-      boxShadow: '0 0 20px rgba(0, 0, 0, 0.8)',
-      animation: 'fadeInScale 0.3s ease-out',
-      maxWidth: '600px',
-      minWidth: '500px'
-    }}>
+    <div className='popup-card'>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',

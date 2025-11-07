@@ -89,7 +89,8 @@ const Chicken_Crossing = () => {
 
   // NEW: set game to playing without resetting/stopping
   const setPlaying = useCallback(() => {
-    setGameState(prev => ({ ...prev, gameStatus: 'playing' }));
+    // clear any previous loss reason when resuming play
+    setGameState(prev => ({ ...prev, gameStatus: 'playing', lossReason: null }));
     setShowStatusPopup(false); // hide popup if visible
   }, [setGameState, setShowStatusPopup]);
 
@@ -208,7 +209,22 @@ const Chicken_Crossing = () => {
   // Keyboard event handling
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      switch (event.key.toLowerCase()) {
+      const key = event.key.toLowerCase();
+      const code = event.code;
+
+      // Space = pickup action (new)
+      if (code === 'Space') {
+        if (gameState.gameStatus !== 'playing') return;
+        event.preventDefault();
+        GameStateManager.handleEnter(gameState, (newState) => {
+          const checkedState = GameStateManager.checkWinLossConditions(newState);
+          setGameState(checkedState);
+          setPlayerCarry(Boolean(checkedState.playerHolding));
+        });
+        return;
+      }
+
+      switch (key) {
         case 'p':
           event.preventDefault();
           setPlaying();
@@ -247,13 +263,20 @@ const Chicken_Crossing = () => {
         case 'enter':
           if (gameState.gameStatus !== 'playing') return;
           event.preventDefault();
-          // Handle enter key with win/loss checking
-          GameStateManager.handleEnter(gameState, (newState) => {
-            const checkedState = GameStateManager.checkWinLossConditions(newState);
-            setGameState(checkedState);
-            // check if in new state if the player is carrying something.
-            setPlayerCarry(Boolean(checkedState.playerHolding));
-          });
+          // Prefer a dedicated sail handler if it exists, otherwise fall back to the original handler
+          if (typeof (GameStateManager as any).handleSail === 'function') {
+            (GameStateManager as any).handleSail(gameState, (newState: any) => {
+              const checkedState = GameStateManager.checkWinLossConditions(newState);
+              setGameState(checkedState);
+              setPlayerCarry(Boolean(checkedState.playerHolding));
+            });
+          } else {
+            GameStateManager.handleEnter(gameState, (newState) => {
+              const checkedState = GameStateManager.checkWinLossConditions(newState);
+              setGameState(checkedState);
+              setPlayerCarry(Boolean(checkedState.playerHolding));
+            });
+          }
           break;
       }
     };
@@ -285,6 +308,7 @@ const Chicken_Crossing = () => {
       {showStatusPopup && gameState.gameStatus !== 'playing' && (
         <GameStatusPopup
           gameStatus={gameState.gameStatus as 'won' | 'lost' | 'paused'}
+          lossReason={gameState.lossReason ?? null}
           onClose={handleClosePopup}
           onRestart={handleRestart}
         />
@@ -304,7 +328,7 @@ const Chicken_Crossing = () => {
           decorationGrid={decorationGrid}
           updateTrigger={updateTrigger}
           modelsLoaded={modelsLoaded}
-          playerDirection={playerDirection} // <-- pass facing direction
+          playerDirection={playerDirection}
           playerCarry={playerCarry}
           gameStatus={gameState.gameStatus}
         />

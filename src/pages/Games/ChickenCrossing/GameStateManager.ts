@@ -12,12 +12,14 @@ export interface GameObject {
     height?: number;
 }
 
-export interface GameState {
+export type GameState = {
     player: GameObject;
     objects: GameObject[];
     cubeTypes: Map<string, string>; // Simple position->type mapping
     level: number;
     gameStatus: 'playing' | 'won' | 'lost' | 'paused';
+    // optional human-readable or coded loss reason for UI (e.g. 'fox', 'grain', 'river')
+    lossReason?: string | null;
     playerHolding?: string; // ID of object player is holding
     lastPlayerAction?: string; // Description of last action
     left?: string[];
@@ -25,8 +27,6 @@ export interface GameState {
 }
 
 export class GameStateManager {
-
-
     private static createDefaultCubeTypes(): Map<string, string> {
         const cubeTypes = new Map<string, string>();
         
@@ -251,6 +251,12 @@ export class GameStateManager {
             return;
         }
 
+        // NEW: If the nearest object is the boat, do not handle sailing here.
+        // Sailing is handled by handleSail so that Enter (sail) and Space (pickup) are separate.
+        if (nearestObj.type === 'boat') {
+            return;
+        }
+
         if (state.playerHolding) {
             // If player is holding something, drop it
             const heldObjectIndex = state.objects.findIndex(obj => obj.id === state.playerHolding);
@@ -294,129 +300,7 @@ export class GameStateManager {
             return;
         }
 
-        if (nearestObj.type === 'boat') {
-            // Check if boat is at starting position or destination position
-            const isAtStart = nearestObj.position.x === -2 && nearestObj.position.y === -1;
-            const isAtDestination = nearestObj.position.x === 3 && nearestObj.position.y === -1;
-            
-            let newBoatPos: Position;
-            let playerAndObjectsNewPos: Position;
-            
-            if (isAtStart) {
-                // Move to destination (across the river)
-                newBoatPos = { x: 3, y: -1, z: nearestObj.position.z };
-
-                // Special case: player standing just left of the boat at start (-3, -1) or (-3, -2)
-                // These should be transported to the specific landing slot (4, -1)
-                if (state.player.position.x === -3 && (state.player.position.y === -1 || state.player.position.y === -2)) {
-                    playerAndObjectsNewPos = { x: 4, y: -1, z: state.player.position.z };
-                } else {
-                    // preserve which boat slot the player is on (left or right) and place them in the same slot on the new boat position
-                    const playerOnBoat = state.player.position.y === nearestObj.position.y &&
-                        (state.player.position.x === nearestObj.position.x || state.player.position.x === nearestObj.position.x + 1);
-                    if (playerOnBoat) {
-                        const relX = state.player.position.x === nearestObj.position.x ? 0 : 1;
-                        playerAndObjectsNewPos = { x: newBoatPos.x + relX, y: newBoatPos.y, z: state.player.position.z };
-                    } else {
-                        playerAndObjectsNewPos = { x: newBoatPos.x, y: newBoatPos.y, z: state.player.position.z };
-                    }
-                }
-            } else if (isAtDestination) {
-                // Move back to start
-                newBoatPos = { x: -2, y: -1, z: nearestObj.position.z };
-                // preserve which boat slot the player is on (left or right) and place them in the same slot on the new boat position
-                const playerOnBoat = state.player.position.y === nearestObj.position.y &&
-                    (state.player.position.x === nearestObj.position.x || state.player.position.x === nearestObj.position.x + 1);
-                if (playerOnBoat) {
-                    const relX = state.player.position.x === nearestObj.position.x ? 0 : 1;
-                    playerAndObjectsNewPos = { x: newBoatPos.x + relX, y: newBoatPos.y, z: state.player.position.z };
-                } else {
-                    playerAndObjectsNewPos = { x: newBoatPos.x, y: newBoatPos.y, z: state.player.position.z };
-                }
-            } else {
-                // If boat is in some other position, move to start as default
-                newBoatPos = { x: -2, y: -1, z: nearestObj.position.z };
-                const playerOnBoat = state.player.position.y === nearestObj.position.y &&
-                    (state.player.position.x === nearestObj.position.x || state.player.position.x === nearestObj.position.x + 1);
-                if (playerOnBoat) {
-                    const relX = state.player.position.x === nearestObj.position.x ? 0 : 1;
-                    playerAndObjectsNewPos = { x: newBoatPos.x + relX, y: newBoatPos.y, z: state.player.position.z };
-                } else {
-                    playerAndObjectsNewPos = { x: newBoatPos.x, y: newBoatPos.y, z: state.player.position.z };
-                }
-            }
-            
-            // Find all objects on the boat (at both boat positions)
-            const objectsOnBoat = state.objects.filter(obj => {
-                if (obj.id === 'boat') return false; // Don't include the boat itself
-                
-                // Check if object is at boat position (x or x+1)
-                return (obj.position.x === nearestObj.position.x || 
-                        obj.position.x === nearestObj.position.x + 1) &&
-                       obj.position.y === nearestObj.position.y;
-            });
-            
-            // Update boat position
-            const newState = this.moveObject(state, nearestObj.id, newBoatPos);
-
-            // Update player position
-            const stateWithPlayer = {
-                ...newState,
-                player: {
-                    ...newState.player,
-                    position: playerAndObjectsNewPos
-                },
-                lastPlayerAction: 'Sailed'
-            };
-
-            // Toggle player between left/right arrays
-            let newLeft = [...(stateWithPlayer.left ?? [])];
-            let newRight = [...(stateWithPlayer.right ?? [])];
-            if (newLeft.includes('player')) {
-                newLeft = newLeft.filter(id => id !== 'player');
-                newRight.push('player');
-            } else if (newRight.includes('player')) {
-                newRight = newRight.filter(id => id !== 'player');
-                newLeft.push('player');
-            }
-
-            // Update all objects that were on the boat
-            // Toggle left/right arrays for objects transported by boat
-            objectsOnBoat.forEach(obj => {
-                if (obj.id === 'player' || obj.id === 'boat') return; // Skip player and boat
-                if (newLeft.includes(obj.id)) {
-                    newLeft = newLeft.filter(id => id !== obj.id);
-                    newRight.push(obj.id);
-                } else if (newRight.includes(obj.id)) {
-                    newRight = newRight.filter(id => id !== obj.id);
-                    newLeft.push(obj.id);
-                }
-            });
-
-            const finalState = {
-                ...stateWithPlayer,
-                objects: stateWithPlayer.objects.map(obj => {
-                    const wasOnBoat = objectsOnBoat.find(boatObj => boatObj.id === obj.id);
-                    if (wasOnBoat) {
-                        // Maintain the relative position on the boat
-                        const relativeX = wasOnBoat.position.x === nearestObj.position.x ? 0 : 1;
-                        return {
-                            ...obj,
-                            position: {
-                                x: newBoatPos.x + relativeX,
-                                y: newBoatPos.y,
-                                z: obj.position.z // Keep original z position
-                            }
-                        };
-                    }
-                    return obj;
-                }),
-                left: newLeft,
-                right: newRight
-            };
-            
-            setState(finalState);
-        } else if (nearestObj.type === 'grain') {
+        if (nearestObj.type === 'grain') {
             // just log pickup grain
             // console.log('Picked up grain!');
             // set playerHolding to grain id and move the gain to same x and y as player but z +1
@@ -463,6 +347,137 @@ export class GameStateManager {
             };
             setState(newState);
         }
+    }
+
+    // NEW: extracted sailing logic so Enter can be dedicated to sailing
+    public static handleSail(state: GameState, setState: (state: GameState) => void): void {
+        const playerPos = state.player.position;
+        const nearestObj = this.getNearestObjectWithinRange(state, playerPos, 2);
+        if (!nearestObj || nearestObj.type !== 'boat') return;
+
+        const boatObj = nearestObj;
+
+        // Check if boat is at starting position or destination position
+        const isAtStart = boatObj.position.x === -2 && boatObj.position.y === -1;
+        const isAtDestination = boatObj.position.x === 3 && boatObj.position.y === -1;
+        
+        let newBoatPos: Position;
+        let playerAndObjectsNewPos: Position;
+        
+        if (isAtStart) {
+            // Move to destination (across the river)
+            newBoatPos = { x: 3, y: -1, z: boatObj.position.z };
+
+            // Special case: player standing just left of the boat at start (-3, -1) or (-3, -2)
+            // These should be transported to the specific landing slot (4, -1)
+            if (state.player.position.x === -3 && (state.player.position.y === -1 || state.player.position.y === -2)) {
+                playerAndObjectsNewPos = { x: 4, y: -1, z: state.player.position.z };
+            } else {
+                // preserve which boat slot the player is on (left or right) and place them in the same slot on the new boat position
+                const playerOnBoat = state.player.position.y === boatObj.position.y &&
+                    (state.player.position.x === boatObj.position.x || state.player.position.x === boatObj.position.x + 1);
+                if (playerOnBoat) {
+                    const relX = state.player.position.x === boatObj.position.x ? 0 : 1;
+                    playerAndObjectsNewPos = { x: newBoatPos.x + relX, y: newBoatPos.y, z: state.player.position.z };
+                } else {
+                    playerAndObjectsNewPos = { x: newBoatPos.x, y: newBoatPos.y, z: state.player.position.z };
+                }
+            }
+        } else if (isAtDestination) {
+            // Move back to start
+            newBoatPos = { x: -2, y: -1, z: boatObj.position.z };
+            // preserve which boat slot the player is on (left or right) and place them in the same slot on the new boat position
+            const playerOnBoat = state.player.position.y === boatObj.position.y &&
+                (state.player.position.x === boatObj.position.x || state.player.position.x === boatObj.position.x + 1);
+            if (playerOnBoat) {
+                const relX = state.player.position.x === boatObj.position.x ? 0 : 1;
+                playerAndObjectsNewPos = { x: newBoatPos.x + relX, y: newBoatPos.y, z: state.player.position.z };
+            } else {
+                playerAndObjectsNewPos = { x: newBoatPos.x, y: newBoatPos.y, z: state.player.position.z };
+            }
+        } else {
+            // If boat is in some other position, move to start as default
+            newBoatPos = { x: -2, y: -1, z: boatObj.position.z };
+            const playerOnBoat = state.player.position.y === boatObj.position.y &&
+                (state.player.position.x === boatObj.position.x || state.player.position.x === boatObj.position.x + 1);
+            if (playerOnBoat) {
+                const relX = state.player.position.x === boatObj.position.x ? 0 : 1;
+                playerAndObjectsNewPos = { x: newBoatPos.x + relX, y: newBoatPos.y, z: state.player.position.z };
+            } else {
+                playerAndObjectsNewPos = { x: newBoatPos.x, y: newBoatPos.y, z: state.player.position.z };
+            }
+        }
+        
+        // Find all objects on the boat (at both boat positions)
+        const objectsOnBoat = state.objects.filter(obj => {
+            if (obj.id === 'boat') return false; // Don't include the boat itself
+            
+            // Check if object is at boat position (x or x+1)
+            return (obj.position.x === boatObj.position.x || 
+                    obj.position.x === boatObj.position.x + 1) &&
+                   obj.position.y === boatObj.position.y;
+        });
+        
+        // Update boat position
+        const newState = this.moveObject(state, boatObj.id, newBoatPos);
+
+        // Update player position
+        const stateWithPlayer = {
+            ...newState,
+            player: {
+                ...newState.player,
+                position: playerAndObjectsNewPos
+            },
+            lastPlayerAction: 'Sailed'
+        };
+
+        // Toggle player between left/right arrays
+        let newLeft = [...(stateWithPlayer.left ?? [])];
+        let newRight = [...(stateWithPlayer.right ?? [])];
+        if (newLeft.includes('player')) {
+            newLeft = newLeft.filter(id => id !== 'player');
+            newRight.push('player');
+        } else if (newRight.includes('player')) {
+            newRight = newRight.filter(id => id !== 'player');
+            newLeft.push('player');
+        }
+
+        // Update all objects that were on the boat
+        // Toggle left/right arrays for objects transported by boat
+        objectsOnBoat.forEach(obj => {
+            if (obj.id === 'player' || obj.id === 'boat') return; // Skip player and boat
+            if (newLeft.includes(obj.id)) {
+                newLeft = newLeft.filter(id => id !== obj.id);
+                newRight.push(obj.id);
+            } else if (newRight.includes(obj.id)) {
+                newRight = newRight.filter(id => id !== obj.id);
+                newLeft.push(obj.id);
+            }
+        });
+
+        const finalState = {
+            ...stateWithPlayer,
+            objects: stateWithPlayer.objects.map(obj => {
+                const wasOnBoat = objectsOnBoat.find(boatObj2 => boatObj2.id === obj.id);
+                if (wasOnBoat) {
+                    // Maintain the relative position on the boat
+                    const relativeX = wasOnBoat.position.x === boatObj.position.x ? 0 : 1;
+                    return {
+                        ...obj,
+                        position: {
+                            x: newBoatPos.x + relativeX,
+                            y: newBoatPos.y,
+                            z: obj.position.z // Keep original z position
+                        }
+                    };
+                }
+                return obj;
+            }),
+            left: newLeft,
+            right: newRight
+        };
+        
+        setState(finalState);
     }
 
     private static calculateDistanceToObject(obj: GameObject, position: Position): number {
@@ -657,6 +672,8 @@ export class GameStateManager {
     }
 
     public static checkWinLossConditions(state: GameState): GameState {
+        let newState = { ...state };
+
         // Skip checking if game is already won or lost
         if (state.gameStatus === 'won' || state.gameStatus === 'lost') {
             return state;
@@ -672,7 +689,8 @@ export class GameStateManager {
         if (allOnRight) {
             return {
                 ...state,
-                gameStatus: 'won'
+                gameStatus: 'won',
+                lossReason: null
             };
         }
 
@@ -683,7 +701,8 @@ export class GameStateManager {
         if (chickenAndGrainOnLeft || chickenAndGrainOnRight) {
             return {
                 ...state,
-                gameStatus: 'lost'
+                gameStatus: 'lost',
+                lossReason: 'grain'
             };
         }
 
@@ -694,11 +713,13 @@ export class GameStateManager {
         if (foxAndChickenOnLeft || foxAndChickenOnRight) {
             return {
                 ...state,
-                gameStatus: 'lost'
+                gameStatus: 'lost',
+                lossReason: 'fox'
             };
         }
 
-        // No win/loss conditions met, return original state
-        return state;
+        // default: keep playing and clear reason
+        newState.lossReason = null;
+        return newState;
     }
 }

@@ -1,88 +1,90 @@
 # PRISM Games
 
-A modern web application built with React, TypeScript, and Vite, featuring client-side routing between a home page and credits page.
+PRISM Games is a small collection of web-based isometric mini-games built with React, TypeScript and Vite. The project focuses on a simple, extensible game framework with an isometric renderer, model/asset manager and per-game state managers so new games can be added quickly.
 
-## Features
+This repository was created as an individual project for a fourth-year Computer Science module and is intended as both a playable demo and a foundation for further experimentation.
 
-- ⚡️ **Vite** - Fast build tool and development server
-- ⚛️ **React 19** - Modern React with latest features
-- 📘 **TypeScript** - Type-safe development
-- 🚀 **React Router** - Client-side routing between pages
-- 🎨 **Modern CSS** - Clean, responsive styling with gradients
+Key goals
+- Provide a reusable isometric renderer and grid system for tile/object/decorations.
+- Demonstrate model loading and lightweight 3D usage in the browser.
+- Keep code structured so new game rules and assets are simple to add.
 
-## Getting Started
+Highlights
+- React 19 + TypeScript (strict) for predictable UI and state management
+- Vite for fast development and hot-reload
+- Small, modular architecture:
+  - Isometric renderer (three.js or canvas-backed rendering)
+  - ModelManager for GLTF models
+  - Per-game GameStateManager for rules and transitions
 
-### Prerequisites
+Projects / Games
+- Chicken Crossing — a small puzzle/strategy game (src/pages/Games/ChickenCrossing). Rules and input handling live in the game's GameStateManager and UI components.
 
-- Node.js (version 16 or higher)
-- npm or yarn
+Quickstart
 
-### Installation
+Prerequisites
+- Node.js 16+ (LTS recommended)
+- npm (or yarn)
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+Install
+```bash
+npm install
+```
 
-### Development
-
-Start the development server:
+Run development server
 ```bash
 npm run dev
 ```
+Open http://localhost:5173/
 
-The application will be available at `http://localhost:5173/`
-
-### Building for Production
-
-Create a production build:
+Build for production
 ```bash
 npm run build
-```
-
-Preview the production build:
-```bash
 npm run preview
 ```
 
-## Project Structure
+Project structure (important files)
+- src/
+  - pages/
+    - Games/
+      - ChickenCrossing/ChickenCrossingGame.tsx — game entry + UI
+      - ChickenCrossing/GameStateManager.ts — game rules & state transitions
+      - ChickenCrossing/GameStatusPopup.tsx — end/paused UI
+    - Home.tsx, Credits.tsx — app pages
+  - components/
+    - isometricGrid/ — CubeGrid, ObjectGrid, DecorationGrid, IsometricRenderer
+    - ModelManager.ts — centralized model loading & caching
+  - App.tsx, main.tsx — router and app bootstrap
+  - styles/ — CSS modules / global styles
+- public/Models/ — GLTF model assets (chicken.gltf, farmer.gltf, etc.)
+- package.json — scripts and dependencies
+- README.md — this file
 
-```
-src/
-├── pages/
-│   ├── Home.tsx      # Home page component
-│   └── Credits.tsx   # Credits page component
-├── App.tsx           # Main app component with routing
-├── App.css           # Global styles
-└── main.tsx          # Application entry point
-```
+Gameplay & controls (example: Chicken Crossing)
+- Controls: WASD or arrow keys to move
+- Enter to interact / pick up / drop where implemented
+- R to reset, P to resume playing from paused
+- The renderer will fallback to primitive shapes if GLTF models fail to load; put models in public/Models for the game to load.
 
-## Navigation
+Development notes
+- Models: place GLTF files under public/Models and reference them by filename in each game's modelMap.
+- State: use the per-game GameStateManager to encapsulate movement, collisions and win/loss checks.
+- Renderer: updateTrigger prop is used to inform IsometricRenderer to re-render when the logical grids change.
+- TypeScript: project uses strict settings — add types for new components and state shapes.
 
-- **Home Page** (`/`) - Welcome page with navigation to credits
-- **Credits Page** (`/credits`) - Information about the project and contributors
+Testing and debugging
+- Use the browser console to view debug logs from GameStateManager and model loading.
+- Renderer fallbacks make it easy to test without all assets present.
+- Add unit tests for pure game logic in GameStateManager (recommended using vitest or jest configured for Vite + TS).
 
-## Technologies Used
+Contributing
+- Fork → feature branch → implement → run dev & lint → open PR
+- Keep game logic modular; avoid UI code leaking into GameStateManager.
+- Add unit tests for new game rules or utility functions.
 
-- **React 19** - JavaScript library for building user interfaces
-- **TypeScript** - Typed superset of JavaScript
-- **Vite** - Fast build tool and development server
-- **React Router DOM** - Declarative routing for React applications
-- **ESLint** - Code linting and formatting
+Troubleshooting
+- Blank screen: check console for model load errors and ensure public/Models paths exist.
+- Keys not working: ensure game canvas has focus; global key handlers are registered on window.
 
-## Development Notes
-
-This project uses Vite's fast HMR (Hot Module Replacement) for instant updates during development. The TypeScript configuration is set up for strict type checking to ensure code quality.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests and linting
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
+Contact / author
+- Repository owner: Fraser Levack

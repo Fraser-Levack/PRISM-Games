@@ -1,3 +1,16 @@
 .description {
     margin-top: 2rem;
 }
+
+.game-cards-title {
+    margin-top: 4rem;
+    color: #c8c1f0;
+}
+
+.game-cards {
+    width: 90%;
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}

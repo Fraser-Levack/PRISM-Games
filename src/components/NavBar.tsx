@@ -24,9 +24,9 @@ export default function NavBar() {
         </div>
         </NavLink>
         <div className="nav-links">
-          <NavLink to="/games" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+          {/* <NavLink to="/games" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
             Games
-          </NavLink>
+          </NavLink> */}
           <NavLink to="/credits" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
             Credits
           </NavLink>

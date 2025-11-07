@@ -1,0 +1,38 @@
+.gameCard {
+    border-radius: 8px;
+    width: 20rem;
+    padding: 1rem 1rem;
+    backdrop-filter: blur(6px);
+    background: rgba(98, 47, 113, 0.25);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+    cursor: pointer;
+}
+
+.gameCard:hover {
+    box-shadow: 0 6px 12px rgba(128, 91, 245, 0.35);
+    transition: all 0.3s ease;
+}
+
+.gameCard h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #c8c1f0;
+}
+
+.gameCard img {
+    width: 4rem;
+    height: auto;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+}
+
+.gameCard p {
+    font-size: 1rem;
+    color: #e0d9f5;
+}
+
+.gameCard .header {
+    display: flex;
+    align-items: space-between;
+    gap: 3rem;
+}

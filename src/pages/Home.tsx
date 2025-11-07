@@ -1,20 +1,18 @@
 // import { Link } from 'react-router-dom';
+import '../styles/Home.css';
 
 const Home = () => {
   return (
-    <> </>
-    // <div className="home">
-    //   <h1>Welcome to PRISM Games</h1>
-    //   <p>A collection of games to help educate about the principles of Deterministic and Probabilistic Model Checking</p>
-    //   <div className="navigation">
-    //     <Link to="/games" className="nav-link">
-    //       View Games
-    //     </Link>
-    //     <Link to="/credits" className="nav-link">
-    //       View Credits
-    //     </Link>
-    //   </div>
-    // </div>
+    
+    <div className="home">
+      <h1>PRISM Games</h1>
+      <h2>Learn about the World of</h2>
+      <h2>Model Checking</h2>
+      <div className="description">
+        <p><strong>Improve your skills by playing games</strong></p>
+        <p><strong>and understand the power of model checking.</strong></p>
+      </div>
+    </div>
   );
 };
 

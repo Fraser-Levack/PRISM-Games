@@ -1,0 +1,163 @@
+/* Control Board Popup Styles */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.control-board-popup {
+  z-index: 210;
+  color: #c8c1f0;
+  text-align: left;
+  width: auto;
+  padding: 8px 12px;       /* shrink overall board padding */
+  max-width: 420px;        /* limit width so board is compact */
+  box-sizing: border-box;
+}
+
+.control-board-title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.control-board-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;             /* removed large gaps between sections */
+}
+
+.control-section-title {
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.movement-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;               /* reduced gap but keep layout */
+  align-items: center;
+  justify-content: center;
+}
+
+.key-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;            /* removed extra spacing around key groups */
+}
+
+.key-row {
+  display: flex;
+  gap: 0.25rem;            /* removed gaps between keys */
+  justify-content: center;
+}
+
+.key-label {
+  text-align: center;
+  margin-top: 0.25rem;     /* tightened label spacing */
+  opacity: 0.8;
+  font-size: 0.875rem;     /* keep text size unchanged */
+}
+
+.or-divider {
+  opacity: 0.7;
+  font-size: 1rem;
+}
+
+.action-controls {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;             /* reduced action grid gaps */
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;             /* tightened item spacing */
+}
+
+.action-title {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.action-note {
+  text-align: center;
+  margin-top: 0.5rem;
+  opacity: 0.7;
+  font-size: 0.875rem;
+}
+
+/* Key Button Styles */
+.key-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;           /* keep buttons from flexing so positions remain stable */
+  min-width: 2.25rem;       /* reduced size */
+  height: 2.25rem;          /* reduced size */
+  padding: 0 8px;           /* tighter padding */
+  background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.1), 0 2px 0 0 rgba(255, 255, 255, 0.9) inset;
+  transition: all 0.15s ease;
+  user-select: none;
+  color: #1f2937;
+  font-weight: 500;
+  font-size: 0.9rem;        /* slightly smaller text to match new key size */
+}
+
+.key-button:hover {
+  box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.1), 0 2px 0 0 rgba(255, 255, 255, 0.9) inset;
+  transform: translateY(2px);
+}
+
+.key-button.wide {
+  min-width: 96px;         /* scaled down proportionally */
+}
+
+.key-button.medium {
+  min-width: 72px;         /* scaled down proportionally */
+}
+
+.key-button svg {
+  width: 16px;             /* smaller icon */
+  height: 16px;
+}
+
+/* keep key labels scaled so visual alignment remains */
+.key-label {
+  text-align: center;
+  margin-top: 0.4rem;
+  opacity: 0.8;
+  font-size: 0.8rem;
+}
+
+/* Responsive Design */
+@media (min-width: 768px) {
+  .movement-controls {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 767px) {
+  .action-controls {
+    grid-template-columns: 1fr;
+  }
+  
+  .control-board-popup {
+    padding: 8px 12px;     /* keep mobile compact */
+    min-width: 240px;      /* allow smaller mobile width */
+  }
+}

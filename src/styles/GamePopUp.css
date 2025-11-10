@@ -2,7 +2,7 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -45%);
     z-index: 200;
     backdrop-filter: blur(6px);
     background: rgba(98, 47, 113, 0.60);

@@ -9,11 +9,11 @@ export interface StepComponentProps {
 const Step0: React.FC<StepComponentProps> = ({ isActive = false }) => {
   return (
     <div style={{
-      background: 'rgba(59, 130, 246, 0.1)',
+      background: 'rgba(52, 29, 54, 0.4)',
       padding: '20px',
       borderRadius: '10px',
       marginBottom: '20px',
-      border: isActive ? '2px solid #3b82f6' : '1px solid rgba(59, 130, 246, 0.3)'
+      border: isActive ? '2px solid #c8c1f0' : '1px solid rgba(59, 130, 246, 0.3)'
     }}>
     <p style={{ color: '#ccc', margin: '0', fontSize: '16px' }}>
   Let’s get started by turning the classic <strong>Chicken Crossing puzzle</strong> into a model that a computer can understand!  

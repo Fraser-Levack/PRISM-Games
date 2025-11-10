@@ -187,7 +187,7 @@ const GameStatusPopup = ({
         marginBottom: '20px'
       }}>
         <h2 style={{
-          color: '#3b82f6',
+          color: '#c8c1f0',
           margin: '0',
           fontSize: '24px'
         }}>

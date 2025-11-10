@@ -6,6 +6,7 @@ import Games from './pages/Games'
 import GeometricBackground from './components/GeometricBackground'
 import './App.css'
 import Chicken_Crossing from './pages/Games/ChickenCrossing/ChickenCrossingGame'
+import TowerOfHanoiGame from './pages/Games/TowerOfHanoi/TowerOfHanoiGame'
 import NavBar from './components/NavBar'
 
 // Component to conditionally render background based on route
@@ -33,6 +34,7 @@ function App() {
           <Route path="/credits" element={<Credits />} />
           <Route path="/games" element={<Games />} />
           <Route path="/games/chicken_crossing" element={<Chicken_Crossing />} />
+          <Route path="/games/tower_of_hanoi" element={<TowerOfHanoiGame />} />
         </Routes>
       </div>
     </Router>

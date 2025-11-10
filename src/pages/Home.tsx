@@ -22,7 +22,7 @@ const Home = () => {
         <GameCard title="Chicken Crossing" imageSrc="/Icons/Chicken_Icon.png" link="/games/chicken_crossing">
           <p>Classic puzzle, move all the farmers items across the river. | difficulty: <span style={{color:"green"}}>Easy</span></p>
         </GameCard>
-        <GameCard title="Tower of Hanoi" imageSrc="/Icons/Chicken_Icon.png" link="/">
+        <GameCard title="Tower of Hanoi" imageSrc="/Icons/Chicken_Icon.png" link="/games/tower_of_hanoi">
           <p>Move all the disks from the source peg to the target peg. | difficulty: <span style={{color:"orange"}}>Medium</span></p>
         </GameCard>
         <GameCard title="Planet Rabbit" imageSrc="/Icons/Chicken_Icon.png" link="/">

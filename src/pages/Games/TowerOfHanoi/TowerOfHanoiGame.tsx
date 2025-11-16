@@ -99,7 +99,8 @@ const TowerOfHanoiGame = () => {
         const size = stack[i]; // 1..N where larger value = larger disk
         const px = pegPositions[pegIndex];
         const py = pegY;
-        const z = 1 + i * 2.5; // stack upwards
+        let z = 1 + i * 2.5; // stack upwards
+        if (i >=2) z -= 0.5;
         // If model loaded, scale model down to 0.8x; otherwise use previous simple height
         const modelScale = 0.2 + (size / state.diskCount) * 0.5;
         const height = modelsLoaded ? 0.18 * modelScale : 0.18;

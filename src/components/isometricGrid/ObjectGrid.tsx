@@ -5,6 +5,7 @@ type Object = {
     height : number;
     color : string | number; // Hex color string or THREE.js color number
     type : string; // object type identifier
+    scale: number; // optional scale for model sizing
 };
 
 class ObjectGrid {
@@ -14,8 +15,8 @@ class ObjectGrid {
     }
 
     // Add an object to the list
-    addObject(x: number, y: number, z: number, height: number, color: string | number, type: string = 'default'): void {
-        this.objects.push({ x, y, z, height, color, type });
+    addObject(x: number, y: number, z: number, height: number, color: string | number, type: string = 'default', scale: number = 1): void {
+        this.objects.push({ x, y, z, height, color, type, scale });
     }
 
     // Remove an object at specific coordinates

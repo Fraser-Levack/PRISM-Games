@@ -161,7 +161,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
         
         objects.forEach((object: Object) => {
             // Try to use GLTF models for chicken/fox/grain and farmer (player).
-            const modelNames = ['chicken', 'fox', 'grain', 'farmer', 'farmer_hands_up'];
+            const modelNames = ['chicken', 'fox', 'grain', 'farmer', 'farmer_hands_up', 'tower'];
             const wantsModel = modelNames.includes(object.type) || (object.type === 'player' && ModelManager.has('farmer'));
 
             if (wantsModel) {
@@ -173,7 +173,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
                     // place them so their base sits on top of the cube (object.z + object.height)
                     clone.position.set(object.x, object.z + object.height, object.y);
                     // Optionally scale models down to fit the grid; tweak this as needed
-                    clone.scale.setScalar(0.8);
+                    clone.scale.setScalar(object.scale || 0.8);
 
                     // If this is the player (farmer), rotate to face last movement direction
                     const isPlayer = object.type === 'player' || object.type === 'farmer';

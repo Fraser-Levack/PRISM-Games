@@ -39,7 +39,7 @@ class ModelManager {
 
 	// Return a deep-cloned Object3D ready to be inserted into a scene.
 	// Returns null if the model hasn't been loaded.
-	getClone(name: ModelKey): THREE.Object3D | null {
+	getClone(name: ModelKey, scale = 1): THREE.Object3D | null {
 		const gltf = this.cache.get(name);
 		if (!gltf) return null;
 
@@ -62,6 +62,12 @@ class ModelManager {
 				mesh.receiveShadow = true;
 			}
 		});
+
+		// Apply uniform scale. Default behaviour: if model is 'tower' and no explicit scale passed, scale to 0.8
+		const finalScale = (scale === 1 && name === 'tower') ? 0.8 : scale;
+		if (finalScale !== 1) {
+			cloned.scale.set(finalScale, finalScale, finalScale);
+		}
 
 		return cloned;
 	}

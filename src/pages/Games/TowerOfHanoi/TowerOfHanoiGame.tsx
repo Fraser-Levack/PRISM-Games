@@ -3,6 +3,7 @@ import IsometricRenderer from '../../../components/isometricGrid/IsometricRender
 import { CubeGrid } from '../../../components/isometricGrid/CubeGrid';
 import { ObjectGrid } from '../../../components/isometricGrid/ObjectGrid';
 import { DecorationGrid } from '../../../components/isometricGrid/DecorationGrid';
+import modelManager from '../../../components/ModelManager';
 
 type GameStatus = 'paused' | 'playing' | 'won';
 
@@ -28,12 +29,32 @@ const TowerOfHanoiGame = () => {
   const [selectedPeg, setSelectedPeg] = useState<number | null>(null);
   const [updateTrigger, setUpdateTrigger] = useState(0);
 
+  const [modelsLoaded, setModelsLoaded] = useState(false);
+
   const cubeGrid = useMemo(() => new CubeGrid(), []);
   const objectGrid = useMemo(() => new ObjectGrid(), []);
   const decorationGrid = useMemo(() => new DecorationGrid(), []);
 
-  // No models available yet — renderer should fallback to simple shapes
-  const modelsLoaded = false;
+  // Declare the model map for this game here so it's easy to change per-game
+  const modelMap = {
+    tower: '/Models/tower.gltf',
+  } as const;
+
+
+  // Preload models on mount for better UX. Renderer will fallback to spheres if not loaded.
+  useEffect(() => {
+    let mounted = true;
+    modelManager.loadAll(modelMap)
+      .then(() => {
+        if (mounted) setModelsLoaded(true);
+      })
+      .catch((err) => {
+        console.error('Failed to preload models:', err);
+        if (mounted) setModelsLoaded(false);
+      });
+    return () => { mounted = false; };
+  }, []);
+
 
   // Initialize ground + simple peg decorations once
   useEffect(() => {
@@ -78,17 +99,20 @@ const TowerOfHanoiGame = () => {
         const size = stack[i]; // 1..N where larger value = larger disk
         const px = pegPositions[pegIndex];
         const py = pegY;
-        const z = 1 + i * 0.22;
-        const height = 0.18;
-        // color by size
+        const z = 1 + i * 2.5; // stack upwards
+        // If model loaded, scale model down to 0.8x; otherwise use previous simple height
+        const modelScale = 0.2 + (size / state.diskCount) * 0.5;
+        const height = modelsLoaded ? 0.18 * modelScale : 0.18;
+        // color by size (kept for fallback rendering / material tint)
         const color = size === 1 ? 0xffdd88 : size === 2 ? 0xffb366 : 0xff7f7f;
-        // Use type 'disc' so the renderer uses a simple fallback shape if no model
-        objectGrid.addObject(px, py, z, height, color, 'disc');
+        // Use type 'tower' when model is available, otherwise fallback to 'disc'
+        const typeName = modelsLoaded ? 'tower' : 'disc';
+        objectGrid.addObject(px, py, z, height, color, typeName, modelScale);
       }
     });
 
     setUpdateTrigger(u => u + 1);
-  }, [state, objectGrid]);
+  }, [state, objectGrid, modelsLoaded]);
 
   // Move logic: from -> to (indices 0..2)
   const tryMove = useCallback((from: number, to: number) => {

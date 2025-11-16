@@ -100,7 +100,21 @@ const TowerOfHanoiGame = () => {
         const px = pegPositions[pegIndex];
         const py = pegY;
         let z = 1 + i * 2.5; // stack upwards
-        if (i >=2) z -= 0.5;
+        // If this is the smallest disk, adjust its height depending on the disk directly beneath it.
+        // stack is bottom -> top, so the disk below the current one is at index i-1.
+        if (size === 1 && i > 0) {
+          const belowSize = stack[i - 1];
+          if (belowSize === 2) {
+            // smallest on top of middle -> slightly lower
+            z -= 0.5;
+          } else if (belowSize === 3) {
+            // smallest on top of large -> slightly higher
+            z += 0.2;
+          }
+        } else if (i >= 2) {
+          // fallback adjustment for tall stacks
+          z -= 0.5;
+        }
         // If model loaded, scale model down to 0.8x; otherwise use previous simple height
         const modelScale = 0.2 + (size / state.diskCount) * 0.5;
         const height = modelsLoaded ? 0.18 * modelScale : 0.18;
@@ -110,7 +124,7 @@ const TowerOfHanoiGame = () => {
         const typeName = modelsLoaded ? 'tower' : 'disc';
         objectGrid.addObject(px, py, z, height, color, typeName, modelScale);
       }
-    });
+    });32
 
     setUpdateTrigger(u => u + 1);
   }, [state, objectGrid, modelsLoaded]);

@@ -28,12 +28,16 @@ const TowerOfHanoiGame = () => {
   const [showTutorial, setShowTutorial] = useState(true);
   const [selectedPeg, setSelectedPeg] = useState<number | null>(null);
   const [updateTrigger, setUpdateTrigger] = useState(0);
+  const [hoveredPeg, setHoveredPeg] = useState<number | null>(null);
 
   const [modelsLoaded, setModelsLoaded] = useState(false);
 
   const cubeGrid = useMemo(() => new CubeGrid(), []);
   const objectGrid = useMemo(() => new ObjectGrid(), []);
   const decorationGrid = useMemo(() => new DecorationGrid(), []);
+
+  // Define which object types are clickable
+  const clickableTypes = useMemo(() => ['tower', 'disc', 'peg'], []);
 
   // Declare the model map for this game here so it's easy to change per-game
   const modelMap = {
@@ -164,6 +168,45 @@ const TowerOfHanoiGame = () => {
     setSelectedPeg(null);
   }, [selectedPeg, tryMove]);
 
+  // Handler for object clicks (mouse control)
+  const handleObjectClick = useCallback((id: string, _data?: any) => {
+    if (state.gameStatus !== 'playing') return;
+    
+    // Parse the object ID to determine which peg was clicked
+    // ID format: "tower_x_y_z" or "disc_x_y_z" or "peg_x_y_z" where x corresponds to peg position
+    const parts = id.split('_');
+    
+    if ((parts[0] === 'tower' || parts[0] === 'disc' || parts[0] === 'peg') && parts.length >= 4) {
+      const x = parseFloat(parts[1]);
+      // Map x position to peg index
+      const pegPositions = [-4, 0, 4];
+      const pegIndex = pegPositions.findIndex(pos => Math.abs(pos - x) < 1);
+      
+      if (pegIndex !== -1) {
+        selectPeg(pegIndex);
+      }
+    }
+  }, [state.gameStatus, selectPeg]);
+
+  // Handler for object hover (mouse feedback)
+  const handleObjectHover = useCallback((id: string | null) => {
+    if (!id) {
+      setHoveredPeg(null);
+      return;
+    }
+    
+    const parts = id.split('_');
+    if ((parts[0] === 'tower' || parts[0] === 'disc' || parts[0] === 'peg') && parts.length >= 4) {
+      const x = parseFloat(parts[1]);
+      const pegPositions = [-4, 0, 4];
+      const pegIndex = pegPositions.findIndex(pos => Math.abs(pos - x) < 1);
+      
+      if (pegIndex !== -1) {
+        setHoveredPeg(pegIndex);
+      }
+    }
+  }, []);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -226,8 +269,10 @@ const TowerOfHanoiGame = () => {
         position: 'absolute', top: 70, left: 20, zIndex: 100, color: 'white',
         background: 'rgba(0,0,0,0.8)', padding: 10, borderRadius: 6, fontSize: 14
       }}>
-        <div>Controls: Press 1/2/3 to select pegs (source then destination)</div>
+        <div>Controls: Click on discs or press 1/2/3 to select pegs</div>
+        <div>Select source peg, then destination peg</div>
         <div>Selected peg: {selectedPeg === null ? 'none' : (selectedPeg + 1)}</div>
+        {hoveredPeg !== null && <div style={{ color: '#4ade80' }}>Hovering: Peg {hoveredPeg + 1}</div>}
         <div>Status: {state.gameStatus}</div>
         <div>Press R to reset</div>
       </div>
@@ -248,6 +293,9 @@ const TowerOfHanoiGame = () => {
           playerDirection={'right'} // not used here but renderer prop required
           playerCarry={false}
           gameStatus={state.gameStatus}
+          onObjectClick={handleObjectClick}
+          onObjectHover={handleObjectHover}
+          clickableTypes={clickableTypes}
         />
       </div>
     </div>

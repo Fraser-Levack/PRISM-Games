@@ -8,6 +8,7 @@ import { CubeGrid, type Cube } from './CubeGrid';
 import { ObjectGrid, type Object } from './ObjectGrid';
 import { DecorationGrid } from './DecorationGrid';
 import ModelManager from '../ModelManager';
+import { createIsometricInputHandler } from './IsometricInputHandler';
 
 interface IsometricRendererProps {
     cubeGrid: CubeGrid;
@@ -18,9 +19,14 @@ interface IsometricRendererProps {
     playerDirection?: 'left'|'right'|'up'|'down'; // <-- new prop
     playerCarry?: boolean;
     gameStatus?: 'playing' | 'won' | 'lost' | 'paused';
+    onObjectClick?: (id: string, data?: any) => void;
+    onObjectHover?: (id: string | null) => void;
+    onDragStart?: (id: string, data?: any) => void;
+    onDragEnd?: (targetId: string | null, targetData?: any) => void;
+    clickableTypes?: string[]; // Array of object types that should be clickable
 }
 
-const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger, modelsLoaded, playerDirection, playerCarry, gameStatus }: IsometricRendererProps) => {
+const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger, modelsLoaded, playerDirection, playerCarry, gameStatus, onObjectClick, onObjectHover, onDragStart, onDragEnd, clickableTypes }: IsometricRendererProps) => {
     const mountRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -60,6 +66,23 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         mountRef.current.appendChild(renderer.domElement);
+
+        // Setup input handler
+        const inputHandler = createIsometricInputHandler(camera, scene, renderer.domElement);
+        
+        // Setup callbacks if provided
+        if (onObjectClick) {
+            inputHandler.setClickCallback(onObjectClick);
+        }
+        if (onObjectHover) {
+            inputHandler.setHoverCallback(onObjectHover);
+        }
+        if (onDragStart) {
+            inputHandler.setDragStartCallback(onDragStart);
+        }
+        if (onDragEnd) {
+            inputHandler.setDragEndCallback(onDragEnd);
+        }
 
         // Simple vibrance/brightness shader
         const VibranceShader = {
@@ -204,6 +227,17 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
 
                     scene.add(clone);
                     clonedObjects.push(clone);
+                    
+                    // Register as clickable if type is in clickableTypes
+                    if (clickableTypes?.includes(object.type)) {
+                        const objectId = `${object.type}_${object.x}_${object.y}_${object.z}`;
+                        inputHandler.registerClickable(clone, objectId, {
+                            type: object.type,
+                            position: { x: object.x, y: object.y, z: object.z },
+                            object
+                        });
+                    }
+                    
                     return; // skip primitive creation
                 }
                 // fallthrough to primitives if model not available
@@ -231,6 +265,16 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
 
             scene.add(mesh);
             objectMeshes.push(mesh);
+            
+            // Register as clickable if type is in clickableTypes
+            if (clickableTypes?.includes(object.type)) {
+                const objectId = `${object.type}_${object.x}_${object.y}_${object.z}`;
+                inputHandler.registerClickable(mesh, objectId, {
+                    type: object.type,
+                    position: { x: object.x, y: object.y, z: object.z },
+                    object
+                });
+            }
         });
     
         // Add all decorations (if decorationGrid is provided)
@@ -291,6 +335,15 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
 
         window.addEventListener('resize', handleResize);
 
+        // Add mouse event listeners
+        const handleMouseDown = (e: MouseEvent) => inputHandler.handleMouseDown(e);
+        const handleMouseMove = (e: MouseEvent) => inputHandler.handleMouseMove(e);
+        const handleMouseUp = (e: MouseEvent) => inputHandler.handleMouseUp(e);
+        
+        renderer.domElement.addEventListener('mousedown', handleMouseDown);
+        renderer.domElement.addEventListener('mousemove', handleMouseMove);
+        renderer.domElement.addEventListener('mouseup', handleMouseUp);
+
         // Simple animation loop
         let animationId: number;
         let lastTime = performance.now();
@@ -328,6 +381,12 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
         return () => {
             cancelAnimationFrame(animationId);
             window.removeEventListener('resize', handleResize);
+            
+            // Remove mouse event listeners
+            renderer.domElement.removeEventListener('mousedown', handleMouseDown);
+            renderer.domElement.removeEventListener('mousemove', handleMouseMove);
+            renderer.domElement.removeEventListener('mouseup', handleMouseUp);
+            inputHandler.clearClickables();
             
             // Dispose of all geometries and materials for meshes
             [...cubeMeshes, ...objectMeshes, ...decorationMeshes].forEach(mesh => {
@@ -372,7 +431,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
                  mountRef.current.innerHTML = '';
              }
          };
-    }, [cubeGrid, objectGrid, updateTrigger, modelsLoaded, playerDirection, decorationGrid, playerCarry, gameStatus]); // Re-run when gameStatus changes too
+    }, [cubeGrid, objectGrid, updateTrigger, modelsLoaded, playerDirection, decorationGrid, playerCarry, gameStatus, onObjectClick, onObjectHover, onDragStart, onDragEnd, clickableTypes]); // Re-run when gameStatus changes too
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>

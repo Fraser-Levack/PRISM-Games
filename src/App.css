@@ -1,3 +1,47 @@
+/* Global CSS Variables */
+:root {
+  /* Primary Colors - Purple Theme (More Vibrant) */
+  --color-primary: #b89fd9;
+  --color-primary-dark: #9370d9;
+  --color-primary-light: #d9c9f5;
+
+  /* Secondary Colors */
+  --color-secondary: #2c3e50;
+  --color-secondary-light: #34495e;
+
+  /* Accent Colors */
+  --color-accent-purple: #c8a2e0;
+  --color-accent-purple-muted: #a878d0;
+  --color-accent-purple-semi: #a878d0aa;
+
+  /* Background Colors - Dark Theme */
+  --color-bg-dark: #1a1a2e;
+  --color-bg-game: rgb(5, 3, 15);
+  --color-bg-light: #16213e;
+  --color-bg-light-secondary: #9370d9;
+
+  /* Text Colors - Light for dark background */
+  --color-text-primary: rgba(255, 255, 255, 0.87);
+  --color-text-secondary: rgba(255, 255, 255, 0.95);
+  --color-text-tertiary: rgba(255, 255, 255, 0.85);
+  --color-text-quaternary: rgba(255, 255, 255, 0.8);
+  --color-text-dark: #c8a2e0;
+  --color-text-dark-secondary: #d9c9f5;
+
+  /* Sidebar Colors - Dark with Purple */
+  --color-sidebar-bg: #16213e;
+  --color-sidebar-text: #ecf0f1;
+  --color-sidebar-border: #16213e;
+  --color-sidebar-hover: rgba(184, 159, 217, 0.2);
+  --color-sidebar-active: rgba(184, 159, 217, 0.35);
+  --color-sidebar-text-muted: #b89fd9;
+  --color-sidebar-text-submenu: #9370d9;
+
+  /* Shadow Colors */
+  --color-shadow: rgba(0, 0, 0, 0.5);
+  --color-shadow-light: rgba(0, 0, 0, 0.1);
+}
+
 /* Add overflow hidden to remove scroll bars */
 html, body {
   margin: 0;
@@ -9,8 +53,8 @@ html, body {
   line-height: 1.5;
   font-weight: 400;
   color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-dark);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -35,7 +79,7 @@ html, body {
   z-index: 10;
   width: 100%;
   /* max-width: 1280px; */
-  margin: 0 4rem;
+  margin: 0 0rem;
   overflow: hidden; /* Prevent app container from scrolling */
   /* min-height: calc(100vh - 64px); */
 }
@@ -53,14 +97,14 @@ html, body {
   top: 0;
   left: 0;
   z-index: 30;
-  background: rgb(5, 3, 15); /* Base vec3(0.02, 0.01, 0.06) converted to RGB */
+  background: var(--color-bg-game);
   overflow: hidden;
 }
 
 .home .top-section h1, .credits.top-section h1, .games.top-section h1 {
   font-size: 3.5rem;
   margin-bottom: 1rem;
-  background-color: #c8c1f0;
+  background-color: var(--color-accent-purple);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -69,7 +113,7 @@ html, body {
 .home .top-section h2, .credits.top-section h2, .games.top-section h2 {
   font-size: 3.5rem;
   margin: -1rem 0;
-  background-color: #bcb3f0AA;
+  background-color: var(--color-accent-purple-semi);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -79,7 +123,7 @@ html, body {
 .home .top-section p {
   font-size: 1.5rem;
   margin: -2rem 0;
-  background-color: #bcb3f0AA;
+  background-color: var(--color-accent-purple-semi);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -96,9 +140,9 @@ html, body {
 }
 
 .credits-content h2 {
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--color-text-secondary);
   margin-bottom: 1rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 4px var(--color-shadow);
 }
 
 .credits-content ul {
@@ -108,12 +152,12 @@ html, body {
 .credits-content li {
   margin-bottom: 0.5rem;
   padding-left: 1rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--color-text-tertiary);
 }
 
 .credits-content p {
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--color-text-quaternary);
 }
 
 /* Performance optimizations for WebGL background */

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Step0, Step1, Step2, Step3, Step4, Step5, Step6, Step7 
 } from './solutionSteps';
@@ -20,6 +21,7 @@ const GameStatusPopup = ({
   onClose, 
   onRestart 
 }: Props) => {
+  const navigate = useNavigate();
   const [showSolution, setShowSolution] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -134,7 +136,7 @@ const GameStatusPopup = ({
           
           {statusDisplay.showSolutionButton && (
             <button
-              onClick={() => setShowSolution(true)}
+              onClick={() => navigate('/solutions')}
               style={{
                 background: '#3b82f6',
                 color: '#fff',

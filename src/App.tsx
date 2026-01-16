@@ -8,6 +8,7 @@ import './App.css'
 import Chicken_Crossing from './pages/Games/ChickenCrossing/ChickenCrossingGame'
 import TowerOfHanoiGame from './pages/Games/TowerOfHanoi/TowerOfHanoiGame'
 import NavBar from './components/NavBar'
+import Solutions from './pages/solutions/Solutions'
 
 // Component to conditionally render background based on route
 function ConditionalBackground() {
@@ -15,9 +16,10 @@ function ConditionalBackground() {
   const [showBackground, setShowBackground] = useState(true)
 
   useEffect(() => {
-    // Hide background on actual game routes
+    // Hide background on actual game routes and solutions route
     const isGameRoute = location.pathname.startsWith('/games/') && location.pathname !== '/games'
-    setShowBackground(!isGameRoute)
+    const isSolutionsRoute = location.pathname.startsWith('/solutions')
+    setShowBackground(!isGameRoute && !isSolutionsRoute)
   }, [location.pathname])
 
   return showBackground ? <GeometricBackground /> : null
@@ -35,6 +37,7 @@ function App() {
           <Route path="/games" element={<Games />} />
           <Route path="/games/chicken_crossing" element={<Chicken_Crossing />} />
           <Route path="/games/tower_of_hanoi" element={<TowerOfHanoiGame />} />
+          <Route path="/solutions" element={<Solutions />} />
         </Routes>
       </div>
     </Router>

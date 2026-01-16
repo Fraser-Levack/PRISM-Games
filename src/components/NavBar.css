@@ -140,7 +140,8 @@
     right: -100%;
     width: 70%;
     max-width: 300px;
-    height: calc(100vh - 4rem);
+    height: calc(80vh);
+    max-height: calc(80vh);
     background: rgba(40, 20, 50, 0.98);
     backdrop-filter: blur(10px);
     flex-direction: column;
@@ -150,6 +151,7 @@
     transition: right 0.3s ease;
     align-items: stretch;
     justify-content: flex-start;
+    overflow-y: auto;
   }
 
   .nav-links.mobile-open {

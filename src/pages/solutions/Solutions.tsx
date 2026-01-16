@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import SolutionsSideBar from './SolutionsSideBar';
+import SiteOverview from './solutions/SiteOverview';
 import ChickenCrossingSolution from './solutions/ChickenCrossingSolution';
 import TowerOfHanoiSolution from './solutions/TowerOfHanoiSolution';
 import ShutTheBoxSolution from './solutions/ShutTheBoxSolution';
 import './Solutions.css';
 
 export default function Solutions() {
-  const [activeGame, setActiveGame] = useState('chickenCrossing');
+  const [activeGame, setActiveGame] = useState('siteOverview');
   const [activeSection, setActiveSection] = useState('overview');
   const contentRef = useRef<HTMLElement | null>(null);
 
@@ -69,6 +70,8 @@ export default function Solutions() {
 
   const renderSolution = () => {
     switch (activeGame) {
+      case 'siteOverview':
+        return <SiteOverview gameId="siteOverview" />;
       case 'chickenCrossing':
         return <ChickenCrossingSolution gameId="chickenCrossing" />;
       case 'towerOfHanoi':
@@ -76,7 +79,7 @@ export default function Solutions() {
       case 'shutTheBox':
         return <ShutTheBoxSolution gameId="shutTheBox" />;
       default:
-        return <ChickenCrossingSolution gameId="chickenCrossing" />;
+        return <SiteOverview gameId="siteOverview" />;
     }
   };
 

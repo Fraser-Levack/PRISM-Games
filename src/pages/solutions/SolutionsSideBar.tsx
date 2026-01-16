@@ -7,6 +7,16 @@ interface SolutionsSideBarProps {
 
 const games = [
   {
+    id: 'siteOverview',
+    name: 'Site Overview',
+    sections: [
+      { id: 'overview', name: 'About This Site' },
+      { id: 'solutions-explained', name: 'Understanding Solutions' },
+      { id: 'prism-integration', name: 'PRISM Integration' },
+      { id: 'getting-started', name: 'Getting Started' },
+    ],
+  },
+  {
     id: 'chickenCrossing',
     name: 'Chicken Crossing',
     sections: [

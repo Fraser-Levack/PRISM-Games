@@ -19,12 +19,13 @@ const GeometricBackground = () => {
     const isMobile = width < 768;
     const pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
     
-    // Use setSize with updateStyle = false and explicitly set canvas style to pixel dimensions
+    // Use setSize with updateStyle = false
     rendererRef.current.setSize(width, height, false);
     rendererRef.current.setPixelRatio(pixelRatio);
     const canvas = rendererRef.current.domElement as HTMLCanvasElement;
-    canvas.style.width = width + 'px';
-    canvas.style.height = height + 'px';
+    // Use 100% dimensions to stay within viewport on mobile
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
     materialRef.current.uniforms.u_resolution.value.set(width, height);
   }, []);
 
@@ -56,15 +57,18 @@ const GeometricBackground = () => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
     renderer.setClearColor(0x000000, 0);
     
-    // Style the canvas element directly (use pixel dimensions to avoid CSS scaling issues)
+    // Style the canvas element directly with proper mobile constraints
     const canvas = renderer.domElement;
     canvas.style.position = 'fixed';
     canvas.style.top = '0';
     canvas.style.left = '0';
-    canvas.style.width = window.innerWidth + 'px';
-    canvas.style.height = window.innerHeight + 'px';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.maxWidth = '100vw';
+    canvas.style.maxHeight = '100vh';
     canvas.style.zIndex = '-1';
     canvas.style.pointerEvents = 'none';
+    canvas.style.overflow = 'hidden';
     
     mountRef.current.appendChild(canvas);
 
@@ -325,12 +329,13 @@ const GeometricBackground = () => {
         position: 'fixed',
         top: 0,
         left: 0,
-        right: 0,
-        bottom: 0,
-        width: '100%',
-        height: '100%',
+        width: '100vw',
+        height: '100vh',
+        maxWidth: '100vw',
+        maxHeight: '100vh',
         zIndex: -10,
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        overflow: 'hidden'
       }}
     />
   );

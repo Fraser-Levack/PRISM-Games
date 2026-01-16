@@ -18,6 +18,10 @@ const Home = () => {
       <div className='game-cards-title'>
         <h2>Available Games</h2>
       </div>
+      <div className="desktop-only-message">
+        <p>🖥️ Games are available on desktop devices only</p>
+        <p>Please visit this site on a laptop or PC to play</p>
+      </div>
       <div className="game-cards">
         <GameCard title="Chicken Crossing" imageSrc="/Icons/Chicken_Icon.png" link="/games/chicken_crossing">
           <p>Classic puzzle, move all the farmers items across the river. | difficulty: <span style={{color:"green"}}>Easy</span></p>

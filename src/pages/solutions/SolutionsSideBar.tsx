@@ -44,7 +44,7 @@ export default function SolutionsSideBar({
   onGameSelect,
   onSectionSelect,
 }: SolutionsSideBarProps) {
-  const currentGame = games.find((g) => g.id === activeGame);
+  // const currentGame = games.find((g) => g.id === activeGame);
 
   return (
     <aside className="solutions-sidebar">

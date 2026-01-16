@@ -47,15 +47,17 @@
   gap: 14px;
   align-items: center;
   justify-content: center;
+  
 }
 
 .nav-link {
   display: inline-block;
   color: #c8c1f0;
   text-decoration: none;
-  
+  border-radius: 0.5rem;
   letter-spacing: 0.4px;
   transition: all 0.3s ease;
+  padding: 0.2rem 0.8rem;
   margin: 0.5rem;
 }
 

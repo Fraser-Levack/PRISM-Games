@@ -23,6 +23,10 @@ export default function NavBar() {
           {/* <NavLink to="/games" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
             Games
           </NavLink> */}
+          <NavLink to="/solutions" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+            Solutions
+          </NavLink>
+
           <NavLink to="/credits" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
             Credits
           </NavLink>

@@ -8,7 +8,7 @@ interface SolutionsSideBarProps {
 const games = [
   {
     id: 'siteOverview',
-    name: 'Site Overview',
+    name: 'PRISM Games Overview',
     sections: [
       { id: 'overview', name: 'About This Site' },
       { id: 'solutions-explained', name: 'Understanding Solutions' },

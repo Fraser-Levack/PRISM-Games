@@ -1,9 +1,18 @@
 import { NavLink} from 'react-router-dom'
+import { useState } from 'react'
 import './NavBar.css'
 
 export default function NavBar() {
-
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const GITHUB_URL = 'https://github.com/Fraser-Levack/PRISM-Games'
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
+
+  const closeMenu = () => {
+    setIsMenuOpen(false)
+  }
 
   return (
     <nav className="navbar">
@@ -19,21 +28,37 @@ export default function NavBar() {
           
         </div>
         </NavLink>
-        <div className="nav-links">
-          {/* <NavLink to="/games" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-            Games
-          </NavLink> */}
-          <NavLink to="/solutions" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+        
+        <button 
+          className="hamburger" 
+          onClick={toggleMenu}
+          aria-label="Toggle menu"
+          aria-expanded={isMenuOpen}
+        >
+          <span className={`hamburger-line ${isMenuOpen ? 'open' : ''}`}></span>
+          <span className={`hamburger-line ${isMenuOpen ? 'open' : ''}`}></span>
+          <span className={`hamburger-line ${isMenuOpen ? 'open' : ''}`}></span>
+        </button>
+
+        <div className={`nav-links ${isMenuOpen ? 'mobile-open' : ''}`}>
+          <NavLink 
+            to="/solutions" 
+            className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+            onClick={closeMenu}
+          >
             Solutions
           </NavLink>
 
-          <NavLink to="/credits" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+          <NavLink 
+            to="/credits" 
+            className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}
+            onClick={closeMenu}
+          >
             Credits
           </NavLink>
         
         <span className="separator" aria-hidden="true">|</span>
 
-        {/* pipe and GitHub link */}
         <div className="nav-external" aria-hidden={false}>
           <a
             className="github-link"

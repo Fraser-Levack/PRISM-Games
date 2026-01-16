@@ -76,3 +76,138 @@
   background: rgba(255,255,255,0.08);
   color: #fff;
 }
+
+/* Hamburger menu button (hidden on desktop) */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 2001;
+}
+
+.hamburger-line {
+  width: 28px;
+  height: 3px;
+  background-color: #c8c1f0;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-line.open:nth-child(1) {
+  transform: rotate(45deg) translate(8px, 8px);
+}
+
+.hamburger-line.open:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-line.open:nth-child(3) {
+  transform: rotate(-45deg) translate(8px, -8px);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .navbar {
+    height: 4rem;
+  }
+
+  .navbar-inner {
+    width: 95%;
+    padding: 0 10px;
+  }
+
+  .brand {
+    font-size: 1.1rem;
+    gap: 8px;
+  }
+
+  .logo-image {
+    width: 30px;
+    height: 30px;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .nav-links {
+    position: fixed;
+    top: 4rem;
+    right: -100%;
+    width: 70%;
+    max-width: 300px;
+    height: calc(100vh - 4rem);
+    background: rgba(40, 20, 50, 0.98);
+    backdrop-filter: blur(10px);
+    flex-direction: column;
+    gap: 0;
+    padding: 2rem 0;
+    box-shadow: -4px 0 12px rgba(0,0,0,0.3);
+    transition: right 0.3s ease;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .nav-links.mobile-open {
+    right: 0;
+  }
+
+  .nav-link {
+    width: 100%;
+    padding: 1rem 2rem;
+    margin: 0;
+    border-radius: 0;
+    text-align: left;
+    border-bottom: 1px solid rgba(200, 193, 240, 0.1);
+  }
+
+  .nav-link:hover {
+    background: rgba(255,255,255,0.05);
+  }
+
+  .nav-link.active {
+    background: rgba(200, 162, 224, 0.15);
+    border-left: 4px solid var(--color-primary);
+  }
+
+  .separator {
+    display: none;
+  }
+
+  .nav-external {
+    width: 100%;
+    padding: 1rem 2rem;
+    border-top: 1px solid rgba(200, 193, 240, 0.2);
+    margin-top: auto;
+  }
+
+  .github-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .github-icon {
+    margin-top: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand {
+    font-size: 1rem;
+    gap: 6px;
+  }
+
+  .logo-image {
+    width: 25px;
+    height: 25px;
+  }
+
+  .nav-links {
+    width: 80%;
+  }
+}

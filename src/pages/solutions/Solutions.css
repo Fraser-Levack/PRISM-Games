@@ -143,24 +143,53 @@
 @media (max-width: 1024px) {
   .solutions-container {
     flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - 80px);
   }
 
   .solutions-sidebar {
     width: 100%;
     height: auto;
-    max-height: 200px;
+    max-height: none;
     border-right: none;
     border-bottom: 2px solid var(--color-sidebar-border);
+    position: sticky;
+    top: 80px;
+    z-index: 100;
+  }
+
+  .sidebar-nav {
+    max-height: 60vh;
+    overflow-y: auto;
   }
 
   .solutions-content {
     padding: 24px;
+    height: auto;
   }
 }
 
 @media (max-width: 768px) {
+  .solutions-container {
+    height: auto;
+  }
+
   .solutions-sidebar {
-    max-height: 150px;
+    position: relative;
+    top: 0;
+  }
+
+  .sidebar-header {
+    padding: 16px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 18px;
+  }
+
+  .sidebar-nav {
+    padding: 8px 0;
+    max-height: 50vh;
   }
 
   .solutions-content {
@@ -168,12 +197,53 @@
   }
 
   .game-button {
-    padding: 10px 16px;
+    padding: 12px 16px;
     font-size: 14px;
   }
 
   .section-button {
-    padding: 8px 16px 8px 32px;
+    padding: 10px 16px 10px 32px;
     font-size: 12px;
+  }
+
+  .game-button:hover,
+  .section-button:hover {
+    padding-left: 16px;
+  }
+
+  .section-button:hover {
+    padding-left: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .solutions-sidebar {
+    width: 100%;
+  }
+
+  .sidebar-header {
+    padding: 12px;
+  }
+
+  .sidebar-header h2 {
+    font-size: 16px;
+  }
+
+  .sidebar-nav {
+    max-height: 40vh;
+  }
+
+  .solutions-content {
+    padding: 12px;
+  }
+
+  .game-button {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .section-button {
+    padding: 8px 12px 8px 28px;
+    font-size: 11px;
   }
 }

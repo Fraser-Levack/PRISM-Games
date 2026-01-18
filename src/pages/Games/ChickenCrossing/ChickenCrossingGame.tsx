@@ -28,16 +28,16 @@ const Chicken_Crossing = () => {
 
   // Declare the model map for this game here so it's easy to change per-game
   const modelMap = {
-    chicken: '/Models/chicken.gltf',
-    fox: '/Models/fox.gltf',
-    grain: '/Models/grain.gltf',
-    farmer: '/Models/farmer.gltf', // <-- added farmer model for player
-    farmer_hands_up: '/Models/farmer_hands_up.gltf', // <-- added carrying model
-    tree: '/Models/tree.gltf',
-    rocks: '/Models/rocks.gltf', 
-    bush: '/Models/bush.gltf',
-    fence: '/Models/fence.gltf',
-    barn: '/Models/barn.gltf',
+    chicken: '/Models/ChickenCrossing/chicken.gltf',
+    fox: '/Models/ChickenCrossing/fox.gltf',
+    grain: '/Models/ChickenCrossing/grain.gltf',
+    farmer: '/Models/ChickenCrossing/farmer.gltf', // <-- added farmer model for player
+    farmer_hands_up: '/Models/ChickenCrossing/farmer_hands_up.gltf', // <-- added carrying model
+    tree: '/Models/ChickenCrossing/tree.gltf',
+    rocks: '/Models/ChickenCrossing/rocks.gltf', 
+    bush: '/Models/ChickenCrossing/bush.gltf',
+    fence: '/Models/ChickenCrossing/fence.gltf',
+    barn: '/Models/ChickenCrossing/barn.gltf',
   } as const;
 
   // Track last player direction so we can rotate the farmer model to face movement

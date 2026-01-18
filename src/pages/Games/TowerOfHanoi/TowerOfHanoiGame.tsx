@@ -40,7 +40,7 @@ const TowerOfHanoiGame = () => {
   const clickableTypes = useMemo(() => ['tower', 'disc', 'peg'], []);
 
   const modelMap = {
-    tower: '/Models/tower.gltf',
+    tower: '/Models/TowerOfHanoi/tower.gltf',
   } as const;
 
   // Preload models

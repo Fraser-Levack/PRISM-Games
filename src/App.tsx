@@ -7,6 +7,7 @@ import GeometricBackground from './components/GeometricBackground'
 import './App.css'
 import Chicken_Crossing from './pages/Games/ChickenCrossing/ChickenCrossingGame'
 import TowerOfHanoiGame from './pages/Games/TowerOfHanoi/TowerOfHanoiGame'
+import ShutTheBoxGame from './pages/Games/ShutTheBox/ShutTheBoxGame'
 import NavBar from './components/NavBar'
 import Solutions from './pages/solutions/Solutions'
 
@@ -37,6 +38,7 @@ function App() {
           <Route path="/games" element={<Games />} />
           <Route path="/games/chicken_crossing" element={<Chicken_Crossing />} />
           <Route path="/games/tower_of_hanoi" element={<TowerOfHanoiGame />} />
+          <Route path="/games/shut_the_box" element={<ShutTheBoxGame />} />
           <Route path="/solutions" element={<Solutions />} />
         </Routes>
       </div>

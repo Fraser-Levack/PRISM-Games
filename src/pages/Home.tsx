@@ -29,8 +29,8 @@ const Home = () => {
         <GameCard title="Tower of Hanoi" imageSrc="/Icons/Chicken_Icon.png" link="/games/tower_of_hanoi">
           <p>Move all the disks from the source peg to the target peg. | difficulty: <span style={{color:"orange"}}>Medium</span></p>
         </GameCard>
-        <GameCard title="Planet Rabbit" imageSrc="/Icons/Chicken_Icon.png" link="/">
-          <p>Simulate rabbit colony behavior. Find the best rabbit strategy. | difficulty: <span style={{color:"red"}}>Hard</span></p>
+        <GameCard title="Shut the Box" imageSrc="/Icons/Chicken_Icon.png" link="/games/shut_the_box">
+          <p>Roll the dice and shut the numbered tiles in the most optimal order. | difficulty: <span style={{color:"red"}}>Hard</span></p>
         </GameCard>
       </div>
     </div>

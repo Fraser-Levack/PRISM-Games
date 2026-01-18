@@ -5,6 +5,8 @@ import { CubeGrid } from '../../../components/isometricGrid/CubeGrid';
 import { ObjectGrid } from '../../../components/isometricGrid/ObjectGrid';
 import { DecorationGrid } from '../../../components/isometricGrid/DecorationGrid';
 import modelManager from '../../../components/ModelManager';
+import Tutorial from './Tutorial';
+import GameStatusPopup from './GameStatusPopup';
 
 type GameStatus = 'paused' | 'playing' | 'won';
 
@@ -267,9 +269,30 @@ const TowerOfHanoiGame = () => {
         <div style={{
           position: 'absolute', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)'
         }}>
-          <div style={{ background: 'white', padding: 20, borderRadius: 8, maxWidth: 520 }}>
-              <button onClick={startGame}>Start</button>
-          </div>
+          <Tutorial onStart={startGame} />
+        </div>
+      )}
+
+      {(state.gameStatus === 'won' || state.gameStatus === 'paused') && !showTutorial && (
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)'
+        }}>
+          <GameStatusPopup
+            gameStatus={state.gameStatus}
+            onClose={() => setState(prev => ({ ...prev, gameStatus: 'playing' }))}
+            onRestart={() => {
+              setState({
+                pegs: [
+                  Array.from({ length: state.diskCount }, (_, i) => state.diskCount - i),
+                  [],
+                  []
+                ],
+                diskCount: state.diskCount,
+                gameStatus: 'paused'
+              });
+              setShowTutorial(true);
+            }}
+          />
         </div>
       )}
 

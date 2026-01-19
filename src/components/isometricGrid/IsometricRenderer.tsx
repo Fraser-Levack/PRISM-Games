@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-// Postprocessing imports (three examples)
+// Postprocessing imports
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
@@ -21,15 +21,32 @@ interface IsometricRendererProps {
     gameStatus?: 'playing' | 'won' | 'lost' | 'paused';
     clickableTypes?: string[]; 
     
+    // NEW: Allow adjusting where the camera looks vertically
+    cameraLookAtY?: number;
+
     // Callbacks
     onObjectClick?: (id: string, data?: any) => void;
     onObjectHover?: (id: string | null) => void;
     onDragStart?: (id: string, data?: any) => boolean;
-    // Updated signature to include dropTargetId
     onDragEnd?: (draggedId: string, draggedData: any, dropPosition: THREE.Vector3, dropTargetId: string | null) => void;
 }
 
-const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger, modelsLoaded, playerDirection, playerCarry, gameStatus, onObjectClick, onObjectHover, onDragStart, onDragEnd, clickableTypes }: IsometricRendererProps) => {
+const IsometricRenderer = ({ 
+    cubeGrid, 
+    objectGrid, 
+    decorationGrid, 
+    updateTrigger, 
+    modelsLoaded, 
+    playerDirection, 
+    playerCarry, 
+    gameStatus, 
+    onObjectClick, 
+    onObjectHover, 
+    onDragStart, 
+    onDragEnd, 
+    clickableTypes,
+    cameraLookAtY = 3 // Default to 3 to keep previous games looking the same
+}: IsometricRendererProps) => {
     const mountRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -52,8 +69,10 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
             1000
         );
 
+        // Position camera
         camera.position.set(8, 11, 8); 
-        camera.lookAt(0, 3, 0);
+        // USE NEW PROP: Look at the specified Y height
+        camera.lookAt(0, cameraLookAtY, 0);
 
         const initialRadius = Math.sqrt(camera.position.x * camera.position.x + camera.position.z * camera.position.z);
         let radius = initialRadius;
@@ -63,6 +82,10 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
+        
+        // FIX SCROLLBAR: Canvas defaults to inline, causing vertical overflow
+        renderer.domElement.style.display = 'block'; 
+        
         mountRef.current.appendChild(renderer.domElement);
 
         const inputHandler = createIsometricInputHandler(camera, scene, renderer.domElement);
@@ -135,7 +158,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
         directionalLight.target = lightTarget;
         scene.add(directionalLight);
 
-        // Grid
+        // Grid Helper
         const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
         scene.add(gridHelper);
 
@@ -300,7 +323,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
                 camera.position.x = Math.cos(theta) * radius;
                 camera.position.z = Math.sin(theta) * radius;
                 camera.position.y = baseCameraY + Math.sin(theta * 0.5) * 0.55;
-                camera.lookAt(0, 3, 0);
+                camera.lookAt(0, cameraLookAtY, 0); // USE NEW PROP HERE
 
                 const lightTheta = theta + 0.3;
                 const lightRadius = radius * 0.85;
@@ -345,7 +368,7 @@ const IsometricRenderer = ({ cubeGrid, objectGrid, decorationGrid, updateTrigger
             renderer.dispose();
              if (mountRef.current) mountRef.current.innerHTML = '';
          };
-    }, [cubeGrid, objectGrid, updateTrigger, modelsLoaded, playerDirection, decorationGrid, playerCarry, gameStatus, onObjectClick, onObjectHover, onDragStart, onDragEnd, clickableTypes]);
+    }, [cubeGrid, objectGrid, updateTrigger, modelsLoaded, playerDirection, decorationGrid, playerCarry, gameStatus, onObjectClick, onObjectHover, onDragStart, onDragEnd, clickableTypes, cameraLookAtY]);
 
     return (
         <div style={{ width: '100%', height: '100%', position: 'relative' }}>

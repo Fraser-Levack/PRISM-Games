@@ -175,25 +175,15 @@ const ShutTheBoxGame = () => {
 
     // --- 3D Visual Helpers ---
 
-    // FIXED: Swapped logic for 3 and 4
     const getDiceRotation = (val: number) => {
         const base = { x: 0, y: 0, z: 0 };
         switch (val) {
             case 1: return { x: 0, y: 0, z: 0 };           // Top
             case 6: return { x: Math.PI, y: 0, z: 0 };     // Bottom
-            
-            // East (2) -> Roll Left (+Z)
-            case 2: return { x: 0, y: 0, z: Math.PI / 2 }; 
-
-            // West (5) -> Roll Right (-Z)
-            case 5: return { x: 0, y: 0, z: -Math.PI / 2 }; 
-
-            // North (3) -> Was -PI/2, Swapped to PI/2
-            case 3: return { x: Math.PI / 2, y: 0, z: 0 }; 
-
-            // South (4) -> Was PI/2, Swapped to -PI/2
-            case 4: return { x: -Math.PI / 2, y: 0, z: 0 }; 
-
+            case 2: return { x: 0, y: 0, z: Math.PI / 2 }; // East (2) -> Roll Left (+Z)
+            case 5: return { x: 0, y: 0, z: -Math.PI / 2 }; // West (5) -> Roll Right (-Z)
+            case 3: return { x: Math.PI / 2, y: 0, z: 0 }; // North (3) -> Roll Forward (+X relative to base)
+            case 4: return { x: -Math.PI / 2, y: 0, z: 0 }; // South (4) -> Roll Back (-X relative to base)
             default: return base;
         }
     };
@@ -460,6 +450,7 @@ const ShutTheBoxGame = () => {
                     clickableTypes={['pin', 'dice']} 
                     onObjectClick={handleObjectClick}
                     onObjectHover={handleHover}
+                    cameraLookAtY={0} // NEW: Offsets the camera to look at the ground (0), lifting the scene up
                 />
             </div>
         </div>

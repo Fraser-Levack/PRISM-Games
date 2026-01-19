@@ -26,10 +26,10 @@ const Home = () => {
         <GameCard title="Chicken Crossing" imageSrc="/Icons/Chicken_Icon.png" link="/games/chicken_crossing">
           <p>Classic puzzle, move all the farmers items across the river. | difficulty: <span style={{color:"green"}}>Easy</span></p>
         </GameCard>
-        <GameCard title="Tower of Hanoi" imageSrc="/Icons/Chicken_Icon.png" link="/games/tower_of_hanoi">
-          <p>Move all the disks from the source peg to the target peg. | difficulty: <span style={{color:"orange"}}>Medium</span></p>
+        <GameCard title="Tower of Hanoi" imageSrc="/Icons/Tower_Icon.png" link="/games/tower_of_hanoi">
+          <p>Move all the tower disks from the source peg to the target peg. | difficulty: <span style={{color:"orange"}}>Medium</span></p>
         </GameCard>
-        <GameCard title="Shut the Box" imageSrc="/Icons/Chicken_Icon.png" link="/games/shut_the_box">
+        <GameCard title="Shut the Box" imageSrc="/Icons/Dice_Icon.png" link="/games/shut_the_box">
           <p>Roll the dice and shut the numbered tiles in the most optimal order. | difficulty: <span style={{color:"red"}}>Hard</span></p>
         </GameCard>
       </div>

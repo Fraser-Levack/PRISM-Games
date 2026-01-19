@@ -17,6 +17,7 @@ const ShutTheBoxGame = () => {
     const [dice, setDice] = useState<number[]>([1, 1]); 
     const [phase, setPhase] = useState<GamePhase>('ROLL');
     const [gameStatus, setGameStatus] = useState<'playing' | 'won' | 'lost' | 'paused'>('paused');
+    const [lossReason, setLossReason] = useState<string | null>(null);
     const [message, setMessage] = useState<string>("Click the Dice to start!");
     
     // Animation State
@@ -127,6 +128,7 @@ const ShutTheBoxGame = () => {
 
                 if (!canMakeSum(total, availablePins)) {
                     setGameStatus('lost');
+                    setLossReason('no_moves');
                     setPhase('GAME_OVER');
                     setMessage(`Rolled ${total}. No moves possible!`);
                 } else {
@@ -335,6 +337,7 @@ const ShutTheBoxGame = () => {
         setDisplayDice([1, 1]);
         setPhase('ROLL');
         setGameStatus('playing');
+        setLossReason(null);
         setMessage("Roll the dice to begin.");
         setShowTutorial(false);
     };
@@ -357,7 +360,9 @@ const ShutTheBoxGame = () => {
             {!showTutorial && (gameStatus === 'won' || gameStatus === 'lost') && (
                 <GameStatusPopup
                     gameStatus={gameStatus}
-                    onClose={() => {}} 
+                    lossReason={lossReason}
+                    dice={gameStatus === 'lost' ? dice : undefined}
+                    onClose={() => setGameStatus('paused')} 
                     onRestart={handleRestart}
                 />
             )}

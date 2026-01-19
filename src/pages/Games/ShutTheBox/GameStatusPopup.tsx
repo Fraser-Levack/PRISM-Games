@@ -4,13 +4,15 @@ import '../../../styles/GamePopUp.css'
 type Props = {
   gameStatus: 'won' | 'lost' | 'paused';
   lossReason?: string | null;
+  dice?: number[];
   onClose: () => void;
   onRestart: () => void;
 }
 
 const GameStatusPopup = ({ 
   gameStatus, 
-  lossReason, 
+  lossReason,
+  dice, 
   onClose, 
   onRestart 
 }: Props) => {
@@ -46,10 +48,17 @@ const GameStatusPopup = ({
   };
 
   const getLossMessage = () => {
-    if (!lossReason) return 'You lost.';
+    const diceDisplay = dice ? `You rolled ${dice[0]} + ${dice[1]} = ${dice[0] + dice[1]}` : '';
+    
+    if (!lossReason) {
+      return diceDisplay ? `${diceDisplay}. No valid moves possible with the remaining pins.` : 'No valid moves possible with the remaining pins.';
+    }
+    
     switch (lossReason) {
+      case 'no_moves':
+        return diceDisplay ? `${diceDisplay}. No combination of open pins can match your roll!` : 'No combination of open pins can match your roll!';
       case 'invalid_move':
-        return '';
+        return 'Invalid selection: the sum doesn\'t match the dice total.';
       default:
         return lossReason;
     }

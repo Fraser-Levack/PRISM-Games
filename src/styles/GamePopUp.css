@@ -31,3 +31,20 @@
     animation: fadeInScale 0.3s ease-out;
     min-width: 300px;
 }
+
+.tutorial-popup-card-stb{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    z-index: 200;
+    backdrop-filter: blur(6px);
+    background: rgba(98, 47, 113, 0.80);
+    box-shadow: 0 0 12px #00000060;
+    color: #c8c1f0;
+    padding: 30px 40px;
+    border-radius: 15px;
+    text-align: left;
+    animation: fadeInScale 0.3s ease-out;
+    min-width: 300px;
+}

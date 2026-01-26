@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import IsometricRenderer from '../../../components/isometricGrid/IsometricRenderer';
 import { CubeGrid } from '../../../components/isometricGrid/CubeGrid';
 import { ObjectGrid } from '../../../components/isometricGrid/ObjectGrid';
@@ -40,7 +40,6 @@ const ShutTheBoxGame = () => {
 
     const [showTutorial, setShowTutorial] = useState(true);
     const [updateTrigger, setUpdateTrigger] = useState(0);
-    const [hoveredId, setHoveredId] = useState<string | null>(null);
     const [modelsLoaded, setModelsLoaded] = useState(false);
 
     // Grids
@@ -392,7 +391,6 @@ const ShutTheBoxGame = () => {
         setUpdateTrigger(prev => prev + 1);
     }, [pins, dice, displayDice, isRolling, diceRotationOffset, objectGrid, decorationGrid]);
 
-
     // --- JSX Render ---
 
     return (
@@ -521,7 +519,6 @@ const ShutTheBoxGame = () => {
                     gameStatus={gameStatus}
                     clickableTypes={turn === 'PLAYER' ? ['pin', 'dice'] : []} 
                     onObjectClick={handleObjectClick}
-                    onObjectHover={setHoveredId}
                     cameraLookAtY={0} 
                 />
             </div>

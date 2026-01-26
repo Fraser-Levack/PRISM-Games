@@ -7,6 +7,7 @@ type Props = {
   dice?: number[];
   onClose: () => void;
   onRestart: () => void;
+  customMessage?: string; // <--- Added new prop
 }
 
 const GameStatusPopup = ({ 
@@ -14,7 +15,8 @@ const GameStatusPopup = ({
   lossReason,
   dice, 
   onClose, 
-  onRestart 
+  onRestart,
+  customMessage // <--- Destructure new prop
 }: Props) => {
   const navigate = useNavigate();
 
@@ -76,8 +78,8 @@ const GameStatusPopup = ({
         {statusDisplay.message}
       </div>
 
-      {/* Show loss reason when gameStatus is 'lost' */}
-      {gameStatus === 'lost' && (
+      {/* Show message if game is lost OR if we have a custom message (like VS AI Scores) */}
+      {(gameStatus === 'lost' || customMessage) && (
         <div style={{
           fontSize: '16px',
           color: '#fff',
@@ -85,7 +87,8 @@ const GameStatusPopup = ({
           marginBottom: '12px',
           textAlign: 'center'
         }}>
-          {getLossMessage()}
+          {/* Prioritize customMessage, otherwise fall back to standard loss reason logic */}
+          {customMessage ? customMessage : getLossMessage()}
         </div>
       )}
       

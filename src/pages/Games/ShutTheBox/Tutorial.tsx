@@ -1,11 +1,49 @@
+import { useState } from 'react';
 import '../../../styles/GamePopUp.css';
 
-type Props = {
-  onStart: () => void;
-  onSkip?: () => void;
-}
+type GameMode = 'SOLO' | 'VS_AI';
 
-const Tutorial = ({ onStart}: Props) => {
+type Props = {
+  onStart: (mode: GameMode) => void;
+};
+
+const Tutorial = ({ onStart }: Props) => {
+  const [step, setStep] = useState<'INSTRUCTIONS' | 'MODE_SELECT'>('INSTRUCTIONS');
+
+  if (step === 'MODE_SELECT') {
+    return (
+      <div className="tutorial-popup-card-stb" style={{ maxWidth: 500, textAlign: 'center' }}>
+        <h2 style={{ color: '#3b82f6' }}>Select Difficulty</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 15, marginTop: 20 }}>
+          
+          <button
+            onClick={() => onStart('SOLO')}
+            style={{
+              background: '#4ade80', color: '#000', border: 'none', padding: '15px',
+              borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1em', cursor: 'pointer'
+            }}
+          >
+            👤 Solo Play
+            <div style={{fontSize: '0.8em', fontWeight: 'normal', opacity: 0.8}}>Try to shut the box yourself</div>
+          </button>
+
+          <button
+            onClick={() => onStart('VS_AI')}
+            style={{
+              background: '#f472b6', color: '#000', border: 'none', padding: '15px',
+              borderRadius: '8px', fontWeight: 'bold', fontSize: '1.1em', cursor: 'pointer'
+            }}
+          >
+            🤖 Vs AI (PRISM Strategy)
+            <div style={{fontSize: '0.8em', fontWeight: 'normal', opacity: 0.8}}>Challenge the optimal strategy</div>
+          </button>
+
+        </div>
+      </div>
+    );
+  }
+
+  // Step 1: Instructions (Existing Code)
   return (
     <div className="tutorial-popup-card-stb" style={{ maxWidth: 640 }}>
       <h2 style={{ marginTop: 0, color: '#3b82f6' }}>Welcome to Shut the Box</h2>
@@ -35,22 +73,15 @@ const Tutorial = ({ onStart}: Props) => {
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 8 }}>
+      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 20 }}>
         <button
-          onClick={onStart}
+          onClick={() => setStep('MODE_SELECT')}
           style={{
-            background: '#4ade80',
-            color: '#000',
-            border: 'none',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            fontWeight: 'bold',
-            cursor: 'pointer'
+            background: '#3b82f6', color: 'white', border: 'none',
+            padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer'
           }}
-          onMouseOver={(e) => (e.currentTarget.style.background = '#22c55e')}
-          onMouseOut={(e) => (e.currentTarget.style.background = '#4ade80')}
         >
-          ▶ Start Game
+          Next: Select Mode
         </button>
       </div>
     </div>

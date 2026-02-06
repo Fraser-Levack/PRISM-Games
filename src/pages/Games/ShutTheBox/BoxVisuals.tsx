@@ -44,7 +44,7 @@ const BoxVisuals = ({ playerPins, aiPins, displayDice, isRolling, turn, gameMode
         objectGrid.clear();
         decorationGrid.clear();
 
-        const renderPinsAndDice = (pins: PinState[], offsetY: number, isCurrentTurn: boolean, isAI: boolean) => {
+        const renderPinsAndDice = (pins: PinState[], offsetY: number, isCurrentTurn: boolean) => {
             const xStart = -((9 - 1) * PIN_SPACING) / 2;
             const pinYPos = offsetY - 2;
 
@@ -74,9 +74,9 @@ const BoxVisuals = ({ playerPins, aiPins, displayDice, isRolling, turn, gameMode
             return { x: r[0], y: r[1], z: r[2] };
         };
 
-        renderPinsAndDice(playerPins, PLAYER_Y_OFFSET, turn === 'PLAYER', false);
+        renderPinsAndDice(playerPins, PLAYER_Y_OFFSET, turn === 'PLAYER');
         if (!isSolo) {
-            renderPinsAndDice(aiPins, AI_Y_OFFSET, turn === 'AI', true);
+            renderPinsAndDice(aiPins, AI_Y_OFFSET, turn === 'AI');
         }
     }, [playerPins, aiPins, displayDice, isRolling, turn, isSolo, PLAYER_Y_OFFSET, diceRotationOffset]);
 

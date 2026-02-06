@@ -62,9 +62,8 @@ const IsometricRenderer = ({
         camera.lookAt(0, cameraLookAtY, 0);
 
         const initialRadius = Math.sqrt(camera.position.x * camera.position.x + camera.position.z * camera.position.z);
-        let radius = initialRadius;
         let theta = Math.atan2(camera.position.z, camera.position.x);
-        const baseCameraY = camera.position.y;
+        // const baseCameraY = camera.position.y;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -123,7 +122,7 @@ const IsometricRenderer = ({
 
         const clonedObjects: THREE.Object3D[] = [];
         objectGrid.getObjects().forEach((object: Object) => {
-            const modelNames = ['chicken', 'fox', 'grain', 'farmer', 'farmer_hands_up', 'tower', 'pin', 'dice'];
+            // const modelNames = ['chicken', 'fox', 'grain', 'farmer', 'farmer_hands_up', 'tower', 'pin', 'dice'];
             // Check if this specific object type (or its prefix) should be clickable
             const isClickable = clickableTypes?.some(t => object.type === t || object.type.startsWith(t + '_'));
 

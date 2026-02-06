@@ -10,12 +10,10 @@ import Tutorial from './Tutorial';
 import GameStatusPopup from './GameStatusPopup';
 import BoxVisuals from './BoxVisuals';
 import { useShutTheBox } from './useShutTheBox';
-import { PIN_SPACING } from './GameTypes';
 
 const ShutTheBoxGame = () => {
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [showTutorial, setShowTutorial] = useState(true);
-    const [updateTrigger, setUpdateTrigger] = useState(0);
 
     // 1. Hook into the Game Engine
     const game = useShutTheBox();
@@ -134,7 +132,6 @@ const ShutTheBoxGame = () => {
 
             <IsometricRenderer
                 {...grids}
-                updateTrigger={updateTrigger}
                 modelsLoaded={modelsLoaded}
                 gameStatus={game.gameStatus}
                 clickableTypes={game.turn === 'PLAYER' ? ['pin', 'dice'] : []} 

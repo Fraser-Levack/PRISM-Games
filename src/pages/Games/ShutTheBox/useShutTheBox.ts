@@ -6,8 +6,10 @@ export const useShutTheBox = () => {
     const strategyEngine = useMemo(() => new ShutTheBoxStrategy(), []);
     const [strategyLoaded, setStrategyLoaded] = useState(false);
     
-    // State
-    const [pins, setPins] = useState<PinState[]>(Array(9).fill('OPEN'));
+    // Split State for Hot Potato
+    const [playerPins, setPlayerPins] = useState<PinState[]>(Array(9).fill('OPEN'));
+    const [aiPins, setAiPins] = useState<PinState[]>(Array(9).fill('OPEN'));
+    
     const [dice, setDice] = useState<number[]>([1, 1]);
     const [displayDice, setDisplayDice] = useState<number[]>([1, 1]);
     const [phase, setPhase] = useState<GamePhase>('ROLL');
@@ -15,62 +17,54 @@ export const useShutTheBox = () => {
     const [turn, setTurn] = useState<Turn>('PLAYER');
     const [gameMode, setGameMode] = useState<GameMode>('SOLO');
     const [message, setMessage] = useState("Roll the dice to begin.");
-    const [playerScore, setPlayerScore] = useState<number | null>(null);
-    const [aiScore, setAiScore] = useState<number | null>(null);
     const [isRolling, setIsRolling] = useState(false);
     const [lossReason, setLossReason] = useState<string | null>(null);
     const [diceRotationOffset, setDiceRotationOffset] = useState({ x: 0, z: 0 });
 
+    // Derived State
+    const currentPins = turn === 'PLAYER' ? playerPins : aiPins;
     const diceSum = dice[0] + dice[1];
-    const selectedSum = pins.reduce((acc, s, i) => s === 'SELECTED' ? acc + (i + 1) : acc, 0);
+    const selectedSum = currentPins.reduce((acc, s, i) => s === 'SELECTED' ? acc + (i + 1) : acc, 0);
+
+    const calculateScore = (pins: PinState[]) => 
+        pins.reduce((acc, s, i) => s !== 'SHUT' ? acc + (i + 1) : acc, 0);
 
     const handleRestart = (mode: GameMode = 'SOLO') => {
-        setPins(Array(9).fill('OPEN'));
+        setPlayerPins(Array(9).fill('OPEN'));
+        setAiPins(Array(9).fill('OPEN'));
         setDice([1, 1]);
         setPhase('ROLL');
         setGameStatus('playing');
         setTurn('PLAYER');
         setGameMode(mode);
-        setPlayerScore(null);
-        setAiScore(null);
         setLossReason(null);
-        setMessage("Roll the dice to begin.");
+        setMessage("Player starts! Roll the dice.");
     };
 
-    const handleNextRound = () => {
-        setTurn('AI');
-        setPins(Array(9).fill('OPEN'));
-        setPhase('ROLL');
-        setGameStatus('playing');
-        setMessage("AI is starting its round...");
+    const checkCanMove = (target: number, pins: PinState[]): boolean => {
+        const avail = pins.map((s, i) => s === 'OPEN' ? i + 1 : 0).filter(n => n > 0);
+        const solve = (t: number, a: number[]): boolean => {
+            if (t === 0) return true;
+            if (t < 0 || a.length === 0) return false;
+            return solve(t - a[0], a.slice(1)) || solve(t, a.slice(1));
+        };
+        return solve(target, avail);
     };
-
-    const handleRoundOver = useCallback((finalPins: PinState[], result: 'won' | 'lost') => {
-        const score = finalPins.reduce((acc, s, i) => s !== 'SHUT' ? acc + (i + 1) : acc, 0);
-        setPhase('GAME_OVER');
-        
-        if (gameMode === 'SOLO') {
-            setGameStatus(result);
-        } else if (turn === 'PLAYER') {
-            setPlayerScore(score);
-            setGameStatus('paused');
-        } else {
-            setAiScore(score);
-            setGameStatus(playerScore !== null && score < playerScore ? 'won' : 'lost');
-        }
-    }, [gameMode, turn, playerScore]);
 
     const rollDice = useCallback(() => {
         if (gameStatus !== 'playing' || isRolling) return;
         setIsRolling(true);
-        setMessage(turn === 'AI' ? "AI is Rolling..." : "Rolling...");
+        setMessage(turn === 'AI' ? "AI is Rolling..." : "You are Rolling...");
 
         const d1 = Math.floor(Math.random() * 6) + 1;
         const d2 = Math.floor(Math.random() * 6) + 1;
         
         let frame = 0;
+        const TOTAL_FRAMES = 10; // 30 FPS for dice animation
+
+
         const animate = () => {
-            if (frame++ < 30) {
+            if (frame++ < TOTAL_FRAMES) {
                 setDisplayDice([Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1]);
                 setDiceRotationOffset({ x: Math.random() * 2, z: Math.random() * 2 });
                 requestAnimationFrame(animate);
@@ -80,17 +74,20 @@ export const useShutTheBox = () => {
                 setDisplayDice([d1, d2]);
                 setDiceRotationOffset({ x: 0, z: 0 });
                 
-                const avail = pins.map((s, i) => s === 'OPEN' ? i + 1 : 0).filter(n => n > 0);
-                const canMove = (t: number, a: number[]): boolean => {
-                    if (t === 0) return true;
-                    if (t < 0 || a.length === 0) return false;
-                    return canMove(t - a[0], a.slice(1)) || canMove(t, a.slice(1));
-                };
-
-                if (!canMove(d1 + d2, avail)) {
+                if (!checkCanMove(d1 + d2, turn === 'PLAYER' ? playerPins : aiPins)) {
+                if (gameMode === 'SOLO') {
                     setLossReason('no_moves');
-                    setMessage(`Rolled ${d1+d2}. No moves!`);
-                    handleRoundOver(pins, 'lost');
+                    setMessage(`Rolled ${d1+d2}. No more moves!`);
+                    setGameStatus('lost'); // In Solo, getting stuck is a loss (unless you shut the box)
+                    setPhase('GAME_OVER');
+                } else {
+                    const finalPlayerScore = calculateScore(playerPins);
+                    const finalAiScore = calculateScore(aiPins);
+                    setLossReason('no_moves');
+                    setMessage(`${turn} rolled ${d1+d2} and is stuck!`);
+                    setGameStatus(finalPlayerScore <= finalAiScore ? 'won' : 'lost');
+                    setPhase('GAME_OVER');
+                }
                 } else {
                     setPhase('SELECT');
                     setMessage(`Rolled ${d1+d2}. Select pins.`);
@@ -98,45 +95,63 @@ export const useShutTheBox = () => {
             }
         };
         animate();
-    }, [gameStatus, isRolling, pins, turn, handleRoundOver]);
+    }, [gameStatus, isRolling, playerPins, aiPins, turn]);
 
     const confirmMove = (overridePins?: PinState[]) => {
-        const currentPins = overridePins || pins;
-        const newPins = currentPins.map(p => p === 'SELECTED' ? 'SHUT' : p);
-        setPins(newPins);
-        if (newPins.every(p => p === 'SHUT')) handleRoundOver(newPins, 'won');
-        else {
-            setPhase('ROLL');
-            setMessage(turn === 'AI' ? "AI's Turn." : "Roll the dice.");
-        }
+    const pinsToUpdate = overridePins || (turn === 'PLAYER' ? playerPins : aiPins);
+    const nextState = pinsToUpdate.map(p => p === 'SELECTED' ? 'SHUT' : p);
+    
+    if (turn === 'PLAYER') setPlayerPins(nextState);
+    else setAiPins(nextState);
+
+    if (nextState.every(p => p === 'SHUT')) {
+        setMessage(`${turn} SHUT THE BOX!`);
+        setGameStatus(turn === 'PLAYER' ? 'won' : 'lost');
+        setPhase('GAME_OVER');
+        return;
+    }
+
+    // Logic for swapping turns
+    if (gameMode === 'SOLO') {
+        setPhase('ROLL');
+        setMessage("Roll again!");
+    } else {
+        // Swap Turn (Hot Potato / VS_AI)
+        const nextTurn = turn === 'PLAYER' ? 'AI' : 'PLAYER';
+        setTurn(nextTurn);
+        setPhase('ROLL');
+        setMessage(`${nextTurn}'s turn to roll.`);
+    }
     };
 
     const togglePin = (index: number) => {
-        if (turn === 'AI' || phase !== 'SELECT' || pins[index] === 'SHUT') return;
-        setPins(prev => {
+        if (turn === 'AI' || phase !== 'SELECT' || playerPins[index] === 'SHUT') return;
+        setPlayerPins(prev => {
             const next = [...prev];
             next[index] = next[index] === 'OPEN' ? 'SELECTED' : 'OPEN';
             return next;
         });
     };
 
-    // AI Logic Loop
+    // AI Brain Logic
     useEffect(() => {
         if (turn !== 'AI' || gameStatus !== 'playing' || !strategyLoaded || isRolling) return;
+        
         const timer = setTimeout(() => {
             if (phase === 'ROLL') rollDice();
             else if (phase === 'SELECT') {
-                const aiPins = pins.map(p => p === 'SHUT' ? 1 : 0) as any;
-                const bestMove = strategyEngine.getBestMove(diceSum, aiPins);
+                const aiBinary = aiPins.map(p => p === 'SHUT' ? 1 : 0);
+                const bestMove = strategyEngine.getBestMove(diceSum, aiBinary as any);
+                
                 if (bestMove) {
-                    const nextPins = pins.map((s, i) => bestMove.includes(i + 1) ? 'SELECTED' : s);
-                    setPins(nextPins);
+                    const nextPins = aiPins.map((s, i) => bestMove.includes(i + 1) ? 'SELECTED' : s);
+                    setAiPins(nextPins);
                     setTimeout(() => confirmMove(nextPins), 800);
                 }
             }
         }, 1000);
         return () => clearTimeout(timer);
-    }, [turn, phase, gameStatus, isRolling, strategyLoaded, diceSum]);
+    }, [turn, phase, gameStatus, isRolling, strategyLoaded, diceSum, aiPins]);
 
     // Strategy Loader
     useEffect(() => {
@@ -147,9 +162,11 @@ export const useShutTheBox = () => {
     }, [strategyEngine]);
 
     return {
-        pins, dice, displayDice, phase, gameStatus, turn, gameMode, 
-        message, playerScore, aiScore, isRolling, lossReason, diceRotationOffset,
+        playerPins, aiPins, dice, displayDice, phase, gameStatus, turn, gameMode, 
+        message, isRolling, lossReason, diceRotationOffset,
         diceSum, selectedSum, strategyLoaded,
-        rollDice, confirmMove, togglePin, handleRestart, handleNextRound, setGameStatus
+        rollDice, confirmMove, togglePin, handleRestart, setGameStatus,
+        playerScore: calculateScore(playerPins),
+        aiScore: calculateScore(aiPins)
     };
 };

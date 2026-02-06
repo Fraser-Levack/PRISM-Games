@@ -39,22 +39,24 @@ const ShutTheBoxGame = () => {
 
     // 4. Interaction Handler
     const handleObjectClick = (id: string) => {
-        if (!id || game.turn === 'AI') return;
-        
-        const parts = id.split('_');
-        const type = parts[0]; 
-        const x = parseFloat(parts[1]);
+    if (!id || game.turn === 'AI') return;
+    const parts = id.split('_'); 
+    const type = parts[0]; 
 
-        if (type === 'dice') {
-            if (game.phase === 'ROLL') game.rollDice();
-            else alert("Select pins to shut first!");
-        } 
-        else if (type === 'pin') {
-            const xStart = -((9 - 1) * PIN_SPACING) / 2;
-            const index = Math.round(((x - xStart) / PIN_SPACING));
-            if (index >= 0 && index < 9) game.togglePin(index);
+    if (type === 'dice') {
+        if (game.phase === 'ROLL') game.rollDice();
+    } 
+    else if (type === 'pin') {
+        const offsetY = parseFloat(parts[1]); 
+        const pinIndex = parseInt(parts[2]);
+
+        // If Solo, offsetY is 0. If VS_AI, offsetY is 6.
+        if (game.gameMode === 'SOLO' || offsetY > 0) { 
+            game.togglePin(pinIndex);
         }
+    }
     };
+
 
     // 5. Game Control Wrappers
     const startNewGame = (mode: any) => {
@@ -65,13 +67,16 @@ const ShutTheBoxGame = () => {
     return (
         <div className="game-container" style={{ width: '100%', height: '100%', position: 'relative', overflow: 'hidden' }}>
             
-            {/* The Visual Engine (Updates Grids) */}
+            {/* The Visual Engine */}
             <BoxVisuals 
-                pins={game.pins} 
-                displayDice={game.displayDice} 
-                isRolling={game.isRolling} 
-                diceRotationOffset={game.diceRotationOffset} 
-                grids={grids} 
+            playerPins={game.playerPins} 
+            aiPins={game.aiPins}
+            displayDice={game.displayDice} 
+            isRolling={game.isRolling} 
+            turn={game.turn}
+            gameMode={game.gameMode} // PASS THIS
+            diceRotationOffset={game.diceRotationOffset} 
+            grids={grids} 
             />
 
             {/* --- UI OVERLAYS --- */}
@@ -79,20 +84,6 @@ const ShutTheBoxGame = () => {
             {showTutorial && (
                 <div style={{ position: 'absolute', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)' }}>
                     <Tutorial onStart={startNewGame} />
-                </div>
-            )}
-
-            {/* Intermediate Round Popup (VS AI Mode) */}
-            {!showTutorial && game.gameMode === 'VS_AI' && game.turn === 'PLAYER' && game.gameStatus === 'paused' && game.playerScore !== null && (
-                <div style={{ position: 'absolute', inset: 0, zIndex: 150, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div className="popup-card" style={{ background: '#222', color: 'white', padding: '30px', borderRadius: '12px', textAlign: 'center', border: '1px solid #444' }}>
-                        <h2>Round Complete</h2>
-                        <div style={{ marginBottom: '20px' }}>
-                            <p>You scored:</p>
-                            <div style={{ fontSize: '4em', fontWeight: 'bold', color: '#ffcc00' }}>{game.playerScore}</div>
-                        </div>
-                        <button onClick={game.handleNextRound} className="primary-button">Start AI Turn →</button>
-                    </div>
                 </div>
             )}
 

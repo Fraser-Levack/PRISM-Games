@@ -7,7 +7,7 @@ import GeometricBackground from './components/GeometricBackground'
 import './App.css'
 import Chicken_Crossing from './pages/Games/ChickenCrossing/ChickenCrossingGame'
 import TowerOfHanoiGame from './pages/Games/TowerOfHanoi/TowerOfHanoiGame'
-import ShutTheBoxGame from './pages/Games/ShutTheBox/ShutTheBoxGame'
+import ShutTheBoxGame from './pages/Games/ShutTheBox/ShutTheBoxGame_mk2'
 import NavBar from './components/NavBar'
 import Solutions from './pages/solutions/Solutions'
 

@@ -383,10 +383,10 @@ const ShutTheBoxGame = () => {
             rot2.x += diceRotationOffset.x + 1; rot2.z += diceRotationOffset.z + 1;
         }
         
-        objectGrid.addObject(d1Pos.x, d1Pos.y, 1.0, 0.65, 0xffffff, 'dice');
-        decorationGrid.addDecoration(d1Pos.x, d1Pos.y, 1.5, 'dice', 'dice', rot1);
-        objectGrid.addObject(d2Pos.x, d2Pos.y, 1.0, 0.65, 0xffffff, 'dice');
-        decorationGrid.addDecoration(d2Pos.x, d2Pos.y, 1.5, 'dice', 'dice', rot2);
+        objectGrid.addObject(d1Pos.x, d1Pos.y, 1.0, 1.2, 0xffffff, 'dice');
+        decorationGrid.addDecoration(d1Pos.x, d1Pos.y, 2.5, 'dice', 'dice', rot1);
+        objectGrid.addObject(d2Pos.x, d2Pos.y, 1.0, 1.2, 0xffffff, 'dice');
+        decorationGrid.addDecoration(d2Pos.x, d2Pos.y, 2.5, 'dice', 'dice', rot2);
         
         setUpdateTrigger(prev => prev + 1);
     }, [pins, dice, displayDice, isRolling, diceRotationOffset, objectGrid, decorationGrid]);

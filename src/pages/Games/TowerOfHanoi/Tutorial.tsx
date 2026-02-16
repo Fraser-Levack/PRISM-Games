@@ -13,7 +13,7 @@ const Tutorial = ({ onStart}: Props) => {
       <div style={{ marginBottom: 2 }}>
         Objective:
         <ul>
-          <li>Move all disks from the left peg to the right peg.</li>
+          <li>Move all disks from the left bronze peg to the gold right peg.</li>
           <li>You can only move one disk at a time.</li>
           <li>A larger disk can never be placed on top of a smaller disk.</li>
         </ul>

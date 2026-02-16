@@ -6,7 +6,6 @@ export interface ClickableObject {
   data?: any; // game-specific data
 }
 
-// Updated Interface: dragEndCallback now includes dropTargetId
 export interface IsometricInputHandler {
   registerClickable: (mesh: THREE.Object3D, id: string, data?: any) => void;
   unregisterClickable: (mesh: THREE.Object3D) => void;
@@ -14,6 +13,9 @@ export interface IsometricInputHandler {
   handleMouseDown: (event: MouseEvent) => string | null;
   handleMouseMove: (event: MouseEvent) => string | null;
   handleMouseUp: (event: MouseEvent) => string | null;
+  // --- ADDED THIS ---
+  getDraggedId: () => string | null;
+  // ------------------
   setHoverCallback: (callback: (id: string | null) => void) => void;
   setClickCallback: (callback: (id: string, data?: any) => void) => void;
   setDragStartCallback: (callback: (id: string, data?: any) => boolean) => void;
@@ -29,12 +31,7 @@ export function createIsometricInputHandler(
   const mouse = new THREE.Vector2();
   const clickables = new Map<THREE.Object3D, ClickableObject>();
   
-  // --- CONFIGURATION ---
-  // Change this value to adjust how high the disk floats when grabbed
   const DRAG_HEIGHT_OFFSET = 0.5; 
-  // ---------------------
-
-  // Mathematical plane for dragging (Horizontal plane at Y=0)
   const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
   const planeIntersectPoint = new THREE.Vector3();
 
@@ -58,8 +55,6 @@ export function createIsometricInputHandler(
   const raycast = (): ClickableObject | null => {
     raycaster.setFromCamera(mouse, camera);
     const meshes = Array.from(clickables.keys());
-    
-    // intersectObjects respects .visible property by default
     const intersects = raycaster.intersectObjects(meshes, true);
     
     if (intersects.length > 0) {
@@ -86,6 +81,11 @@ export function createIsometricInputHandler(
     currentHoveredId = null;
   };
 
+  // --- ADDED THIS LOGIC ---
+  const getDraggedId = () => {
+    return (isDragging && draggedObject) ? draggedObject.id : null;
+  };
+
   const handleMouseDown = (event: MouseEvent): string | null => {
     updateMousePosition(event);
     dragStartPosition = { x: event.clientX, y: event.clientY };
@@ -101,13 +101,10 @@ export function createIsometricInputHandler(
   const handleMouseMove = (event: MouseEvent): string | null => {
     updateMousePosition(event);
 
-    // 1. Handle Active Drag
     if (isDragging && draggedObject) {
         raycaster.setFromCamera(mouse, camera);
         raycaster.ray.intersectPlane(dragPlane, planeIntersectPoint);
         
-        // Update mesh position immediately
-        // Use the configured offset so it doesn't float too high
         draggedObject.mesh.position.set(
             planeIntersectPoint.x, 
             planeIntersectPoint.y + DRAG_HEIGHT_OFFSET, 
@@ -116,7 +113,6 @@ export function createIsometricInputHandler(
         return draggedObject.id;
     }
 
-    // 2. Check for Drag Start
     if (!isDragging && draggedObject) {
          const dragDistance = Math.sqrt(
             Math.pow(event.clientX - dragStartPosition.x, 2) + 
@@ -138,7 +134,6 @@ export function createIsometricInputHandler(
         }
     }
 
-    // 3. Handle Hover (only if not dragging)
     if (!isDragging) {
         const clickable = raycast();
         const newHoveredId = clickable ? clickable.id : null;
@@ -159,30 +154,24 @@ export function createIsometricInputHandler(
     updateMousePosition(event);
     
     if (isDragging && draggedObject) {
-      // DRAG END LOGIC
-      
-      // 1. Temporarily hide the dragged object so we can raycast "through" it
-      // to see what is underneath (e.g. a peg base or another disk)
       draggedObject.mesh.visible = false;
       const targetUnderneath = raycast();
-      draggedObject.mesh.visible = true; // Restore visibility immediately
+      draggedObject.mesh.visible = true;
 
       if (dragEndCallback) {
         dragEndCallback(
             draggedObject.id, 
             draggedObject.data, 
             draggedObject.mesh.position.clone(),
-            targetUnderneath ? targetUnderneath.id : null // Pass the ID of the drop target
+            targetUnderneath ? targetUnderneath.id : null
         );
       }
     } else if (draggedObject) {
-      // Click Logic
       if (clickCallback) {
         clickCallback(draggedObject.id, draggedObject.data);
       }
     }
     
-    // Reset State
     isDragging = false;
     draggedObject = null;
     dragStartPosition = { x: 0, y: 0 };
@@ -207,6 +196,7 @@ export function createIsometricInputHandler(
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    getDraggedId, // Exposed here
     setHoverCallback,
     setClickCallback,
     setDragStartCallback,

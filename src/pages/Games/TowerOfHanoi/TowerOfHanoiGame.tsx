@@ -11,7 +11,7 @@ import GameStatusPopup from './GameStatusPopup';
 type GameStatus = 'paused' | 'playing' | 'won';
 
 interface TowerState {
-  pegs: number[][]; // each peg is array of disk sizes, bottom -> top
+  pegs: number[][]; 
   diskCount: number;
   gameStatus: GameStatus;
 }
@@ -20,7 +20,7 @@ const TowerOfHanoiGame = () => {
   const initialDiskCount = 3;
   const [state, setState] = useState<TowerState>(() => ({
     pegs: [
-      Array.from({ length: initialDiskCount }, (_, i) => initialDiskCount - i), // [3,2,1]
+      Array.from({ length: initialDiskCount }, (_, i) => initialDiskCount - i),
       [],
       []
     ],
@@ -43,7 +43,6 @@ const TowerOfHanoiGame = () => {
     tower: '/Models/TowerOfHanoi/tower.gltf',
   } as const;
 
-  // Preload models
   useEffect(() => {
     let mounted = true;
     modelManager.loadAll(modelMap)
@@ -57,7 +56,6 @@ const TowerOfHanoiGame = () => {
     return () => { mounted = false; };
   }, []);
 
-  // Initialize ground + pegs
   useEffect(() => {
     cubeGrid.clear();
     decorationGrid.clear();
@@ -81,16 +79,17 @@ const TowerOfHanoiGame = () => {
     setUpdateTrigger(u => u + 1);
   }, [cubeGrid, decorationGrid]);
 
-  // Populate object grid
   useEffect(() => {
     objectGrid.clear();
 
-    const pegPositions = [-4, 0, 4]; // Peg X positions
+    const pegPositions = [-4, 0, 4];
     const pegY = 1;
+    // Distinct colors for the cylinders: Bronze, Silver, Gold
+    const pegColors = [0xcd7f32, 0xa9a9a9, 0xffd700]; 
 
-    // Draw peg bases
-    pegPositions.forEach((px) => {
-      objectGrid.addObject(px, pegY, 0.6, 0.8, 0x8B5A2B, 'peg');
+    // Draw peg bases using the NEW geometry property
+    pegPositions.forEach((px, index) => {
+      objectGrid.addObject(px, pegY, 0.6, 1.8, pegColors[index], 'peg', 1.0);
     });
 
     // Draw discs
@@ -114,6 +113,7 @@ const TowerOfHanoiGame = () => {
         const color = size === 1 ? 0xffdd88 : size === 2 ? 0xffb366 : 0xff7f7f;
         const typeName = modelsLoaded ? 'tower' : 'disc';
         
+        // Disks use default sphere (no geometry param) unless models load
         objectGrid.addObject(px, py, z, height, color, typeName, modelScale);
       }
     });
@@ -121,7 +121,6 @@ const TowerOfHanoiGame = () => {
     setUpdateTrigger(u => u + 1);
   }, [state, objectGrid, modelsLoaded]);
 
-  // Logic: try move disk from -> to
   const tryMove = useCallback((from: number, to: number) => {
     if (from === to) return false;
     const pegsCopy = state.pegs.map(s => [...s]);
@@ -130,9 +129,7 @@ const TowerOfHanoiGame = () => {
     const disk = pegsCopy[from][pegsCopy[from].length - 1]; 
     const destTop = pegsCopy[to][pegsCopy[to].length - 1];
     
-    if (destTop !== undefined && destTop < disk) {
-      return false; 
-    }
+    if (destTop !== undefined && destTop < disk) return false; 
 
     pegsCopy[from].pop();
     pegsCopy[to].push(disk);
@@ -148,53 +145,36 @@ const TowerOfHanoiGame = () => {
     return true;
   }, [state]);
 
-  // --- DRAG AND DROP HANDLERS ---
-
   const handleDragStart = useCallback((id: string, _data?: any): boolean => {
     if (state.gameStatus !== 'playing') return false;
-
     const parts = id.split('_');
     if (parts[0] !== 'disc' && parts[0] !== 'tower') return false;
-
-    // Determine which peg this disk belongs to
     const x = parseFloat(parts[1]);
     const pegPositions = [-4, 0, 4];
     const pegIndex = pegPositions.findIndex(pos => Math.abs(pos - x) < 1);
-
     if (pegIndex === -1) return false;
-    
-    const stack = state.pegs[pegIndex];
-    if (stack.length === 0) return false;
-    return true;
+    return state.pegs[pegIndex].length > 0;
   }, [state.gameStatus, state.pegs]);
 
-  // Updated signature includes 'dropTargetId'
   const handleDragEnd = useCallback((id: string, _data: any, dropPos: THREE.Vector3, dropTargetId: string | null) => {
     if (!id) {
         setUpdateTrigger(p => p + 1); 
         return;
     }
-
-    // 1. Find Source Peg
     const parts = id.split('_');
     const sourceX = parseFloat(parts[1]);
     const pegPositions = [-4, 0, 4];
     const sourcePegIndex = pegPositions.findIndex(pos => Math.abs(pos - sourceX) < 1);
-
     let destPegIndex = -1;
 
-    // 2. Identify Destination Peg
-    // Strategy A: Check if we dropped ON TOP OF a specific object (Peg or Disk)
     if (dropTargetId) {
         const targetParts = dropTargetId.split('_');
-        // If we hit a tower, disc, or peg base, we know which peg it belongs to by its X coord
         if (targetParts.length >= 2 && ['tower', 'disc', 'peg'].includes(targetParts[0])) {
             const targetX = parseFloat(targetParts[1]);
             destPegIndex = pegPositions.findIndex(pos => Math.abs(pos - targetX) < 1);
         }
     }
 
-    // Strategy B: Fallback to spatial proximity (if dropped on empty ground near peg)
     if (destPegIndex === -1 && dropPos) {
         const dropX = dropPos.x;
         let minDist = 999;
@@ -207,14 +187,10 @@ const TowerOfHanoiGame = () => {
         });
     }
 
-    // 3. Attempt Move
     if (sourcePegIndex !== -1 && destPegIndex !== -1) {
-        const success = tryMove(sourcePegIndex, destPegIndex);
-        if (!success) {
-            setUpdateTrigger(p => p + 1); // Snap back on invalid rule
-        }
+        if (!tryMove(sourcePegIndex, destPegIndex)) setUpdateTrigger(p => p + 1);
     } else {
-        setUpdateTrigger(p => p + 1); // Snap back on invalid target
+        setUpdateTrigger(p => p + 1);
     }
   }, [tryMove]);
 
@@ -235,11 +211,7 @@ const TowerOfHanoiGame = () => {
       if (e.key === 'r') {
         e.preventDefault();
         setState({
-          pegs: [
-            Array.from({ length: state.diskCount }, (_, i) => state.diskCount - i),
-            [],
-            []
-          ],
+          pegs: [Array.from({ length: state.diskCount }, (_, i) => state.diskCount - i), [], []],
           diskCount: state.diskCount,
           gameStatus: 'paused'
         });
@@ -266,27 +238,19 @@ const TowerOfHanoiGame = () => {
   return (
     <div className="game-container">
       {showTutorial && (
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)'
-        }}>
+        <div style={{ position: 'absolute', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)' }}>
           <Tutorial onStart={startGame} />
         </div>
       )}
 
       {(state.gameStatus === 'won' || state.gameStatus === 'paused') && !showTutorial && (
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)'
-        }}>
+        <div style={{ position: 'absolute', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)' }}>
           <GameStatusPopup
             gameStatus={state.gameStatus}
             onClose={() => setState(prev => ({ ...prev, gameStatus: 'playing' }))}
             onRestart={() => {
               setState({
-                pegs: [
-                  Array.from({ length: state.diskCount }, (_, i) => state.diskCount - i),
-                  [],
-                  []
-                ],
+                pegs: [Array.from({ length: state.diskCount }, (_, i) => state.diskCount - i), [], []],
                 diskCount: state.diskCount,
                 gameStatus: 'paused'
               });
@@ -296,9 +260,7 @@ const TowerOfHanoiGame = () => {
         </div>
       )}
 
-      <div style={{
-        position: 'absolute', top: 70, left: 20, zIndex: 100, color: 'white', background: 'rgba(0,0,0,0.8)', padding: 10, borderRadius: 6, fontSize: 14
-      }}>
+      <div style={{ position: 'absolute', top: 70, left: 20, zIndex: 100, color: 'white', background: 'rgba(0,0,0,0.8)', padding: 10, borderRadius: 6, fontSize: 14 }}>
         <div>Controls: Drag and drop disks between pegs</div>
         {hoveredPeg !== null && <div style={{ color: '#4ade80' }}>Hovering: Peg {hoveredPeg + 1}</div>}
         <div>Status: {state.gameStatus}</div>

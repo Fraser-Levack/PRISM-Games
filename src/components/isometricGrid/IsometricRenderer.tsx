@@ -110,6 +110,7 @@ const IsometricRenderer = ({
         scene.add(directionalLight);
         scene.add(new THREE.GridHelper(20, 20, 0x444444, 0x222222));
 
+        // --- Render Cubes ---
         cubeGrid.getCubes().forEach((cube: Cube) => {
             const height = cube.type === 'water' ? 0.5 : 1;
             const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, height, 1), new THREE.MeshLambertMaterial({ color: cube.color }));
@@ -119,6 +120,7 @@ const IsometricRenderer = ({
 
         const meshMap = new Map<string, THREE.Object3D>();
 
+        // --- Render Objects ---
         objectGrid.getObjects().forEach((object: Object) => {
             const isClickable = clickableTypes?.some(t => object.type === t || object.type.startsWith(t + '_'));
             let activeObject: THREE.Object3D;
@@ -126,8 +128,19 @@ const IsometricRenderer = ({
 
             if (ModelManager.has(modelKey)) {
                 let clone = ModelManager.getClone(modelKey)!;
+                if (object.type === 'player' && playerCarry) {
+                    const handsUp = ModelManager.getClone('farmer_hands_up');
+                    if (handsUp) clone = handsUp;
+                }
                 clone.position.set(object.x, object.z + object.height, object.y);
                 clone.scale.setScalar(object.scale || 0.8);
+                
+                // Rotation for player
+                if (object.type === 'player') {
+                    const rotations: any = { left: Math.PI, right: 0, up: Math.PI / 2, down: -Math.PI / 2 };
+                    clone.rotation.y = rotations[playerDirection || 'right'];
+                }
+
                 scene.add(clone);
                 activeObject = clone;
             } else {
@@ -136,6 +149,8 @@ const IsometricRenderer = ({
                     geo = new THREE.CylinderGeometry(0.4, 0.5, 6.5, 32);
                 } else if (object.type === 'boat') {
                     geo = new THREE.CylinderGeometry(0.5, 0.5, 1, 24);
+                    // squish the boat to be double the length in the x direction and half the height
+                    geo.scale(2, 0.5, 1);
                 } else {
                     geo = new THREE.SphereGeometry(0.4, 16, 12);
                 }
@@ -153,6 +168,32 @@ const IsometricRenderer = ({
             }
         });
 
+        // --- RESTORED: Render Decorations ---
+        if (decorationGrid) {
+            decorationGrid.getDecorations().forEach(dec => {
+                const modelClone = ModelManager.getClone(dec.model);
+                if (modelClone) {
+                    modelClone.position.set(dec.x, dec.z + 0.01, dec.y);
+                    modelClone.scale.setScalar(0.8);
+                    if (dec.rotation) {
+                        modelClone.rotation.set(dec.rotation.x ?? 0, dec.rotation.y ?? 0, dec.rotation.z ?? 0);
+                    }
+                    scene.add(modelClone);
+                }
+            });
+        }
+
+        const handleResize = () => {
+            const aspect = window.innerWidth / window.innerHeight;
+            camera.left = -frustumSize * aspect / 2;
+            camera.right = frustumSize * aspect / 2;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        };
+
+        window.addEventListener('resize', handleResize);
+
         let lastDraggedId: string | null = null;
 
         const animate = () => {
@@ -160,7 +201,6 @@ const IsometricRenderer = ({
             const currentDragId = inputHandler.getDraggedId();
             
             if (currentDragId !== lastDraggedId) {
-                // RESET PREVIOUS
                 if (lastDraggedId) {
                     const oldMesh = meshMap.get(lastDraggedId);
                     if (oldMesh) {
@@ -175,14 +215,12 @@ const IsometricRenderer = ({
                     }
                 }
 
-                // APPLY TO NEW
                 if (currentDragId) {
                     const newMesh = meshMap.get(currentDragId);
                     if (newMesh) {
                         newMesh.renderOrder = 999;
                         newMesh.traverse((child) => {
                             if (child instanceof THREE.Mesh) {
-                                // IMPORTANT: Clone material so we don't squish other disks!
                                 if (!Array.isArray(child.material)) {
                                     child.material = child.material.clone();
                                 }
@@ -206,6 +244,7 @@ const IsometricRenderer = ({
             composer.render();
             return frameId;
         };
+
         const animationId = animate();
 
         renderer.domElement.addEventListener('mousedown', inputHandler.handleMouseDown);
@@ -214,12 +253,7 @@ const IsometricRenderer = ({
 
         return () => {
             cancelAnimationFrame(animationId);
-            window.removeEventListener('resize', () => {
-                const aspect = window.innerWidth / window.innerHeight;
-                camera.left = -frustumSize * aspect / 2;
-                camera.right = frustumSize * aspect / 2;
-                camera.updateProjectionMatrix();
-            });
+            window.removeEventListener('resize', handleResize);
             renderer.dispose();
             inputHandler.clearClickables();
         };

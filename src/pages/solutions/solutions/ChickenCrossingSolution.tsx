@@ -7,7 +7,7 @@ interface ChickenCrossingSolutionProps {
 
 export default function ChickenCrossingSolution({
   gameId,
-  videoUrl = "https://youtu.be/raO0EmaFVzg",
+  videoUrl = "https://youtube.com/embed/raO0EmaFVzg",
 }: ChickenCrossingSolutionProps) {
   const sectionId = (id: string) => `${gameId}-${id}`;
 

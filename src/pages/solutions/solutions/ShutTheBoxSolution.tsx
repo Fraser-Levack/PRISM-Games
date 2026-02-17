@@ -2,172 +2,294 @@ import '../SolutionContent.css';
 
 interface ShutTheBoxSolutionProps {
   gameId: string;
+  videoUrl?: string; // e.g., "https://www.youtube.com/embed/your-video-id"
 }
 
 export default function ShutTheBoxSolution({
   gameId,
+  videoUrl = "https://www.youtube.com/embed/STB_VIDEO_ID", // Replace with your final video ID
 }: ShutTheBoxSolutionProps) {
   const sectionId = (id: string) => `${gameId}-${id}`;
 
   return (
     <div className="solution-content">
-      <h1>Shut The Box Solution</h1>
+      <h1>Shut The Box: Mastering Chance</h1>
 
-      <section
-        id={sectionId('overview')}
-        data-section-id="overview"
-        className="solution-section"
-      >
-        <h2>Overview</h2>
-        <p>
-          Shut The Box (also known as Bluff or Klackerlarsch) is a dice game
-          played with numbered tiles from 1 to 9. The objective is to close
-          (shut) all the numbered tiles by rolling dice and selecting tiles that
-          sum to the dice values.
-        </p>
-        <h3>Game Rules</h3>
-        <ul>
-          <li>Start with all tiles (1-9) open</li>
-          <li>Roll two dice and cover tiles that sum to the dice values</li>
-          <li>Continue rolling and closing tiles until no valid moves remain</li>
-          <li>Score is the sum of remaining open tiles</li>
-        </ul>
-        <h3>Objective</h3>
-        <p>
-          The goal is to achieve the lowest score by closing as many tiles as
-          possible.
-        </p>
+      {/* 1. Video Integration */}
+      <section className="video-container">
+        <iframe
+          width="100%"
+          height="450"
+          src={videoUrl}
+          title="Shut The Box - Probabilistic PRISM Solution"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        ></iframe>
       </section>
 
-      <section
-        id={sectionId('algorithm')}
-        data-section-id="algorithm"
-        className="solution-section"
-      >
-        <h2>Game Logic</h2>
+      <hr />
 
-        <h3>Move Generation</h3>
+      {/* 2. Probabilistic Models */}
+      <section id={sectionId('probabilities')} className="solution-section" data-section-id="probabilities">
+        <h2>From Logic to Probability</h2>
         <p>
-          After rolling the dice, the game must find all valid combinations of
-          tiles that sum to the dice values. This involves:
+          Unlike our previous puzzles, "Shut the Box" involves <strong>chance</strong>. 
+          In PRISM, we represent this by adding weights to our actions. Since a standard die has six sides, 
+          each outcome has a <strong>1/6</strong> probability.
         </p>
-        <ol>
-          <li>Finding all open (unplayed) tiles</li>
-          <li>Generating combinations that sum to the dice total</li>
-          <li>Presenting valid moves to the player</li>
-        </ol>
+        
+        
 
-        <h3>Move Validation</h3>
-        <p>
-          A move is valid if the selected tiles sum to the dice total and all
-          tiles are currently open.
-        </p>
-
-        <h3>Game End Detection</h3>
-        <p>
-          The game ends when the player cannot make any valid move with the
-          current dice roll.
-        </p>
-
-        <h3>Score Calculation</h3>
-        <p>
-          Score equals the sum of all remaining open tiles at the end of the
-          game.
-        </p>
-      </section>
-
-      <section
-        id={sectionId('implementation')}
-        data-section-id="implementation"
-        className="solution-section"
-      >
-        <h2>Technical Structure</h2>
-
-        <h3>Components</h3>
-        <ul>
-          <li>
-            <strong>ShutTheBoxGame:</strong> Main game component
-          </li>
-          <li>
-            <strong>Tiles:</strong> Visual representation of numbered tiles
-          </li>
-          <li>
-            <strong>DiceRoller:</strong> Handles dice rolling mechanics
-          </li>
-          <li>
-            <strong>MoveSelector:</strong> Allows player to select tiles
-          </li>
-        </ul>
-
-        <h3>State Management</h3>
-        <p>
-          Tracks which tiles are open/closed, current dice values, selected
-          tiles, total score, and game status.
-        </p>
-
-        <h3>Combination Generator</h3>
-        <p>
-          Algorithm to generate all valid tile combinations that sum to the dice
-          total, considering which tiles are already closed.
-        </p>
-      </section>
-
-      <section
-        id={sectionId('codeWalkthrough')}
-        data-section-id="codeWalkthrough"
-        className="solution-section"
-      >
-        <h2>Key Implementation Details</h2>
-
-        <h3>Generating Valid Moves</h3>
         <pre className="code-block">
-{`function generateValidMoves(openTiles, diceSum) {
-  const validMoves = [];
-
-  function findCombinations(
-    remaining,
-    currentSum,
-    currentSelection,
-    startIdx
-  ) {
-    if (currentSum === diceSum) {
-      validMoves.push([...currentSelection]);
-      return;
-    }
-
-    if (currentSum > diceSum || startIdx >= remaining.length) {
-      return;
-    }
-
-    for (let i = startIdx; i < remaining.length; i++) {
-      currentSelection.push(remaining[i]);
-      findCombinations(
-        remaining,
-        currentSum + remaining[i],
-        currentSelection,
-        i + 1
-      );
-      currentSelection.pop();
-    }
-  }
-
-  findCombinations(openTiles, 0, [], 0);
-  return validMoves;
-}`}
+{`// Modeling a die roll in PRISM
+[rolldie] phase = 0 -> 1/6 : (sum'=1) + 1/6 : (sum'=2) + ...`}
         </pre>
-
-        <h3>Closing Tiles</h3>
         <p>
-          When a player selects tiles that sum to the dice total, those tiles are
-          marked as closed and cannot be selected again.
-        </p>
-
-        <h3>Game Over Condition</h3>
-        <p>
-          The game checks if any valid moves exist after each turn. If no valid
-          moves are possible, the game ends and calculates the final score.
+          This creates a <strong>Markov Decision Process (MDP)</strong>: a mix of player choices 
+          (which pins to shut) and random outcomes (the dice roll).
         </p>
       </section>
+
+      {/* 3. Phases and Formulas */}
+      <section id={sectionId('phases')} className="solution-section" data-section-id="phases">
+        <h2>Phases and Logic</h2>
+        <p>
+          To keep the model organized, we use a <code>phase</code> variable to track the game state: 
+          Rolling, Shutting, or Game Over. We also use <strong>Formulas</strong> to check if a move 
+          is valid.
+        </p>
+        <pre className="code-block">
+{`formula can_5 = (pin5=0) | (pin1=0 & pin4=0) | (pin2=0 & pin3=0);`}
+        </pre>
+        <p>
+          This formula checks if the sum of 5 can be made using available pins. 
+          If <code>pin5</code> is already shut, PRISM looks for combinations like <code>1+4</code> or <code>2+3</code>.
+        </p>
+      </section>
+
+      {/* 4. Maximizing Rewards */}
+      <section id={sectionId('verifying')} className="solution-section" data-section-id="verifying">
+        <h2>Verifying the "Perfect" Strategy</h2>
+        <p>
+          We don't just want to solve the game; we want to <strong>maximize the score</strong>. 
+          We define rewards for every pin shut and ask PRISM:
+        </p>
+        <blockquote>
+          <strong>"What is the maximum expected score I can get?"</strong>
+        </blockquote>
+        <pre className="code-block">
+{`Rmax =? [ F phase = 3 ]`}
+        </pre>
+        <p>
+          PRISM explores every possible dice roll and every possible pin combination to find the 
+          mathematically optimal move for any situation.
+        </p>
+        <p>
+          We can also try to get the <strong>probability</strong> of shutting all of the pins in a single game.
+          The property for that would be:
+        </p>
+        <pre className="code-block">
+{`Pmax =? [ F "all_down" ]`}
+        </pre>
+        <blockquote>
+          <strong>The Result: 5.35%</strong>
+        </blockquote>
+        <p>
+          Even with perfect play, the odds of shutting all the pins is only about 5.35%!
+        </p>
+      </section>
+
+      {/* 5. Playing Against the AI */}
+      <section id={sectionId('ai')} className="solution-section" data-section-id="ai">
+        <h2>Can you beat the PRISM?</h2>
+        <p>
+          The most exciting part of this project is the <strong>Strategy Export</strong>. 
+          We took the massive strategy table generated by PRISM and converted it into a 
+          TypeScript look-up table.
+        </p>
+        
+        
+
+        <p>
+          When you play "Shut the Box" on this site, the computer isn't just guessing. 
+          It is using the <strong>Optimal Strategy</strong> verified by PRISM. Every move it 
+          makes is the one with the highest statistical probability of success.
+        </p>
+      </section>
+    {/* 6. The full PRISM model */}
+    <section id={sectionId('full-model')} className="solution-section" data-section-id="full-model">
+      <h2>Full PRISM Model</h2>
+      <pre className="code-block">
+{`
+mdp
+
+module box1
+
+    phase : [0..3] init 0; // 0 is die roll one, 1 die roll two, 2 is shut pins, 3 is count up game over
+
+    sum : [0..12] init 0;
+
+    pin1 : [0..1] init 0;
+    pin2 : [0..1] init 0;
+    pin3 : [0..1] init 0;
+    pin4 : [0..1] init 0;
+    pin5 : [0..1] init 0;
+    pin6 : [0..1] init 0;
+    pin7 : [0..1] init 0;
+    pin8 : [0..1] init 0;
+    pin9 : [0..1] init 0;
+    
+
+    [rolldie1] phase = 0 -> 1/6 : (sum'=1)&(phase'=1) + 1/6 : (sum'=2)&(phase'=1) + 1/6 : (sum'=3)&(phase'=1) + 1/6 : (sum'=4)&(phase'=1) + 1/6 : (sum'=5)&(phase'=1) + 1/6 : (sum'=6)&(phase'=1);
+
+    [rolldie2] phase = 1 & sum <= 6 -> 1/6 : (sum'= sum + 1)&(phase'=2) + 1/6 : (sum'= sum + 2)&(phase'=2) + 1/6 : (sum'= sum + 3)&(phase'=2) + 1/6 : (sum'= sum + 4)&(phase'=2) + 1/6 : (sum'= sum + 5)&(phase'=2) + 1/6 : (sum'= sum + 6)&(phase'=2);
+
+
+    // Set zero to zero.
+
+    [shutforresult2_2] sum=2 & phase=2 & pin2=0 -> (pin2'=1) & (phase'=0);
+
+    [shutforresult2finish] sum=2 & phase=2 & !can_2 -> (phase'=3);
+
+    [shutforresult3_3] sum=3 & phase=2 & pin3=0 -> (pin3'=1) & (phase'=0);
+    [shutforresult3_1_2] sum=3 & phase=2 & pin1=0 & pin2=0 -> (pin1'=1) & (pin2'=1) & (phase'=0);
+
+    [shutforresult3finish] sum=3 & phase = 2 & !can_3 -> (phase'=3);
+
+    [shutforresult4_4] sum=4 & phase=2 & pin4=0 -> (pin4'=1) & (phase'=0);
+    [shutforresult4_1_3] sum=4 & phase=2 & pin1=0 & pin3 = 0 -> (pin1'=1) & (pin3'=1) & (phase'=0);
+    
+    [shutforresult4finish] sum=4 & phase=2 & !can_4 -> (phase'=3);
+
+    [shutforresult5_5] sum=5 & phase=2 & pin5=0 -> (pin5'=1) & (phase'=0);
+    [shutforresult5_1_4] sum=5 & phase=2 & pin1=0 & pin4=0 -> (pin1'=1) & (pin4'=1) & (phase'=0);
+    [shutforresult5_2_3] sum=5 & phase=2 & pin2=0 & pin3=0 -> (pin2'=1) & (pin3'=1) & (phase'=0);
+
+    [shutforresult5finish] sum=5 & phase=2 & !can_5 -> (phase'=3);
+
+    [shutforresult6_6] sum=6 & phase=2 & pin6=0 -> (pin6'=1) & (phase' = 0);
+    [shutforresult6_1_5] sum=6 & phase=2 & pin1=0 & pin5=0 -> (pin1'=1) & (pin5'=1) & (phase'=0);
+    [shutforresult6_2_4] sum=6 & phase=2 & pin2=0 & pin4=0 -> (pin2'=1) & (pin4'=1) & (phase'=0);
+
+    [shutforresult6finish] sum=6 & phase=2 & !can_6 -> (phase'=3);
+
+    [shutforresult7_7] sum=7 & phase=2 & pin7=0 -> (pin7'=1) & (phase'=0);
+    [shutforresult7_1_6] sum=7 & phase=2 & pin1=0 & pin6=0 -> (pin1'=1) & (pin6'=1) & (phase'=0);
+    [shutforresult7_2_5] sum=7 & phase=2 & pin2=0 & pin5=0 -> (pin2'=1) & (pin5'=1) & (phase'=0);
+    [shutforresult7_3_4] sum=7 & phase=2 & pin3=0 & pin4=0 -> (pin3'=1) & (pin4'=1) & (phase'=0);
+
+    [shutforresult7finish] sum=7 & phase=2 & !can_7 -> (phase'=3);
+
+    [shutforresult8_8] sum=8 & phase=2 & pin8=0 -> (pin8'=1) & (phase' = 0);
+    [shutforresult8_1_7] sum=8 & phase=2 & pin1=0 & pin7=0 -> (pin1'=1) & (pin7'=1) & (phase'=0);
+    [shutforresult8_2_6] sum=8 & phase=2 & pin2=0 & pin6=0 -> (pin2'=1) & (pin6'=1) & (phase'=0);
+    [shutforresult8_3_5] sum=8 & phase=2 & pin3=0 & pin5=0 -> (pin3'=1) & (pin5'=1) & (phase'=0);
+
+    [shutforresult8finish] sum=8 & phase = 2 & !can_8 -> (phase' = 3);
+
+    [shutforresult9_9] sum=9 & phase=2 & pin9=0 -> (pin9'=1) & (phase'=0);
+    [shutforresult9_1_8] sum=9 & phase=2 & pin1=0 & pin8=0 -> (pin1'=1) & (pin8'=1) & (phase'=0);
+    [shutforresult9_2_7] sum=9 & phase=2 & pin2=0 & pin7=0 -> (pin2'=1) & (pin7'=1) & (phase'=0);
+    [shutforresult9_3_6] sum=9 & phase=2 & pin3=0 & pin6=0 -> (pin3'=1) & (pin6'=1) & (phase'=0);
+    [shutforresult9_4_5] sum=9 & phase=2 & pin4=0 & pin5=0 -> (pin4'=1) & (pin5'=1) & (phase'=0);
+
+    [shutforresult9finish] sum=9 & phase = 2 & !can_9 -> (phase' = 3);
+
+    [shutforresult10_1_9] sum=10 & phase=2 & pin1=0 & pin9=0 -> (pin1'=1) & (pin9'=1) & (phase'=0);
+    [shutforresult10_2_8] sum=10 & phase=2 & pin2=0 & pin8=0 -> (pin2'=1) & (pin8'=1) & (phase'=0);
+    [shutforresult10_3_7] sum=10 & phase=2 & pin3=0 & pin7=0 -> (pin3'=1) & (pin7'=1) & (phase'=0);
+    [shutforresult10_4_6] sum=10 & phase=2 & pin4=0 & pin6=0 -> (pin4'=1) & (pin6'=1) & (phase'=0);
+
+    [shutforresult10finish] sum=10 & phase = 2 & !can_10 -> (phase' = 3);
+    
+    [shutforresult11_2_9] sum=11 & phase=2 & pin2=0 & pin9=0 -> (pin2'=1) & (pin9'=1) & (phase'=0);
+    [shutforresult11_3_8] sum=11 & phase=2 & pin3=0 & pin8=0 -> (pin3'=1) & (pin8'=1) & (phase'=0);
+    [shutforresult11_4_7] sum=11 & phase=2 & pin4=0 & pin7=0 -> (pin4'=1) & (pin7'=1) & (phase'=0);
+    [shutforresult11_5_6] sum=11 & phase=2 & pin5=0 & pin6=0 -> (pin5'=1) & (pin6'=1) & (phase'=0);
+
+    [shutforresult11finish] sum=11 & phase=2 & !can_11 -> (phase'=3);
+
+    [shutforresult12_3_9] sum=12 & phase=2 & pin3=0 & pin9=0 -> (pin3'=1) & (pin9'=1) & (phase'=0);
+    [shutforresult12_4_8] sum=12 & phase=2 & pin4=0 & pin8=0 -> (pin4'=1) & (pin8'=1) & (phase'=0);
+    [shutforresult12_5_7] sum=12 & phase=2 & pin5=0 & pin7=0 -> (pin5'=1) & (pin7'=1) & (phase'=0);
+
+    [shutforresult12finish] sum=12 & phase=2 & !can_12 -> (phase'=3);
+
+endmodule
+
+formula can_2 = (pin2=0);
+formula can_3 = (pin3=0) | (pin1=0 & pin2=0);
+formula can_4 = (pin4=0) | (pin1=0 & pin3=0);
+formula can_5 = (pin5=0) | (pin1=0 & pin4=0) | (pin2=0 & pin3=0);
+formula can_6 = (pin6=0) | (pin1=0 & pin5=0) | (pin2=0 & pin4=0); 
+
+formula can_7 = (pin7=0) | (pin1=0 & pin6=0) | (pin2=0 & pin5=0) | (pin3=0 & pin4=0);
+formula can_8 = (pin8=0) | (pin1=0 & pin7=0) | (pin2=0 & pin6=0) | (pin3=0 & pin5=0);
+formula can_9 = (pin9=0) | (pin1=0 & pin8=0) | (pin2=0 & pin7=0) | (pin3=0 & pin6=0) | (pin4=0 & pin5=0);
+
+formula can_10 = (pin1=0 & pin9=0) | (pin2=0 & pin8=0) | (pin3=0 & pin7=0) | (pin4=0 & pin6=0);
+formula can_11 = (pin2=0 & pin9=0) | (pin3=0 & pin8=0) | (pin4=0 & pin7=0) | (pin5=0 & pin6=0);
+formula can_12 = (pin3=0 & pin9=0) | (pin4=0 & pin8=0) | (pin5=0 & pin7=0);
+
+
+// Use the sum and fomula for simplicity. 
+
+rewards "score"
+    [shutforresult2_2]true : 2;
+
+    [shutforresult3_3]true : 3;
+    [shutforresult3_1_2]true : 3;
+
+    [shutforresult4_4]true : 4;
+    [shutforresult4_1_3]true : 4;
+
+    [shutforresult5_5]true : 5;
+    [shutforresult5_1_4]true : 5;
+    [shutforresult5_2_3]true : 5;
+    
+    [shutforresult6_6]true : 6;
+    [shutforresult6_1_5]true : 6;
+    [shutforresult6_2_4]true : 6;
+    
+    [shutforresult7_7]true: 7;
+    [shutforresult7_1_6]true: 7;
+    [shutforresult7_2_5]true: 7;
+    [shutforresult7_3_4]true: 7;
+
+    [shutforresult8_8]true: 8;
+    [shutforresult8_1_7] true: 8;
+    [shutforresult8_2_6] true: 8;
+    [shutforresult8_3_5] true: 8;
+
+    [shutforresult9_9]true: 9;
+    [shutforresult9_1_8]true: 9;
+    [shutforresult9_2_7]true: 9;
+    [shutforresult9_3_6]true: 9;
+    [shutforresult9_4_5]true: 9;
+
+    [shutforresult10_1_9]true: 10;
+    [shutforresult10_2_8]true: 10;
+    [shutforresult10_3_7]true: 10;
+    [shutforresult10_4_6]true: 10;
+
+    [shutforresult11_2_9]true: 11;
+    [shutforresult11_3_8]true: 11;
+    [shutforresult11_4_7]true: 11;
+    [shutforresult11_5_6]true: 11;
+
+    [shutforresult12_3_9]true: 12;
+    [shutforresult12_4_8]true: 12;
+    [shutforresult12_5_7]true: 12;
+endrewards
+
+label "all_down" = ( pin1 + pin2 + pin3 + pin4 + pin5 + pin6 + pin7 + pin8 + pin9 = 9);
+`}
+      </pre>
+      <p>
+        (Note: The full model includes all actions and reward definitions.)
+      </p>
+    </section>
     </div>
   );
 }

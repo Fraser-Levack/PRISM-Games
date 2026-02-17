@@ -107,7 +107,7 @@ const GameStatusPopup = ({
         
         {statusDisplay.showSolutionButton && (
           <button
-            onClick={() => navigate('/solutions')}
+            onClick={() => navigate('/solutions?game=towerOfHanoi')}
             style={{
               background: '#3b82f6',
               color: '#fff',

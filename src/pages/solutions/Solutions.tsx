@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-// import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import SolutionsSideBar from './SolutionsSideBar';
 import SiteOverview from './solutions/SiteOverview';
 import ChickenCrossingSolution from './solutions/ChickenCrossingSolution';
@@ -8,11 +8,36 @@ import ShutTheBoxSolution from './solutions/ShutTheBoxSolution';
 import './Solutions.css';
 
 export default function Solutions() {
-  // const location = useLocation();
-  const [activeGame, setActiveGame] = useState('siteOverview');
-  const [activeSection, setActiveSection] = useState('overview');
+  const location = useLocation();
   const contentRef = useRef<HTMLElement | null>(null);
 
+  // Initialize state based on URL parameters (?game=chickenCrossing)
+  const [activeGame, setActiveGame] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('game') || 'siteOverview';
+  });
+
+  const [activeSection, setActiveSection] = useState('overview');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const gameParam = params.get('game');
+    if (gameParam && gameParam !== activeGame) {
+      setActiveGame(gameParam);
+      setActiveSection('overview');
+    }
+  }, [location.search, activeGame]);
+
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // We don't want the observer to fight the reset, 
+    // so we set section back to top default
+    setActiveSection('overview');
+  }, [activeGame]);
+
+  // Handler for sidebar clicks
   const handleSectionSelect = (sectionId: string) => {
     setActiveSection(sectionId);
     const target = document.getElementById(`${activeGame}-${sectionId}`);
@@ -22,16 +47,10 @@ export default function Solutions() {
   };
 
   useEffect(() => {
-    setActiveSection('overview');
-    if (contentRef.current) {
-      contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  }, [activeGame]);
-
-  useEffect(() => {
     const container = contentRef.current;
     if (!container) return;
 
+    // This looks for the [data-section-id] we discussed earlier
     const sections = Array.from(
       container.querySelectorAll<HTMLElement>('[data-section-id]')
     );
@@ -58,7 +77,7 @@ export default function Solutions() {
       },
       {
         root: container,
-        threshold: 0.5,
+        threshold: 0.4, // Trigger when 40% of section is visible
       }
     );
 
@@ -68,7 +87,7 @@ export default function Solutions() {
       sections.forEach((section) => observer.unobserve(section));
       observer.disconnect();
     };
-  }, [activeGame]);
+  }, [activeGame]); // Re-run when the game (and thus its sections) changes
 
   const renderSolution = () => {
     switch (activeGame) {

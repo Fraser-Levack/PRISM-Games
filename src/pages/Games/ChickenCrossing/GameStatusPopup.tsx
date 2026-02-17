@@ -136,7 +136,7 @@ const GameStatusPopup = ({
           
           {statusDisplay.showSolutionButton && (
             <button
-              onClick={() => navigate('/solutions')}
+              onClick={() => navigate('/solutions?game=chickenCrossing')}
               style={{
                 background: '#3b82f6',
                 color: '#fff',

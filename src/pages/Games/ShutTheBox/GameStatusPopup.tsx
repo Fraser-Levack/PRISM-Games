@@ -119,7 +119,7 @@ const GameStatusPopup = ({
         
         {statusDisplay.showSolutionButton && (
           <button
-            onClick={() => navigate('/solutions')}
+            onClick={() => navigate('/solutions?game=shutTheBox')}
             style={{
               background: '#3b82f6',
               color: '#fff',

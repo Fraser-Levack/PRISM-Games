@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+// import { useLocation } from 'react-router-dom';
 import SolutionsSideBar from './SolutionsSideBar';
 import SiteOverview from './solutions/SiteOverview';
 import ChickenCrossingSolution from './solutions/ChickenCrossingSolution';
@@ -7,6 +8,7 @@ import ShutTheBoxSolution from './solutions/ShutTheBoxSolution';
 import './Solutions.css';
 
 export default function Solutions() {
+  // const location = useLocation();
   const [activeGame, setActiveGame] = useState('siteOverview');
   const [activeSection, setActiveSection] = useState('overview');
   const contentRef = useRef<HTMLElement | null>(null);

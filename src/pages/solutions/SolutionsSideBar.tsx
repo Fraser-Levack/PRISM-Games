@@ -5,6 +5,8 @@ interface SolutionsSideBarProps {
   onSectionSelect: (section: string) => void;
 }
 
+const SURVEY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScH4Qcb0SSLuUC5OM72SnHbtdfiFBCuSK_n26nhRJcYlZjBXQ/viewform?usp=header';
+
 const games = [
   {
     id: 'siteOverview',
@@ -88,7 +90,17 @@ export default function SolutionsSideBar({
               </ul>
             )}
           </div>
+          
         ))}
+        <a
+            className="nav-link"
+            href={SURVEY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open survey link"
+          >
+            Survey
+            </a>
       </nav>
     </aside>
   );

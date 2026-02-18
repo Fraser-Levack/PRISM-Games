@@ -5,6 +5,7 @@ import './NavBar.css'
 export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const GITHUB_URL = 'https://github.com/Fraser-Levack/PRISM-Games'
+  const SURVEY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScH4Qcb0SSLuUC5OM72SnHbtdfiFBCuSK_n26nhRJcYlZjBXQ/viewform?usp=header'
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -48,6 +49,18 @@ export default function NavBar() {
           >
             Solutions
           </NavLink>
+
+          <div className="nav-external" aria-hidden={false}>
+          <a
+            className="nav-link"
+            href={SURVEY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open survey link"
+          >
+            Survey
+            </a>
+          </div>
 
           <NavLink 
             to="/credits" 

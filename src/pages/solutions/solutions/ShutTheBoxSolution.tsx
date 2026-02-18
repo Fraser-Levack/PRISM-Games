@@ -7,7 +7,7 @@ interface ShutTheBoxSolutionProps {
 
 export default function ShutTheBoxSolution({
   gameId,
-  videoUrl = "https://www.youtube.com/embed/STB_VIDEO_ID", // Replace with your final video ID
+  videoUrl = "https://youtube.com/embed/itjn4-Ffsak", // Replace with your final video ID
 }: ShutTheBoxSolutionProps) {
   const sectionId = (id: string) => `${gameId}-${id}`;
 
@@ -22,7 +22,6 @@ export default function ShutTheBoxSolution({
           height="450"
           src={videoUrl}
           title="Shut The Box - Probabilistic PRISM Solution"
-          frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
         ></iframe>

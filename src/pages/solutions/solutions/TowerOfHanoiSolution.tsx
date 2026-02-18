@@ -7,7 +7,7 @@ interface TowerOfHanoiSolutionProps {
 
 export default function TowerOfHanoiSolution({
   gameId,
-  videoUrl = "https://www.youtube.com/embed/TOH_VIDEO_ID", // Replace with your actual ID
+  videoUrl = "https://youtube.com/embed/aSvazgJpagw", // Replace with your actual ID
 }: TowerOfHanoiSolutionProps) {
   const sectionId = (id: string) => `${gameId}-${id}`;
 

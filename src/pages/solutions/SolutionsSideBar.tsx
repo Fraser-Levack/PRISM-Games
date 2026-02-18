@@ -5,7 +5,7 @@ interface SolutionsSideBarProps {
   onSectionSelect: (section: string) => void;
 }
 
-const SURVEY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScH4Qcb0SSLuUC5OM72SnHbtdfiFBCuSK_n26nhRJcYlZjBXQ/viewform?usp=header';
+const SURVEY_URL = 'https://forms.gle/sVHUDABjtWHmH8Er8';
 
 const games = [
   {

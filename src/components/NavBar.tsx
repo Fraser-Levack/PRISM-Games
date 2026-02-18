@@ -5,7 +5,7 @@ import './NavBar.css'
 export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const GITHUB_URL = 'https://github.com/Fraser-Levack/PRISM-Games'
-  const SURVEY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScH4Qcb0SSLuUC5OM72SnHbtdfiFBCuSK_n26nhRJcYlZjBXQ/viewform?usp=header'
+  const SURVEY_URL = 'https://forms.gle/sVHUDABjtWHmH8Er8'
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)

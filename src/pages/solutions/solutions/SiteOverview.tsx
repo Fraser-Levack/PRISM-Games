@@ -58,27 +58,16 @@ export default function SiteOverview({ gameId }: SiteOverviewProps) {
         <h3>Solution Structure</h3>
         <ul>
           <li>
-            <strong>Overview:</strong> Introduction to the game mechanics, rules, and
-            objectives
+            <strong>Video Explanation:</strong> A visual walkthrough of the solution, highlighting key concepts and strategies
           </li>
           <li>
-            <strong>Core Algorithm:</strong> Detailed explanation of the solving algorithm
-            with pseudocode and implementation details
+            <strong>Learning PRISM:</strong> How we use the PRISM to build formal models of the games
+            </li>
+          <li>
+            <strong>Verifying the Model:</strong> Verification methods and results that provide mathematical guarantees about the strategies
           </li>
           <li>
-            <strong>PRISM Model:</strong> Formal specification using probabilistic model
-            checking, including state spaces and transition systems
-          </li>
-          <li>
-            <strong>Verification Results:</strong> Analysis of properties such as
-            reachability, optimal strategies, and winning probabilities
-          </li>
-          <li>
-            <strong>Implementation:</strong> Technical details about how the game is
-            implemented in code
-          </li>
-          <li>
-            <strong>Extensions:</strong> Possible variations and future enhancements
+            <strong>PRISM Model:</strong> The entire PRISM model used for verification, allowing you to see the formal representation of the game
           </li>
         </ul>
       </section>
@@ -139,9 +128,6 @@ export default function SiteOverview({ gameId }: SiteOverviewProps) {
           <li>
             <strong>Play First:</strong> Try each game yourself before reading the
             solutions to develop your own strategies
-          </li>
-          <li>
-            <strong>Read the Overview:</strong> Understand the game rules and objectives
           </li>
           <li>
             <strong>Study the Algorithm:</strong> Learn how optimal strategies are computed

@@ -113,7 +113,6 @@ const TowerOfHanoiGame = () => {
         const color = size === 1 ? 0xffdd88 : size === 2 ? 0xffb366 : 0xff7f7f;
         const typeName = modelsLoaded ? 'tower' : 'disc';
         
-        // Disks use default sphere (no geometry param) unless models load
         objectGrid.addObject(px, py, z, height, color, typeName, modelScale);
       }
     });

@@ -1,90 +1,73 @@
 # PRISM Games
 
-PRISM Games is a small collection of web-based isometric mini-games built with React, TypeScript and Vite. The project focuses on a simple, extensible game framework with an isometric renderer, model/asset manager and per-game state managers so new games can be added quickly.
+PRISM Games is an interactive, web-based educational platform designed to teach the principles of probabilistic model checking and formal verification. Built with React 19, TypeScript, Vite, and Three.js, the project abstracts complex mathematical structures (like Labelled Transition Systems and Markov Decision Processes) into intuitive 3D isometric puzzles.
 
-This repository was created as an individual project for a fourth-year Computer Science module and is intended as both a playable demo and a foundation for further experimentation.
+This repository was created as an Honours Individual Project dissertation for a fourth-year Computer Science module. It serves as a playable educational tool, demonstrating how ludic contexts can lower the barrier to entry for formal methods.
 
-Key goals
-- Provide a reusable isometric renderer and grid system for tile/object/decorations.
-- Demonstrate model loading and lightweight 3D usage in the browser.
-- Keep code structured so new game rules and assets are simple to add.
+## Key Goals
+- **Educational Scaffolding:** Guide users through a "Play -> Watch -> Read" pipeline, transitioning from intuitive gameplay to formal PRISM syntax.
+- **Interactive Formal Verification:** Demonstrate model checking in action by allowing users to play against mathematically optimal AI strategies synthesized directly from the PRISM model checker.
+- **Extensible 3D Framework:** Provide a reusable isometric renderer and grid system so new games, rules, and assets can be added easily.
 
-Highlights
-- React 19 + TypeScript (strict) for predictable UI and state management
-- Vite for fast development and hot-reload
-- Small, modular architecture:
-  - Isometric renderer (three.js or canvas-backed rendering)
-  - ModelManager for GLTF models
-  - Per-game GameStateManager for rules and transitions
+## Highlights
+- **React 19 + TypeScript (Strict):** For predictable UI, robust state management, and component architecture.
+- **Three.js Isometric Renderer:** A unified 3D orthographic rendering pipeline with custom post-processing (VibranceShader) for a modern, glass-like aesthetic.
+- **PRISM Strategy Engine:** A dedicated TypeScript engine (`StrategyEngine`) that parses exported PRISM policy files into lookup tables for real-time optimal decision-making.
 
-Projects / Games
-- Chicken Crossing — a small puzzle/strategy game (src/pages/Games/ChickenCrossing). Rules and input handling live in the game's GameStateManager and UI components.
+## Included Games / Modules
+The platform scales in mathematical complexity through three distinct modules:
+1. **Chicken Crossing Problem:** Introduces basic deterministic state spaces, safety properties, and simple reachability goals.
+2. **Tower of Hanoi:** Introduces model scalability, module renaming (templates), and constraints within deterministic models.
+3. **Shut the Box:** Acts as the capstone, introducing Markov Decision Processes (MDPs), probabilistic transitions, and optimal reward strategies.
 
-Quickstart
+---
 
-Prerequisites
+## Quickstart
+
+### Prerequisites
 - Node.js 16+ (LTS recommended)
 - npm (or yarn)
 
-Install
+### Install & Run
 ```bash
 npm install
-```
-
-Run development server
-```bash
 npm run dev
 ```
-Open http://localhost:5173/
+Open `http://localhost:5173/` in your browser.
 
-Build for production
+### Build for Production
 ```bash
 npm run build
 npm run preview
 ```
 
-Project structure (important files)
-- src/
-  - pages/
-    - Games/
-      - ChickenCrossing/ChickenCrossingGame.tsx — game entry + UI
-      - ChickenCrossing/GameStateManager.ts — game rules & state transitions
-      - ChickenCrossing/GameStatusPopup.tsx — end/paused UI
-    - Home.tsx, Credits.tsx — app pages
-  - components/
-    - isometricGrid/ — CubeGrid, ObjectGrid, DecorationGrid, IsometricRenderer
-    - ModelManager.ts — centralized model loading & caching
-  - App.tsx, main.tsx — router and app bootstrap
-  - styles/ — CSS modules / global styles
-- public/Models/ — GLTF model assets (chicken.gltf, farmer.gltf, etc.)
-- package.json — scripts and dependencies
-- README.md — this file
+---
 
-Gameplay & controls (example: Chicken Crossing)
-- Controls: WASD or arrow keys to move
-- Enter to interact / pick up / drop where implemented
-- R to reset, P to resume playing from paused
-- The renderer will fallback to primitive shapes if GLTF models fail to load; put models in public/Models for the game to load.
+## Project Structure (Key Directories)
+- `src/`
+  - `pages/`
+    - `Games/` — Contains individual game folders (`ChickenCrossing`, `TowerOfHanoi`, `ShutTheBox`), housing game entry UIs, state managers, and status popups.
+    - `Solutions/` — The dynamic educational explanation pages mapping gameplay to PRISM code.
+  - `components/`
+    - `isometricGrid/` — The core 3D rendering pipeline (`IsometricRenderer`, `IsometricInputHandler`).
+  - `utils/`
+    - `ModelManager.ts` — Centralized GLTF model loading and caching.
+    - `StrategyEngine.ts` — Decodes PRISM text file exports into playable AI lookup tables.
+- `public/Models/` — GLTF 3D assets (`chicken.gltf`, `disks.gltf`, etc.) and PRISM strategy `.txt` files.
 
-Development notes
-- Models: place GLTF files under public/Models and reference them by filename in each game's modelMap.
-- State: use the per-game GameStateManager to encapsulate movement, collisions and win/loss checks.
-- Renderer: updateTrigger prop is used to inform IsometricRenderer to re-render when the logical grids change.
-- TypeScript: project uses strict settings — add types for new components and state shapes.
+## Gameplay & Controls
+- **Unified Perspective:** All games share a consistent 3D isometric camera.
+- **Contextual Input:** Controls mimic natural interactions (e.g., WASD/Arrow keys for grid movement in Chicken Crossing; drag-and-drop mouse controls for Tower of Hanoi).
+- **Fallback Rendering:** The renderer will fallback to primitive geometric shapes if GLTF models fail to load from the `public/Models` directory.
 
-Testing and debugging
-- Use the browser console to view debug logs from GameStateManager and model loading.
-- Renderer fallbacks make it easy to test without all assets present.
-- Add unit tests for pure game logic in GameStateManager (recommended using vitest or jest configured for Vite + TS).
+## Development Notes
+- **State Management:** Use the per-game `GameStateManager` to encapsulate movement, collisions, and win/loss checks, keeping React components strictly for UI.
+- **Adding Strategies:** To add new optimal AI behaviors, export the strategy from the PRISM GUI as a plain text file and load it via the `StrategyEngine`.
+- **Educational Content:** Solution pages utilize the `IntersectionObserver` API to dynamically highlight sidebar navigation as users scroll through PRISM code explanations.
 
-Contributing
-- Fork → feature branch → implement → run dev & lint → open PR
-- Keep game logic modular; avoid UI code leaking into GameStateManager.
-- Add unit tests for new game rules or utility functions.
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Troubleshooting
-- Blank screen: check console for model load errors and ensure public/Models paths exist.
-- Keys not working: ensure game canvas has focus; global key handlers are registered on window.
-
-Contact / author
-- Repository owner: Fraser Levack
+## Contact / Author
+- **Author:** Fraser W. Levack
+- **Supervisor:** Professor Gethin Norman

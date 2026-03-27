@@ -43,7 +43,7 @@ const Tutorial = ({ onStart }: Props) => {
     );
   }
 
-  // Step 1: Instructions (Existing Code)
+  // Instructions (Existing Code)
   return (
     <div className="tutorial-popup-card-stb" style={{ maxWidth: 640 }}>
       <h2 style={{ marginTop: 0, color: '#3b82f6' }}>Welcome to Shut the Box</h2>

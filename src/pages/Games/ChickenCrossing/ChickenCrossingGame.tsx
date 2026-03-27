@@ -14,7 +14,7 @@ const Chicken_Crossing = () => {
     return GameStateManager.getDefaultState();
   });
 
-  // NEW: show tutorial before play
+  // show tutorial before play
   const [showTutorial, setShowTutorial] = useState<boolean>(true);
 
   const [updateTrigger, setUpdateTrigger] = useState(0);
@@ -31,8 +31,8 @@ const Chicken_Crossing = () => {
     chicken: '/Models/ChickenCrossing/chicken.gltf',
     fox: '/Models/ChickenCrossing/fox.gltf',
     grain: '/Models/ChickenCrossing/grain.gltf',
-    farmer: '/Models/ChickenCrossing/farmer.gltf', // <-- added farmer model for player
-    farmer_hands_up: '/Models/ChickenCrossing/farmer_hands_up.gltf', // <-- added carrying model
+    farmer: '/Models/ChickenCrossing/farmer.gltf',
+    farmer_hands_up: '/Models/ChickenCrossing/farmer_hands_up.gltf',
     tree: '/Models/ChickenCrossing/tree.gltf',
     rocks: '/Models/ChickenCrossing/rocks.gltf', 
     bush: '/Models/ChickenCrossing/bush.gltf',
@@ -64,10 +64,10 @@ const Chicken_Crossing = () => {
     const currentStatus = gameState.gameStatus;
     const previousStatus = previousStatusRef.current;
     
-    console.log('Status check:', { currentStatus, previousStatus }); // Debug log
+    // console.log('Status check:', { currentStatus, previousStatus }); // Debug log
     
     if (currentStatus !== previousStatus && currentStatus !== 'playing') {
-      console.log('Showing popup for status:', currentStatus); // Debug log
+      // console.log('Showing popup for status:', currentStatus); // Debug log
       setShowStatusPopup(true);
       
       // Update the ref to the new status
@@ -98,7 +98,7 @@ const Chicken_Crossing = () => {
     setShowTutorial(true);
   };
 
-  // NEW: start the game after tutorial
+  // Start the game after tutorial
   const onStartTutorial = () => {
     setShowTutorial(false);
     // Resume playing
@@ -106,7 +106,7 @@ const Chicken_Crossing = () => {
     setShowStatusPopup(false);
   };
 
-  // NEW: allow skipping tutorial (optional)
+  // Allow skipping tutorial
   const onSkipTutorial = () => {
     setShowTutorial(false);
     setGameState(prev => ({ ...prev, gameStatus: 'playing', lossReason: null }));

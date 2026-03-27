@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom'; // Add useNavigate
+import { useLocation, useNavigate } from 'react-router-dom';
 import SolutionsSideBar from './SolutionsSideBar';
 import SiteOverview from './solutions/SiteOverview';
 import ChickenCrossingSolution from './solutions/ChickenCrossingSolution';
@@ -15,8 +15,6 @@ export default function Solutions() {
   const [activeGame, setActiveGame] = useState('siteOverview');
   const [activeSection, setActiveSection] = useState('overview');
 
-  // 1. Sync State with URL
-  // This is the "Master Sync" - whenever the URL changes, the page updates
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const gameParam = params.get('game') || 'siteOverview';
@@ -31,8 +29,6 @@ export default function Solutions() {
     }
   }, [location.search]);
 
-  // 2. Navigation Handlers
-  // Instead of setting state, we change the URL
   const handleGameChange = (gameId: string) => {
     // When switching games, we reset to the 'overview' section
     navigate(`/solutions?game=${gameId}&section=overview`);
@@ -49,7 +45,7 @@ export default function Solutions() {
     }
   };
 
-  // 3. Scroll Highlighting (Intersection Observer)
+  // (Intersection Observer)
   useEffect(() => {
     const container = contentRef.current;
     if (!container) return;
@@ -73,7 +69,6 @@ export default function Solutions() {
           // Only update state if it's different to avoid infinite nav loops
           if (sectionId && sectionId !== activeSection) {
             setActiveSection(sectionId);
-            // We DON'T call navigate() here to avoid cluttering browser history while scrolling
           }
         }
       },
@@ -99,8 +94,8 @@ export default function Solutions() {
       <SolutionsSideBar
         activeGame={activeGame}
         activeSection={activeSection}
-        onGameSelect={handleGameChange} // Use the new handler
-        onSectionSelect={handleSectionSelect} // Use the new handler
+        onGameSelect={handleGameChange}
+        onSectionSelect={handleSectionSelect}
       />
       <main className="solutions-content" ref={contentRef}>
         {renderSolution()}

@@ -15,8 +15,8 @@
   color: #c8c1f0;
   text-align: left;
   width: auto;
-  padding: 8px 12px;       /* shrink overall board padding */
-  max-width: 420px;        /* limit width so board is compact */
+  padding: 8px 12px;       
+  max-width: 420px;        
   box-sizing: border-box;
 }
 
@@ -30,7 +30,7 @@
 .control-board-content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;             /* removed large gaps between sections */
+  gap: 0.5rem;
 }
 
 .control-section-title {
@@ -42,7 +42,7 @@
 .movement-controls {
   display: flex;
   flex-direction: column;
-  gap: 1rem;               /* reduced gap but keep layout */
+  gap: 1rem;               
   align-items: center;
   justify-content: center;
 }
@@ -51,20 +51,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;            /* removed extra spacing around key groups */
+  gap: 0.25rem;            
 }
 
 .key-row {
   display: flex;
-  gap: 0.25rem;            /* removed gaps between keys */
+  gap: 0.25rem;            
   justify-content: center;
 }
 
 .key-label {
   text-align: center;
-  margin-top: 0.25rem;     /* tightened label spacing */
+  margin-top: 0.25rem;     
   opacity: 0.8;
-  font-size: 0.875rem;     /* keep text size unchanged */
+  font-size: 0.875rem;     
 }
 
 .or-divider {
@@ -75,14 +75,14 @@
 .action-controls {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;             /* reduced action grid gaps */
+  gap: 0.5rem;             
 }
 
 .action-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;             /* tightened item spacing */
+  gap: 0.5rem;             
 }
 
 .action-title {
@@ -103,10 +103,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 auto;           /* keep buttons from flexing so positions remain stable */
-  min-width: 2.25rem;       /* reduced size */
-  height: 2.25rem;          /* reduced size */
-  padding: 0 8px;           /* tighter padding */
+  flex: 0 0 auto;           
+  min-width: 2.25rem;       
+  height: 2.25rem;          
+  padding: 0 8px;           
   background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
   border: 2px solid #d1d5db;
   border-radius: 8px;
@@ -115,7 +115,7 @@
   user-select: none;
   color: #1f2937;
   font-weight: 500;
-  font-size: 0.9rem;        /* slightly smaller text to match new key size */
+  font-size: 0.9rem;        
 }
 
 .key-button:hover {
@@ -124,15 +124,15 @@
 }
 
 .key-button.wide {
-  min-width: 96px;         /* scaled down proportionally */
+  min-width: 96px;         
 }
 
 .key-button.medium {
-  min-width: 72px;         /* scaled down proportionally */
+  min-width: 72px;         
 }
 
 .key-button svg {
-  width: 16px;             /* smaller icon */
+  width: 16px;             
   height: 16px;
 }
 
@@ -157,7 +157,7 @@
   }
   
   .control-board-popup {
-    padding: 8px 12px;     /* keep mobile compact */
+    padding: 8px 12px;     
     min-width: 240px;      /* allow smaller mobile width */
   }
 }

@@ -1,3 +1,5 @@
+// !! Steps were removed from final version, but keeping this file in case we want to add them back in the future. !!
+
 import React from 'react';
 
 export interface StepComponentProps {

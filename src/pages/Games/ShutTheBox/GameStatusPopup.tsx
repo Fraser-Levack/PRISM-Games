@@ -7,7 +7,7 @@ type Props = {
   dice?: number[];
   onClose: () => void;
   onRestart: () => void;
-  customMessage?: string; // <--- Added new prop
+  customMessage?: string;
 }
 
 const GameStatusPopup = ({ 
@@ -16,7 +16,7 @@ const GameStatusPopup = ({
   dice, 
   onClose, 
   onRestart,
-  customMessage // <--- Destructure new prop
+  customMessage
 }: Props) => {
   const navigate = useNavigate();
 

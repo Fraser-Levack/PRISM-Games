@@ -13,9 +13,7 @@ export interface IsometricInputHandler {
   handleMouseDown: (event: MouseEvent) => string | null;
   handleMouseMove: (event: MouseEvent) => string | null;
   handleMouseUp: (event: MouseEvent) => string | null;
-  // --- ADDED THIS ---
   getDraggedId: () => string | null;
-  // ------------------
   setHoverCallback: (callback: (id: string | null) => void) => void;
   setClickCallback: (callback: (id: string, data?: any) => void) => void;
   setDragStartCallback: (callback: (id: string, data?: any) => boolean) => void;
@@ -81,7 +79,6 @@ export function createIsometricInputHandler(
     currentHoveredId = null;
   };
 
-  // --- ADDED THIS LOGIC ---
   const getDraggedId = () => {
     return (isDragging && draggedObject) ? draggedObject.id : null;
   };
@@ -196,7 +193,7 @@ export function createIsometricInputHandler(
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    getDraggedId, // Exposed here
+    getDraggedId,
     setHoverCallback,
     setClickCallback,
     setDragStartCallback,

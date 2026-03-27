@@ -41,7 +41,7 @@ export default function ChickenCrossingSolution({
         </blockquote>
       </section>
 
-      {/* 3. Step 1: Building the Model */}
+      {/* 3. Building the Model */}
       <section id={sectionId('building')} className="solution-section" data-section-id="building">
         <h2>Step 1: Building the Model</h2>
         

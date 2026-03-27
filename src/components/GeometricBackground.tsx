@@ -8,7 +8,6 @@ const GeometricBackground = () => {
   const animationIdRef = useRef<number | null>(null);
   const materialRef = useRef<THREE.ShaderMaterial | null>(null);
 
-  // Performance optimization: Use callback for resize handler
   const handleResize = useCallback(() => {
     if (!rendererRef.current || !materialRef.current) return;
     
@@ -266,7 +265,7 @@ const GeometricBackground = () => {
     `;
 
     // Enhanced performance optimizations in the material setup
-    const complexity = isLowEnd || isMobile ? 0.2 : 0.8; // Reduced complexity even for desktop
+    const complexity = isLowEnd || isMobile ? 0.2 : 0.8;
     const material = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,

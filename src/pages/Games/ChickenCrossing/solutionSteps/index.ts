@@ -1,3 +1,6 @@
+// !! Steps were removed from final version, but keeping this file in case we want to add them back in the future. !!
+
+
 // Export all step components for easy importing
 export { default as Step0 } from './Step0';
 export { default as Step1 } from './Step1';

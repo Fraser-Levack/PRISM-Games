@@ -77,7 +77,7 @@ const IsometricRenderer = ({
         if (onDragStart) inputHandler.setDragStartCallback(onDragStart);
         if (onDragEnd) inputHandler.setDragEndCallback(onDragEnd);
 
-        // --- Post Processing ---
+        // Post Processing
         const VibranceShader = {
             uniforms: {
                 tDiffuse: { value: null }, brightness: { value: 1.20 },
@@ -110,7 +110,6 @@ const IsometricRenderer = ({
         scene.add(directionalLight);
         scene.add(new THREE.GridHelper(20, 20, 0x444444, 0x222222));
 
-        // --- Render Cubes ---
         cubeGrid.getCubes().forEach((cube: Cube) => {
             const height = cube.type === 'water' ? 0.5 : 1;
             const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, height, 1), new THREE.MeshLambertMaterial({ color: cube.color }));
@@ -120,7 +119,6 @@ const IsometricRenderer = ({
 
         const meshMap = new Map<string, THREE.Object3D>();
 
-        // --- Render Objects ---
         objectGrid.getObjects().forEach((object: Object) => {
             const isClickable = clickableTypes?.some(t => object.type === t || object.type.startsWith(t + '_'));
             let activeObject: THREE.Object3D;
@@ -168,7 +166,7 @@ const IsometricRenderer = ({
             }
         });
 
-        // --- RESTORED: Render Decorations ---
+        // Render Decorations
         if (decorationGrid) {
             decorationGrid.getDecorations().forEach(dec => {
                 const modelClone = ModelManager.getClone(dec.model);

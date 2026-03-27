@@ -15,17 +15,17 @@ const ShutTheBoxGame = () => {
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [showTutorial, setShowTutorial] = useState(true);
 
-    // 1. Hook into the Game Engine
+    // Hook into the Game Engine
     const game = useShutTheBox();
 
-    // 2. Initialize Grids
+    // Initialize Grids
     const grids = useMemo(() => ({
         cubeGrid: new CubeGrid(),
         objectGrid: new ObjectGrid(),
         decorationGrid: new DecorationGrid()
     }), []);
 
-    // 3. Load Assets
+    // Load Assets
     useEffect(() => {
         const modelMap: Record<string, string> = { 'dice': '/Models/ShutTheBox/dice.gltf' };
         for (let i = 1; i <= 9; i++) {
@@ -35,7 +35,7 @@ const ShutTheBoxGame = () => {
         ModelManager.loadAll(modelMap).then(() => setModelsLoaded(true));
     }, []);
 
-    // 4. Interaction Handler
+    // Interaction Handler
     const handleObjectClick = (id: string) => {
     if (!id || game.turn === 'AI') return;
     const parts = id.split('_'); 
@@ -56,7 +56,7 @@ const ShutTheBoxGame = () => {
     };
 
 
-    // 5. Game Control Wrappers
+    // Game Control Wrappers
     const startNewGame = (mode: any) => {
         setShowTutorial(false);
         game.handleRestart(mode);

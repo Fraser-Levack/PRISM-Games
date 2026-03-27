@@ -18,7 +18,7 @@ export type GameState = {
     cubeTypes: Map<string, string>; // Simple position->type mapping
     level: number;
     gameStatus: 'playing' | 'won' | 'lost' | 'paused';
-    // optional human-readable or coded loss reason for UI (e.g. 'fox', 'grain', 'river')
+    // human-readable or coded loss reason for UI (e.g. 'fox', 'grain', 'river')
     lossReason?: string | null;
     playerHolding?: string; // ID of object player is holding
     lastPlayerAction?: string; // Description of last action
@@ -59,7 +59,7 @@ export class GameStateManager {
             }
         }
 
-        // im needing the same for these decorations
+        // Decorations
         cubeTypes.set(`${2 + xOffset},${1 + yOffset}`, 'hitbox'); // tree
         cubeTypes.set(`${5 + xOffset},${1 + yOffset}`, 'hitbox'); // tree
         cubeTypes.set(`${17 + xOffset},${11 + yOffset}`, 'hitbox'); // tree
@@ -251,7 +251,7 @@ export class GameStateManager {
             return;
         }
 
-        // NEW: If the nearest object is the boat, do not handle sailing here.
+        // If the nearest object is the boat, do not handle sailing here.
         // Sailing is handled by handleSail so that Enter (sail) and Space (pickup) are separate.
         if (nearestObj.type === 'boat') {
             return;
@@ -301,7 +301,6 @@ export class GameStateManager {
         }
 
         if (nearestObj.type === 'grain') {
-            // just log pickup grain
             // console.log('Picked up grain!');
             // set playerHolding to grain id and move the gain to same x and y as player but z +1
             const newState = { 
@@ -317,7 +316,6 @@ export class GameStateManager {
 
             setState(newState);
         } else if (nearestObj.type === 'chicken') {
-            // just log pickup chicken
             // console.log('Picked up chicken!');
             // set playerHolding to chicken id and move the chicken to same x and y as player but z +1
             const newState = {
@@ -332,7 +330,6 @@ export class GameStateManager {
             };
             setState(newState);
         } else if (nearestObj.type === 'fox') {
-            // just log pickup fox
             // console.log('Picked up fox!');
             // set playerHolding to fox id and move the fox to same x and y as player but z +1
             const newState = {
@@ -349,7 +346,7 @@ export class GameStateManager {
         }
     }
 
-    // NEW: extracted sailing logic so Enter can be dedicated to sailing
+    // Extracted sailing logic so Enter can be dedicated to sailing
     public static handleSail(state: GameState, setState: (state: GameState) => void): void {
         const playerPos = state.player.position;
         const nearestObj = this.getNearestObjectWithinRange(state, playerPos, 2);

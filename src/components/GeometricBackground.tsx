@@ -1,6 +1,10 @@
 import { useEffect, useRef, useCallback } from 'react';
 import * as THREE from 'three';
 
+// Devices with ≤2 logical cores get a pure-CSS gradient — no WebGL shader at all.
+// This threshold covers old Atom/Celeron CPUs and most low-end Android devices.
+const isVeryLowEnd = () => (navigator.hardwareConcurrency ?? 8) <= 2;
+
 const GeometricBackground = () => {
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -10,19 +14,16 @@ const GeometricBackground = () => {
 
   const handleResize = useCallback(() => {
     if (!rendererRef.current || !materialRef.current) return;
-    
+
     const width = window.innerWidth;
     const height = window.innerHeight;
-    
-    // Reduce resolution on mobile for better performance
+
     const isMobile = width < 768;
-    const pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
-    
-    // Use setSize with updateStyle = false
+    const pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1 : 1.5);
+
     rendererRef.current.setSize(width, height, false);
     rendererRef.current.setPixelRatio(pixelRatio);
     const canvas = rendererRef.current.domElement as HTMLCanvasElement;
-    // Use 100% dimensions to stay within viewport on mobile
     canvas.style.width = '100%';
     canvas.style.height = '100%';
     materialRef.current.uniforms.u_resolution.value.set(width, height);
@@ -31,9 +32,12 @@ const GeometricBackground = () => {
   useEffect(() => {
     if (!mountRef.current) return;
 
-    // Detect device capabilities for performance optimization
+    // Very low-end: skip WebGL entirely — the CSS fallback background is already
+    // applied via the container div's style below.
+    if (isVeryLowEnd()) return;
+
     const isMobile = window.innerWidth < 768;
-    const isLowEnd = navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4;
+    const isLowEnd = (navigator.hardwareConcurrency ?? 8) < 4;
 
     // Scene setup
     const scene = new THREE.Scene();
@@ -53,7 +57,7 @@ const GeometricBackground = () => {
     rendererRef.current = renderer;
     
     renderer.setSize(window.innerWidth, window.innerHeight, false);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1 : 1.5));
     renderer.setClearColor(0x000000, 0);
     
     // Style the canvas element directly with proper mobile constraints
@@ -284,16 +288,17 @@ const GeometricBackground = () => {
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    // Animation loop with adaptive frame rate
+    // Animation loop — throttled FPS, paused when tab is hidden
     let lastTime = 0;
-    const targetFPS = isMobile ? 24 : 45;
+    const targetFPS = isMobile ? 20 : 40;
     const frameInterval = 1000 / targetFPS;
+    let paused = false;
 
     const animate = (currentTime: number) => {
       animationIdRef.current = requestAnimationFrame(animate);
-      
+      if (paused) return;
       if (currentTime - lastTime >= frameInterval) {
-        material.uniforms.u_time.value += isMobile ? 0.006 : 0.008; // Slower animation on mobile
+        material.uniforms.u_time.value += isMobile ? 0.005 : 0.007;
         renderer.render(scene, camera);
         lastTime = currentTime;
       }
@@ -301,20 +306,17 @@ const GeometricBackground = () => {
 
     animate(0);
 
-    // Set up resize listener
+    const handleVisibilityChange = () => { paused = document.hidden; };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('resize', handleResize);
 
-    // Cleanup function
     return () => {
-      if (animationIdRef.current) {
-        cancelAnimationFrame(animationIdRef.current);
-      }
+      if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('resize', handleResize);
-      
       if (mountRef.current && renderer.domElement) {
         mountRef.current.removeChild(renderer.domElement);
       }
-      
       geometry.dispose();
       material.dispose();
       renderer.dispose();
@@ -334,7 +336,9 @@ const GeometricBackground = () => {
         maxHeight: '100vh',
         zIndex: -10,
         pointerEvents: 'none',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        // CSS fallback shown on very-low-end devices (no WebGL shader)
+        background: 'radial-gradient(ellipse at 50% 60%, #1a0a2e 0%, #0d051a 60%, #050008 100%)',
       }}
     />
   );

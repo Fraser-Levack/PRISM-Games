@@ -49,15 +49,13 @@ class ModelManager {
 		cloned.traverse((node: any) => {
 			if ((node as THREE.Mesh).isMesh) {
 				const mesh = node as THREE.Mesh;
-				// Clone geometry
-				if (mesh.geometry) mesh.geometry = mesh.geometry.clone();
-				// Clone material(s)
+				// Share geometry across instances — no mutation ever happens to BufferGeometry.
+				// Clone materials so per-instance effects (drag opacity, etc.) stay isolated.
 				if (Array.isArray(mesh.material)) {
 					mesh.material = mesh.material.map((m: any) => (m && typeof m.clone === 'function') ? m.clone() : m);
 				} else if (mesh.material && typeof mesh.material.clone === 'function') {
 					mesh.material = mesh.material.clone();
 				}
-				// Ensure castShadow / receiveShadow defaults are settable
 				mesh.castShadow = true;
 				mesh.receiveShadow = true;
 			}

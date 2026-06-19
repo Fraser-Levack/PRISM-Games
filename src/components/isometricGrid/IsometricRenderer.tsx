@@ -4,7 +4,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { CubeGrid, type Cube } from './CubeGrid';
-import { ObjectGrid, type Object } from './ObjectGrid';
+import { ObjectGrid } from './ObjectGrid';
 import { DecorationGrid } from './DecorationGrid';
 import ModelManager from '../ModelManager';
 import { createIsometricInputHandler } from './IsometricInputHandler';
